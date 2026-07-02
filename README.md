@@ -122,9 +122,16 @@ npm test
 
 Git 仓库安装示例：
 
+仓库地址：
+
+```text
+https://github.com/AISuperXiang/ai-work-team
+https://github.com/AISuperXiang/ai-work-team.git
+```
+
 ```bash
 SKILLS_DIR="/path/to/skills"
-REPO_URL="https://github.com/OWNER/REPO.git"
+REPO_URL="https://github.com/AISuperXiang/ai-work-team.git"
 mkdir -p "$SKILLS_DIR"
 git clone "$REPO_URL" "$SKILLS_DIR/ai-work-team"
 cd "$SKILLS_DIR/ai-work-team"
@@ -134,10 +141,10 @@ npm test
 Skills 市场安装示例：
 
 ```bash
-npx skills add OWNER/REPO@ai-work-team -g -y
+npx skills add AISuperXiang/ai-work-team@ai-work-team -g -y
 ```
 
-发布后的正式包名以 Skills 市场为准。
+如果 Skills 市场使用独立包名，以市场展示的正式包名为准。
 
 ## IDE / Agent 接入
 
