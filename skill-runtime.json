@@ -1,0 +1,103 @@
+{
+  "$schema": "./schemas/skill-runtime.schema.json",
+  "schemaVersion": "1.0.0",
+  "skill": {
+    "id": "ai-work-team",
+    "name": "AI Work Team Skill",
+    "version": "0.1.0",
+    "entry": "SKILL.md",
+    "description": "Product, operations, UI, engineering, QA, and delivery expert-team workflow skill."
+  },
+  "runtime": {
+    "node": ">=18",
+    "packageManager": "npm",
+    "requiredCommands": [
+      "node",
+      "npm"
+    ],
+    "optionalCommands": [
+      "npx",
+      "git"
+    ],
+    "environmentVariables": []
+  },
+  "entrypoints": {
+    "skill": "SKILL.md",
+    "readme": "README.md",
+    "commands": "commands/team.md",
+    "validation": "scripts/validate-structure.js"
+  },
+  "install": {
+    "packageName": "ai-work-team",
+    "supportedTargets": [
+      "trae",
+      "codex",
+      "claude",
+      "generic-agent"
+    ],
+    "postInstall": [
+      "npm test"
+    ],
+    "requiredFiles": [
+      "SKILL.md",
+      "README.md",
+      "package.json",
+      "skill-runtime.json",
+      "members/",
+      "workflows/",
+      "commands/",
+      "docs/",
+      "external-cli/",
+      "external-skills/",
+      "schemas/",
+      "assets/templates/",
+      "scripts/"
+    ],
+    "methods": [
+      {
+        "id": "local-copy",
+        "label": "Local directory copy",
+        "command": "cp -R /path/to/ai-work-team /path/to/skills/ai-work-team",
+        "verify": "cd /path/to/skills/ai-work-team && npm test"
+      },
+      {
+        "id": "git-clone",
+        "label": "Git repository clone",
+        "command": "git clone https://github.com/OWNER/REPO.git /path/to/skills/ai-work-team",
+        "verify": "cd /path/to/skills/ai-work-team && npm test"
+      },
+      {
+        "id": "skill-market",
+        "label": "Skills marketplace",
+        "command": "npx skills add OWNER/REPO@ai-work-team -g -y",
+        "verify": "Run npm test in the installed skill directory when the marketplace exposes the local package path."
+      }
+    ]
+  },
+  "agentHints": {
+    "readOrder": [
+      "SKILL.md",
+      "skill-runtime.json",
+      "commands/team.md",
+      "workflows/route-table.md"
+    ],
+    "environmentPolicy": "Run Node scripts from the skill root. Core workflows must not require credentials or external services.",
+    "externalSkillPolicy": "Only install external skills from external-skills/catalog.json after explicit user instruction or approval.",
+    "externalCliPolicy": "Only use local CLI capabilities that are registered under external-cli/ and verified in the current user environment."
+  },
+  "privacy": {
+    "portable": true,
+    "omitLocalSkillNames": true,
+    "policy": "Do not store environment-specific, locally downloaded, private, or company-internal skill names in this runtime file."
+  },
+  "referencedCapabilities": [
+    "code-review",
+    "security-review",
+    "runtime-debugging",
+    "database-analysis",
+    "frontend-ui-design",
+    "test-generation",
+    "product-planning",
+    "project-triage"
+  ]
+}

@@ -1,0 +1,759 @@
+{
+  "version": "0.1.0",
+  "updatedAt": "2026-07-01",
+  "skills": [
+    {
+      "id": "frontend-design",
+      "name": "Frontend Design",
+      "package": "anthropics/skills@frontend-design",
+      "sourceUrl": "https://skills.sh/anthropics/skills/frontend-design",
+      "qualityTier": "recommended",
+      "installCount": "605.8K",
+      "reviewedAt": "2026-06-30",
+      "trustScore": 0.95,
+      "lastInstallCheck": "2026-06-30",
+      "roles": [
+        "ui-designer",
+        "frontend-engineer",
+        "tech-lead"
+      ],
+      "keywords": [
+        "frontend",
+        "design",
+        "ui",
+        "ux",
+        "web",
+        "page",
+        "component",
+        "visual",
+        "aesthetic",
+        "高质量",
+        "前端设计",
+        "页面设计",
+        "组件设计",
+        "视觉设计",
+        "交互原型",
+        "美化",
+        "响应式"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "frontend-design",
+          "frontend-ui-engineering",
+          "web-dev"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已安装同能力 Skill，先判断本地 Skill 是否最新；若 skills CLI 提示有更新，建议先运行 npx skills update，项目内自定义 Skill 则按来源同步更新后再决定是否安装外部版本。"
+      },
+      "scenarios": [
+        "从零创建高质量 Web 页面或组件",
+        "提升 UI 视觉表达、布局节奏和交互细节",
+        "把产品目标转成更有设计方向的前端界面"
+      ],
+      "useWhen": [
+        "用户要求页面、组件、Web 应用或交互原型具备高设计质量",
+        "UI 走查发现界面泛化、信息层级弱或视觉记忆点不足",
+        "前端实现需要明确设计语言和组件细节"
+      ],
+      "doNotUseWhen": [
+        "只做后端接口、数据模型或命令行工具",
+        "已有明确 Figma 规范且只需要严格还原",
+        "安全、性能、测试等非 UI 主任务"
+      ],
+      "installCommand": "npx skills add anthropics/skills@frontend-design -g -y",
+      "notes": "来自技能市场高安装量条目，适合作为 UI 设计师和前端工程师的默认高质量前端设计能力。"
+    },
+    {
+      "id": "vercel-react-best-practices",
+      "name": "Vercel React Best Practices",
+      "package": "vercel-labs/agent-skills@vercel-react-best-practices",
+      "sourceUrl": "https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices",
+      "qualityTier": "recommended",
+      "installCount": "512.3K",
+      "reviewedAt": "2026-06-30",
+      "trustScore": 0.94,
+      "lastInstallCheck": "2026-06-30",
+      "roles": [
+        "frontend-engineer",
+        "tech-lead"
+      ],
+      "keywords": [
+        "react",
+        "nextjs",
+        "next.js",
+        "vite",
+        "component",
+        "state",
+        "performance",
+        "render",
+        "hooks",
+        "前端工程",
+        "最佳实践",
+        "组件架构",
+        "状态管理",
+        "性能优化",
+        "可维护性"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "frontend-ui-engineering",
+          "web-dev",
+          "karpathy-guidelines"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有前端工程或 Web 开发类 Skill，先确认它是否覆盖 React 最佳实践；若有更新，建议先更新本地 Skill，再判断是否需要安装 Vercel 外部版本。"
+      },
+      "scenarios": [
+        "React 或 Next.js 项目实现前的最佳实践校准",
+        "组件拆分、状态管理、性能和可维护性评审",
+        "技术负责人评估前端方案是否符合现代 React 约束"
+      ],
+      "useWhen": [
+        "项目使用 React、Next.js、Vite React 或相关生态",
+        "前端实现方案涉及组件架构、渲染性能或状态边界",
+        "代码评审发现 React 反模式或可维护性风险"
+      ],
+      "doNotUseWhen": [
+        "项目不是 React 技术栈",
+        "任务主要是视觉创意而非工程实践",
+        "只需要运行现有测试而不改实现"
+      ],
+      "installCommand": "npx skills add vercel-labs/agent-skills@vercel-react-best-practices -g -y",
+      "notes": "用于强化前端工程师和技术负责人在 React 实现阶段的工程判断。"
+    },
+    {
+      "id": "code-review-excellence",
+      "name": "Code Review Excellence",
+      "package": "wshobson/agents@code-review-excellence",
+      "sourceUrl": "https://skills.sh/wshobson/agents/code-review-excellence",
+      "qualityTier": "recommended",
+      "installCount": "23.5K",
+      "reviewedAt": "2026-06-30",
+      "trustScore": 0.82,
+      "lastInstallCheck": "2026-06-30",
+      "roles": [
+        "tech-lead",
+        "frontend-engineer",
+        "backend-engineer",
+        "qa-engineer"
+      ],
+      "keywords": [
+        "code review",
+        "review",
+        "cr",
+        "diff",
+        "pull request",
+        "merge request",
+        "quality",
+        "maintainability",
+        "代码审查",
+        "代码评审",
+        "缺陷",
+        "可维护性",
+        "回归风险",
+        "交付自检"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "bits-code-guard",
+          "TRAE-code-review",
+          "differential-review"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有 bits-code-guard、TRAE-code-review 或 differential-review，优先判断本地官方/已安装能力是否最新；若有更新，建议先更新本地能力，再决定是否安装外部通用审查 Skill。"
+      },
+      "scenarios": [
+        "技术方案完成后的代码质量审查",
+        "实现交付前对关键改动做缺陷和可维护性评估",
+        "QA 发现回归风险后辅助定位代码评审关注点"
+      ],
+      "useWhen": [
+        "用户要求 review、CR、代码审查或交付前自检",
+        "改动跨模块、跨角色或存在较高回归风险",
+        "需要输出结构化代码审查清单"
+      ],
+      "doNotUseWhen": [
+        "只评审产品需求或 UI 原型",
+        "用户明确要求安全专项审查，应优先使用安全类 Skill",
+        "没有代码 diff、文件或实现上下文"
+      ],
+      "installCommand": "npx skills add wshobson/agents@code-review-excellence -g -y",
+      "notes": "作为通用代码审查能力候选；内部已有 bits-code-guard 时优先遵循本地官方 Skill。"
+    },
+    {
+      "id": "security-review",
+      "name": "Security Review",
+      "package": "getsentry/skills@security-review",
+      "sourceUrl": "https://skills.sh/getsentry/skills/security-review",
+      "qualityTier": "recommended",
+      "installCount": "8.8K",
+      "reviewedAt": "2026-06-30",
+      "trustScore": 0.8,
+      "lastInstallCheck": "2026-06-30",
+      "roles": [
+        "tech-lead",
+        "backend-engineer",
+        "frontend-engineer",
+        "qa-engineer"
+      ],
+      "keywords": [
+        "security",
+        "secure",
+        "auth",
+        "permission",
+        "token",
+        "secret",
+        "xss",
+        "csrf",
+        "upload",
+        "dependency",
+        "安全",
+        "权限",
+        "鉴权",
+        "敏感数据",
+        "输入校验",
+        "漏洞",
+        "依赖风险"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "TRAE-security-review",
+          "differential-review",
+          "bits-code-guard"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有安全审查 Skill，先检查是否最新；安全场景优先使用本地官方能力，若存在更新建议先更新后再评估是否安装外部版本。"
+      },
+      "scenarios": [
+        "涉及鉴权、权限、输入校验、敏感数据和依赖风险的安全审查",
+        "上线前安全风险复核",
+        "缺陷修复中评估是否引入安全回归"
+      ],
+      "useWhen": [
+        "需求涉及用户数据、登录态、权限、文件上传或外部 API",
+        "代码改动可能影响安全边界",
+        "用户明确要求安全审查或安全扫描"
+      ],
+      "doNotUseWhen": [
+        "任务完全是离线 demo 且不处理用户数据",
+        "只需要普通代码风格 review",
+        "已有更高优先级的本地安全审查 Skill 且覆盖当前场景"
+      ],
+      "installCommand": "npx skills add getsentry/skills@security-review -g -y",
+      "notes": "用于补足安全专项视角；安装前仍需确认是否与本地安全 Skill 重叠。"
+    },
+    {
+      "id": "web-design-guidelines",
+      "name": "Vercel Web Design Guidelines",
+      "package": "vercel-labs/agent-skills@web-design-guidelines",
+      "sourceUrl": "https://skills.sh/vercel-labs/agent-skills/web-design-guidelines",
+      "qualityTier": "recommended",
+      "installCount": "428.2K",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.9,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "ui-designer",
+        "frontend-engineer",
+        "qa-engineer",
+        "tech-lead"
+      ],
+      "keywords": [
+        "web design guidelines",
+        "ui review",
+        "design review",
+        "accessibility",
+        "a11y",
+        "ux",
+        "interface",
+        "visual audit",
+        "component review",
+        "frontend review",
+        "design system",
+        "界面规范",
+        "设计规范",
+        "UI 审查",
+        "视觉走查",
+        "可访问性",
+        "无障碍",
+        "交互规范",
+        "组件规范",
+        "验收走查"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "frontend-design",
+          "frontend-ui-engineering",
+          "web-dev"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有 frontend-design、frontend-ui-engineering 或 web-dev，先判断它们是否已覆盖 UI 实现；当任务是按 Vercel Web Interface Guidelines 做文件级 UI/可访问性审查时，再考虑安装该外部 Skill。"
+      },
+      "scenarios": [
+        "前端实现完成后进行 UI、UX 和可访问性合规走查",
+        "技术负责人或 UI 设计师评审页面代码是否符合 Web Interface Guidelines",
+        "QA 将视觉、交互和无障碍问题转成可复现验收项"
+      ],
+      "useWhen": [
+        "用户要求 UI 走查、前端设计规范审查、无障碍审查或交付前界面验收",
+        "已有具体前端文件、组件或页面需要按规范输出 file:line 级问题",
+        "前端实现质量需要从视觉、交互和可访问性角度建立门禁"
+      ],
+      "doNotUseWhen": [
+        "任务仍处于纯视觉创意阶段且没有代码或页面实现",
+        "只需要 React 性能、状态管理或组件架构建议",
+        "后端、数据库、命令行工具等非 Web UI 场景"
+      ],
+      "installCommand": "npx skills add vercel-labs/agent-skills@web-design-guidelines -g -y",
+      "notes": "适合作为 UI 实现后的规范化审查能力；与 frontend-design 的创意生成不同，该 Skill 更偏文件级 UI/UX/a11y 门禁。"
+    },
+    {
+      "id": "vercel-composition-patterns",
+      "name": "Vercel Composition Patterns",
+      "package": "vercel-labs/agent-skills@vercel-composition-patterns",
+      "sourceUrl": "https://skills.sh/vercel-labs/agent-skills/vercel-composition-patterns",
+      "qualityTier": "recommended",
+      "installCount": "231.3K",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.92,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "frontend-engineer",
+        "tech-lead"
+      ],
+      "keywords": [
+        "react composition",
+        "composition patterns",
+        "compound components",
+        "boolean props",
+        "component api",
+        "component architecture",
+        "context provider",
+        "state lifting",
+        "react 19",
+        "refactor component",
+        "组件组合",
+        "组件架构",
+        "复合组件",
+        "布尔参数",
+        "状态提升",
+        "组件 API",
+        "上下文 Provider",
+        "前端重构",
+        "可维护性"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "vercel-react-best-practices",
+          "frontend-ui-engineering",
+          "karpathy-guidelines"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有 React 最佳实践或前端工程类 Skill，先判断是否已覆盖组件组合模式；当任务涉及复杂组件 API、compound components 或 boolean props 膨胀时，再考虑安装该外部 Skill。"
+      },
+      "scenarios": [
+        "复杂 React 组件 API 设计和重构",
+        "评审组件是否存在 boolean props 膨胀、状态耦合或上下文滥用",
+        "技术负责人制定组件库、业务组件和可复用模块的架构约束"
+      ],
+      "useWhen": [
+        "React 组件需要设计扩展点、组合关系、状态归属或 Provider 边界",
+        "现有组件出现 props 模式失控、复用困难或兄弟组件状态共享问题",
+        "前端技术方案需要判断组件架构是否可维护"
+      ],
+      "doNotUseWhen": [
+        "项目不是 React 技术栈",
+        "任务只是视觉样式调整或普通页面布局",
+        "只需要性能优化规则，应优先匹配 vercel-react-best-practices"
+      ],
+      "installCommand": "npx skills add vercel-labs/agent-skills@vercel-composition-patterns -g -y",
+      "notes": "用于强化 React 组件 API 与组合模式判断，和 vercel-react-best-practices 互补：前者偏组件架构，后者偏性能和现代 React 规则。"
+    },
+    {
+      "id": "webapp-testing",
+      "name": "Web Application Testing",
+      "package": "anthropics/skills@webapp-testing",
+      "sourceUrl": "https://skills.sh/anthropics/skills/webapp-testing",
+      "qualityTier": "recommended",
+      "installCount": "107K",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.91,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "qa-engineer",
+        "frontend-engineer",
+        "tech-lead"
+      ],
+      "keywords": [
+        "webapp testing",
+        "web application testing",
+        "playwright",
+        "browser testing",
+        "e2e",
+        "ui testing",
+        "local webapp",
+        "screenshot",
+        "console logs",
+        "networkidle",
+        "regression",
+        "浏览器验证",
+        "前端验证",
+        "端到端测试",
+        "E2E 测试",
+        "回归测试",
+        "页面截图",
+        "控制台日志",
+        "本地 Web 应用",
+        "交互验证"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "frontend-ui-engineering",
+          "diagnose",
+          "TRAE-debugger"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有浏览器测试、诊断或前端工程 Skill，先判断是否已能完成当前验证；当需要标准化 Playwright 脚本、服务生命周期和截图/日志证据时，再考虑安装该外部 Skill。"
+      },
+      "scenarios": [
+        "本地 Web 应用启动后执行端到端交互验证",
+        "QA 或前端对页面关键路径做截图、控制台日志和 DOM 状态采证",
+        "技术负责人要求交付前补充可复现浏览器验证证据"
+      ],
+      "useWhen": [
+        "任务需要验证真实浏览器行为、用户交互、页面跳转或动态渲染结果",
+        "需要通过 Playwright 脚本管理本地服务、等待 networkidle 并采集证据",
+        "QA 需要将验收场景转成可执行自动化回归脚本"
+      ],
+      "doNotUseWhen": [
+        "只需要单元测试、接口测试或静态代码审查",
+        "没有可运行的 Web 页面、路由或本地服务",
+        "用户明确只要求手工测试计划而不需要自动化验证"
+      ],
+      "installCommand": "npx skills add anthropics/skills@webapp-testing -g -y",
+      "notes": "用于补足 Web 应用浏览器级验证能力；输出必须沉淀为可复现脚本、截图/日志证据和 QA 验证结论。"
+    },
+    {
+      "id": "test-driven-development",
+      "name": "Test Driven Development",
+      "package": "obra/superpowers@test-driven-development",
+      "sourceUrl": "https://skills.sh/obra/superpowers/test-driven-development",
+      "qualityTier": "recommended",
+      "installCount": "147.6K",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.88,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "tech-lead",
+        "frontend-engineer",
+        "backend-engineer",
+        "qa-engineer"
+      ],
+      "keywords": [
+        "tdd",
+        "test driven development",
+        "red green refactor",
+        "failing test",
+        "unit test",
+        "bug fix",
+        "regression test",
+        "test first",
+        "behavior change",
+        "测试驱动",
+        "红绿重构",
+        "先写测试",
+        "失败测试",
+        "单元测试",
+        "回归测试",
+        "缺陷修复",
+        "行为变更",
+        "测试门禁"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "tdd",
+          "bits-unit-test-gen",
+          "test-architect"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有 tdd、bits-unit-test-gen 或 test-architect，优先使用本地测试工作流；若需要安装 obra/superpowers 的严格 TDD 版本，应先确认不会与本地单测生成流程冲突。"
+      },
+      "scenarios": [
+        "新功能、bugfix 或行为变更采用红绿重构工作流",
+        "技术负责人要求实现前先定义失败测试和最小通过实现",
+        "QA 将缺陷复现路径转成回归测试并约束研发修复"
+      ],
+      "useWhen": [
+        "用户明确要求 TDD、测试先行、红绿重构或高风险 bugfix",
+        "改动影响核心业务逻辑、数据转换、状态机或跨模块契约",
+        "需要证明测试能先失败再通过，避免补测试流于形式"
+      ],
+      "doNotUseWhen": [
+        "任务没有可自动化验证的行为边界",
+        "用户明确要求快速原型或一次性探索，不进入交付质量门禁",
+        "已有本地强制单测生成 Skill 正在主导当前任务"
+      ],
+      "installCommand": "npx skills add obra/superpowers@test-driven-development -g -y",
+      "notes": "作为跨前端、后端、QA、技术负责人的测试先行决策能力；由于本地已有 tdd 与单测 Skill，默认遵循本地优先，外部版本用于补充严格红绿重构约束。"
+    },
+    {
+      "id": "sql-code-review",
+      "name": "SQL Code Review",
+      "package": "github/awesome-copilot@sql-code-review",
+      "sourceUrl": "https://skills.sh/github/awesome-copilot/sql-code-review",
+      "qualityTier": "recommended",
+      "installCount": "11.6K",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.84,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "backend-engineer",
+        "tech-lead",
+        "qa-engineer"
+      ],
+      "keywords": [
+        "sql",
+        "database",
+        "query",
+        "schema",
+        "index",
+        "migration",
+        "sql injection",
+        "n+1",
+        "join",
+        "performance",
+        "mysql",
+        "postgresql",
+        "数据库",
+        "SQL 审查",
+        "查询性能",
+        "索引",
+        "数据模型",
+        "表结构",
+        "迁移",
+        "注入风险",
+        "慢查询",
+        "数据一致性"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "TRAE-database-toolbox",
+          "bits-code-guard",
+          "TRAE-code-review",
+          "differential-review"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有数据库工具箱、代码审查或差异审查 Skill，优先使用本地能力；当任务聚焦 SQL 片段、索引、查询性能、SQL 注入或 schema 质量时，再考虑安装该外部 SQL 审查 Skill。"
+      },
+      "scenarios": [
+        "后端接口涉及 SQL 查询、索引、表结构或数据迁移审查",
+        "技术负责人评估数据库变更的安全、性能和可维护性风险",
+        "QA 将数据库风险转成数据一致性、权限和性能测试点"
+      ],
+      "useWhen": [
+        "改动包含 SQL、ORM 查询、数据库 schema、索引或迁移脚本",
+        "需要检查 SQL 注入、N+1 查询、SELECT *、索引缺失或 WHERE 函数误用",
+        "数据库设计或查询性能是交付风险之一"
+      ],
+      "doNotUseWhen": [
+        "任务没有数据库、SQL、ORM 或迁移内容",
+        "需要直接连接 ByteRDS、ByteRedis 或 ByteDoc，应优先使用 TRAE-database-toolbox",
+        "只做通用代码质量审查且数据库不是主要风险"
+      ],
+      "installCommand": "npx skills add github/awesome-copilot@sql-code-review -g -y",
+      "notes": "用于补足后端数据库审查视角；不替代真实数据库执行计划、慢查询观测、DDL 工单和生产变更审批。"
+    },
+    {
+      "id": "product-management",
+      "name": "Product Management",
+      "package": "vasilyu1983/ai-agents-public@product-management",
+      "sourceUrl": "https://skills.sh/vasilyu1983/ai-agents-public/product-management",
+      "qualityTier": "recommended",
+      "installCount": "777",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.76,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "product-manager"
+      ],
+      "keywords": [
+        "product management",
+        "prd",
+        "requirements",
+        "roadmap",
+        "prioritization",
+        "outcome",
+        "strategy",
+        "discovery",
+        "evidence",
+        "acceptance criteria",
+        "产品管理",
+        "产品经理",
+        "需求澄清",
+        "需求分析",
+        "产品策略",
+        "路线图",
+        "优先级",
+        "成功指标",
+        "验收标准",
+        "产品决策"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "to-prd",
+          "triage",
+          "prototype",
+          "grill-me"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有 to-prd、triage、prototype 或 grill-me，先判断本地能力是否覆盖当前产品分析任务；若 skills CLI 提示有更新，建议先运行 npx skills update，再决定是否安装外部产品管理 Skill。"
+      },
+      "scenarios": [
+        "模糊需求转成目标、范围、优先级和验收标准",
+        "产品路线图、需求取舍和业务结果导向的决策校准",
+        "评估需求证据质量、成功指标和产品风险"
+      ],
+      "useWhen": [
+        "用户诉求涉及 PRD、产品策略、roadmap、需求优先级或验收标准",
+        "产品经理需要把需求从功能描述提升为可验证的业务结果",
+        "需求进入 UI 或研发前需要做范围、假设和证据质量检查"
+      ],
+      "doNotUseWhen": [
+        "任务只是代码实现、bugfix 或技术方案细化",
+        "用户已经给出稳定 PRD 且只需要严格按文档实现",
+        "需要做运营投放、GTM 或增长实验设计，应优先匹配运营类 Skill"
+      ],
+      "installCommand": "npx skills add vasilyu1983/ai-agents-public@product-management -g -y",
+      "notes": "用于强化产品经理在需求澄清、取舍、roadmap 和结果导向决策中的判断；检索时该条目存在安全审计提示，安装前需复审来源和最新状态。"
+    },
+    {
+      "id": "gtm-strategy",
+      "name": "GTM Strategy",
+      "package": "phuryn/pm-skills@gtm-strategy",
+      "sourceUrl": "https://skills.sh/phuryn/pm-skills/gtm-strategy",
+      "qualityTier": "recommended",
+      "installCount": "1.7K",
+      "reviewedAt": "2026-07-01",
+      "trustScore": 0.82,
+      "lastInstallCheck": "2026-07-01",
+      "roles": [
+        "operations-manager",
+        "product-manager"
+      ],
+      "keywords": [
+        "gtm",
+        "go to market",
+        "launch",
+        "product launch",
+        "marketing channel",
+        "messaging",
+        "positioning",
+        "launch roadmap",
+        "success metrics",
+        "activation",
+        "conversion",
+        "运营",
+        "运营策略",
+        "上线节奏",
+        "发布计划",
+        "增长",
+        "渠道",
+        "转化",
+        "投放",
+        "用户触达",
+        "成功指标"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "lark-sheets",
+          "lark-base",
+          "lark-calendar",
+          "lark-task",
+          "lumina-seo-manager"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有表格建模、任务排期、日历协同或 Lumina SEO/GTM 相关 Skill，先判断本地能力是否覆盖执行层；若有更新，建议先更新本地 Skill，再决定是否安装外部 GTM 策略 Skill。"
+      },
+      "scenarios": [
+        "新功能、活动或产品上线前制定 GTM 策略",
+        "定义渠道、信息传达、上线节奏、成功指标和复盘口径",
+        "运营经理将产品目标转成可执行发布和增长计划"
+      ],
+      "useWhen": [
+        "需求涉及上线计划、GTM、运营活动、渠道投放、用户触达或 launch roadmap",
+        "运营经理需要定义成功指标、发布节奏和上线后观测计划",
+        "产品方案需要补齐市场进入、运营配合或增长目标"
+      ],
+      "doNotUseWhen": [
+        "任务只需要写代码或修复缺陷",
+        "需求尚未明确目标用户、核心价值或产品范围",
+        "只需要做项目进度管理，应优先匹配交付经理或项目管理类 Skill"
+      ],
+      "installCommand": "npx skills add phuryn/pm-skills@gtm-strategy -g -y",
+      "notes": "用于强化运营经理在 GTM、上线节奏、渠道策略、发布指标和增长观测上的决策质量；也可在产品经理需要验证市场进入策略时辅助调用。"
+    },
+    {
+      "id": "vue-pinia-unit-test",
+      "name": "Vue Pinia Unit Test",
+      "package": "github/awesome-copilot@unit-test-vue-pinia",
+      "sourceUrl": "https://skills.sh/github/awesome-copilot/unit-test-vue-pinia",
+      "qualityTier": "candidate",
+      "installCount": "1.6K",
+      "reviewedAt": "2026-06-30",
+      "trustScore": 0.62,
+      "lastInstallCheck": "2026-06-30",
+      "roles": [
+        "qa-engineer",
+        "frontend-engineer"
+      ],
+      "keywords": [
+        "vue",
+        "pinia",
+        "unit test",
+        "vitest",
+        "jest",
+        "store",
+        "testing",
+        "单元测试",
+        "补充单测",
+        "状态管理测试",
+        "测试覆盖率"
+      ],
+      "localSkillPriority": {
+        "preferInstalled": true,
+        "installedSkillNames": [
+          "bits-unit-test-gen",
+          "test-architect"
+        ],
+        "updateCheckCommand": "npx skills check",
+        "updateAdvice": "如果本地已有通用单测生成或测试架构 Skill，先判断是否覆盖 Vue/Pinia；若本地能力有更新，建议先更新后再决定是否安装该候选 Skill。"
+      },
+      "scenarios": [
+        "Vue + Pinia 项目补充单元测试",
+        "QA 与前端共同补齐状态管理测试覆盖"
+      ],
+      "useWhen": [
+        "项目明确使用 Vue 和 Pinia",
+        "现有本地单测 Skill 无法覆盖该技术栈细节"
+      ],
+      "doNotUseWhen": [
+        "项目不是 Vue/Pinia",
+        "任务是 E2E 或接口测试",
+        "存在更适配当前项目的本地测试 Skill"
+      ],
+      "installCommand": "npx skills add github/awesome-copilot@unit-test-vue-pinia -g -y",
+      "notes": "候选条目，默认不自动安装；需要 QA 或前端工程师确认项目技术栈后再安装。"
+    }
+  ]
+}

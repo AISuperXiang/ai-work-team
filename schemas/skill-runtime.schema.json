@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Work Team Skill Runtime",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "skill",
+    "runtime",
+    "entrypoints",
+    "install",
+    "agentHints"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "skill": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "version",
+        "entry",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "entry": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "node",
+        "packageManager",
+        "requiredCommands"
+      ],
+      "properties": {
+        "node": {
+          "type": "string"
+        },
+        "packageManager": {
+          "type": "string"
+        },
+        "requiredCommands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "optionalCommands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "environmentVariables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "entrypoints": {
+      "type": "object",
+      "required": [
+        "skill",
+        "readme",
+        "commands",
+        "validation"
+      ],
+      "properties": {
+        "skill": {
+          "type": "string"
+        },
+        "readme": {
+          "type": "string"
+        },
+        "commands": {
+          "type": "string"
+        },
+        "validation": {
+          "type": "string"
+        }
+      }
+    },
+    "install": {
+      "type": "object",
+      "required": [
+        "packageName",
+        "supportedTargets",
+        "postInstall",
+        "requiredFiles",
+        "methods"
+      ],
+      "properties": {
+        "packageName": {
+          "type": "string"
+        },
+        "supportedTargets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postInstall": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requiredFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "command",
+              "verify"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "command": {
+                "type": "string"
+              },
+              "verify": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "agentHints": {
+      "type": "object",
+      "required": [
+        "readOrder",
+        "environmentPolicy",
+        "externalSkillPolicy"
+      ],
+      "properties": {
+        "readOrder": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "environmentPolicy": {
+          "type": "string"
+        },
+        "externalSkillPolicy": {
+          "type": "string"
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "required": [
+        "portable",
+        "omitLocalSkillNames",
+        "policy"
+      ],
+      "properties": {
+        "portable": {
+          "type": "boolean"
+        },
+        "omitLocalSkillNames": {
+          "type": "boolean"
+        },
+        "policy": {
+          "type": "string"
+        }
+      }
+    },
+    "referencedCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

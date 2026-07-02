@@ -1,0 +1,64 @@
+{
+  "workflow": "",
+  "requirementFolder": "",
+  "complexityLevel": "S",
+  "updatedAt": "",
+  "stages": [
+    {
+      "name": "Intake",
+      "owner": "delivery-manager,product-manager",
+      "status": "pending",
+      "gates": ["requirement-gate", "complexity-gate"],
+      "artifacts": ["requirement-brief.md", "risk-register.md"],
+      "evidence": []
+    },
+    {
+      "name": "PRD",
+      "owner": "product-manager,operations-manager",
+      "status": "pending",
+      "gates": ["requirement-gate", "value-gate"],
+      "artifacts": ["prd.md"],
+      "evidence": []
+    },
+    {
+      "name": "UI/UX",
+      "owner": "ui-designer",
+      "status": "pending",
+      "gates": ["design-gate", "handoff-gate"],
+      "artifacts": ["ui-review.md", "role-handoff.md"],
+      "evidence": []
+    },
+    {
+      "name": "Tech Design",
+      "owner": "tech-lead",
+      "status": "pending",
+      "gates": ["technical-gate", "decision-gate", "complexity-gate"],
+      "artifacts": ["technical-design.md", "implementation-plan.md", "decision-log.md"],
+      "evidence": []
+    },
+    {
+      "name": "Implementation",
+      "owner": "frontend-engineer,backend-engineer",
+      "status": "pending",
+      "gates": ["implementation-gate", "evidence-gate"],
+      "artifacts": ["implementation-plan.md", "evidence/README.md"],
+      "evidence": []
+    },
+    {
+      "name": "QA",
+      "owner": "qa-engineer",
+      "status": "pending",
+      "gates": ["test-gate", "evidence-gate"],
+      "artifacts": ["test-plan.md", "evidence/README.md"],
+      "evidence": []
+    },
+    {
+      "name": "Delivery",
+      "owner": "delivery-manager",
+      "status": "pending",
+      "gates": ["delivery-gate", "evidence-gate", "no-legacy-contract"],
+      "artifacts": ["delivery-summary.md", "workflow-status.json"],
+      "evidence": []
+    }
+  ]
+}
