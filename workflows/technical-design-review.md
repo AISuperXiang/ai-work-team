@@ -16,13 +16,18 @@ members:
   - qa-engineer
 execution_mode: hybrid
 quality_gates:
+  - role-activation-gate
   - technical-gate
+  - decision-gate
   - implementation-gate
   - test-gate
+  - delivery-gate
 outputs:
   - technical-design
   - implementation-plan
   - test-plan
+  - decision-log
+  - risk-register
 ---
 
 # 技术方案评审
@@ -41,12 +46,12 @@ outputs:
 
 | 阶段 | 负责人 | 动作 | 产出 | 门禁 |
 | --- | --- | --- | --- | --- |
-| Context | 技术负责人 | 读取现状、识别边界和依赖 | 背景摘要 | technical-gate |
-| Architecture | 技术负责人 | 评估架构、接口、数据和兼容 | `technical-design` | technical-gate |
-| Frontend Review | 前端工程师 | 评审 UI 状态、前端边界、联调风险 | 前端风险 | implementation-gate |
-| Backend Review | 后端工程师 | 评审 API、数据、权限、幂等 | 后端风险 | implementation-gate |
-| QA Review | 测试工程师 | 评审可测性和回归范围 | `test-plan` | test-gate |
-| Decision | 交付经理 | 汇总通过、修改点和执行顺序 | 评审结论 | delivery-gate |
+| Context | 交付经理 + 技术负责人 | 读取现状、识别边界、依赖、执行档位和 `rolePlan` | 背景摘要、角色激活结论 | role-activation-gate、technical-gate |
+| Architecture | 技术负责人 | 基于事实评估架构、接口、数据、兼容和回滚 | `technical-design.md`、`risk-register.md` | technical-gate |
+| Frontend Review | 前端工程师 | 仅在客户端代码、页面或状态受影响时评审边界和联调风险 | 前端风险或 N/A 依据 | implementation-gate |
+| Backend Review | 后端工程师 | 仅在 API、数据、权限或服务端行为受影响时评审契约和幂等 | 后端风险或 N/A 依据 | implementation-gate |
+| QA Review | 测试工程师 | 评审可测性、最小回归集和目标验证等级 | `test-plan.md` | test-gate |
+| Decision | 交付经理 + 技术负责人 | 汇总方案、修改点、执行顺序和责任边界 | `decision-log.md`、评审结论 | decision-gate、delivery-gate |
 
 ## 必查项
 
@@ -55,6 +60,7 @@ outputs:
 - 是否有最小可交付切片。
 - 是否避免不必要重构。
 - 测试策略是否覆盖核心风险。
+- 未激活的工程角色是否有明确不适用依据。
 
 ## 失败处理
 
@@ -67,4 +73,5 @@ outputs:
 
 - 技术方案可被研发直接执行。
 - 风险、依赖、验证和回滚明确。
+- `rolePlan`、责任边界和 N/A 依据明确。
 - 需要用户或团队决策的问题已列出。

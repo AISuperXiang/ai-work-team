@@ -1,8 +1,8 @@
 ---
 name: "ai-work-team"
-description: "产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接需求、评审需求、设计方案、实现交付、缺陷修复、走查验收，或使用 /team 指令。"
+description: "产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接需求、评审需求、代码审查与优化、设计方案、实现交付、缺陷修复、走查验收，或使用 /team 指令。"
 metadata:
-  version: "0.1.0"
+  version: "0.3.0"
 ---
 
 # AI Work Team
@@ -33,7 +33,7 @@ metadata:
 - 用户输入 `/team` 指令。
 - 用户要求承接需求、实现需求、从需求到交付完整推进。
 - 用户要求产品、运营、UI、研发、测试等角色协作。
-- 用户要求需求评审、技术方案评审、缺陷修复交付、产品/UI/QA 走查。
+- 用户要求需求评审、代码逻辑审查与优化、技术方案评审、缺陷修复交付、产品/UI/QA 走查。
 - 用户要求构建项目上下文、生成或更新 `AGENTS.md`。
 - 用户要求推荐或安装外部 Skills，或登记本地 CLI 能力给团队角色使用。
 
@@ -57,11 +57,12 @@ metadata:
 
 | 输入或意图 | 必读文件 | 按需文件 |
 | --- | --- | --- |
-| `/team` 或自然语言路由 | `commands/team.md`、`workflows/route-table.md`、`workflows/execution-protocol.md` | `commands/README.md` |
+| `/team` 或自然语言路由 | `commands/team.md`、`workflows/route-table.md`、`workflows/execution-protocol.md`、`docs/methodologies/role-activation-methodology.md` | `commands/README.md` |
 | `/team intake`、`/team review` | `workflows/requirement-review.md`、`docs/quality-gates.md` | `members/product-manager.md`、`members/operations-manager.md`、`assets/templates/requirement-brief.md`、`assets/templates/prd.md` |
 | `/team design` | `workflows/technical-design-review.md`、`docs/quality-gates.md`、`docs/handoff-contract.md` | `members/ui-designer.md`、`members/tech-lead.md`、`assets/templates/technical-design.md` |
-| `/team build` | `workflows/requirement-end-to-end.md`、`workflows/implementation-protocol.md`、`workspace/README.md`、`docs/quality-gates.md`、`docs/quality-rubrics.md`、`docs/business-impact-rubric.md`、`docs/handoff-contract.md` | 当前阶段涉及的 `members/*.md`、`assets/templates/` 中对应模板 |
-| `/team bugfix` | `workflows/bugfix-delivery.md`、`workflows/implementation-protocol.md`、`docs/quality-gates.md`、`docs/quality-rubrics.md` | `members/tech-lead.md`、对应研发角色、`members/qa-engineer.md` |
+| `/team build` | `workflows/requirement-end-to-end.md`、`workflows/implementation-protocol.md`、`workspace/README.md`、`docs/methodologies/role-activation-methodology.md`、`docs/quality-gates.md`、`docs/quality-rubrics.md`、`docs/business-impact-rubric.md`、`docs/handoff-contract.md` | `rolePlan` 中处于 `active` / `consulted` 的 `members/*.md`、对应方法论与模板 |
+| `/team bugfix` | `workflows/bugfix-delivery.md`、`workflows/implementation-protocol.md`、`docs/methodologies/execution-methodology.md`、`docs/methodologies/role-activation-methodology.md`、`docs/quality-gates.md`、`docs/quality-rubrics.md` | `rolePlan` 中的技术负责人、问题归属研发、QA、产品角色和对应模板 |
+| `/team code-review` | `workflows/code-review-delivery.md`、`docs/methodologies/execution-methodology.md`、`docs/methodologies/role-activation-methodology.md`、`docs/engineering-standards/review-standard.md`、`docs/quality-gates.md` | `rolePlan` 中命中领域的研发、QA、产品或 UI 角色与 `assets/templates/code-review.md` |
 | `/team walk`、`/team deliver` | `workflows/product-ui-qa-walkthrough.md`、`docs/quality-rubrics.md`、`docs/handoff-contract.md` | `members/product-manager.md`、`members/ui-designer.md`、`members/qa-engineer.md`、`assets/templates/walkthrough-report.md`、`assets/templates/delivery-summary.md` |
 | `/team buildContext` | `workflows/project-context-build.md`、`assets/templates/agents-context.md` | `scripts/build-context.js`、目标仓库现有 `AGENTS.md` |
 | `/team install` | `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md`、`external-skills/role-map.md` | `external-skills/README.md`、`scripts/list-external-skills.js`、`scripts/install-external-skills.js` |
@@ -75,19 +76,21 @@ metadata:
 1. **Intake**：给出目标契约，包含用户目标、当前输入、成功标准、约束、信息缺口。
 2. **Route**：选择一个主工作流，并说明命中依据。
 3. **Load**：只加载主工作流、当前阶段角色、质量门禁和模板。
-4. **Plan**：输出状态板，列出阶段、负责人、状态、当前产出和门禁。
-5. **Workspace**：代码落地或交付类任务必须先创建或选择 workspace 需求目录。
-6. **Execute**：逐阶段产出文档、代码变更或验证记录；阶段完成前检查门禁。
-7. **Verify**：运行可用验证；不能运行时说明原因、影响和替代检查。
-8. **Score**：涉及实现交付、缺陷修复或走查时，按质量评分规则给出结论。
-9. **Deliver**：输出交付摘要、证据、风险和下一步建议。
+4. **Profile**：实现、缺陷修复和代码审查先按风险、未知度和影响范围选择 `lightweight`、`standard` 或 `assurance`。
+5. **Activate Roles**：按 `role-activation-methodology.md` 形成 `rolePlan`，只加载处于 `active` 或 `consulted` 的角色与方法论。
+6. **Plan**：输出状态板，列出阶段、负责人、状态、当前产出、门禁、执行档位和验证等级。
+7. **Workspace**：代码落地或交付类任务必须先创建或选择 workspace 需求目录。
+8. **Execute**：逐阶段产出文档、代码变更或验证记录；阶段完成前检查门禁。
+9. **Verify**：运行可用验证；不能运行时说明原因、影响和替代检查，并按 `V0-V4` 标记验证等级。
+10. **Score**：涉及实现交付、缺陷修复、代码审查或走查时，按质量评分规则给出结论。
+11. **Deliver**：输出交付摘要、证据、风险和下一步建议。
 
 如果需求信息不足但可通过仓库探索获得，先探索；只有产品意图、优先级或取舍无法从环境推断时才询问用户。
 
 过程中保持状态板：
 
 ```text
-阶段 | 负责人 | 状态 | 当前产出 | 门禁
+阶段 | 负责人 | 状态 | 当前产出 | 门禁 | 执行档位 | 验证等级
 ```
 
 状态使用 `pending`、`in_progress`、`blocked`、`review`、`completed`。
@@ -101,7 +104,7 @@ metadata:
 - 只有用户明确指定“在某需求下增加某功能”时，才复用已有需求目录并写入 `features/`。
 - 代码改动发生在用户项目仓库；workspace 保存 PRD、方案、计划、决策、风险、交接、验证证据和交付摘要。
 - 产物优先使用 `assets/templates/` 中的模板。
-- `workflow-status.json` 必须记录阶段状态、负责人、门禁、产物路径和证据路径。
+- `workflow-status.json` 必须记录阶段状态、负责人、门禁、产物路径、证据路径、`executionProfile`、`verificationLevel` 和 `rolePlan`。
 - `evidence/` 只保存命令结果、截图说明、日志摘要、数据来源或人工验收记录，不保存密钥、Cookie、Token 或敏感数据。
 
 ## 硬门禁
@@ -113,6 +116,10 @@ metadata:
 - **handoff-gate**：阶段切换必须按 `docs/handoff-contract.md` 写入 `role-handoff.md` 或等价交接摘要。
 - **complexity-gate**：需求必须按 `S / M / L / XL` 分级；`L / XL` 必须拆里程碑、技术 spike、QA 策略、灰度、回滚和收益复盘。
 - **evidence-gate**：所有“已完成”“已验证”“可交付”“收益可观测”的结论必须有证据。
+- **verification-gate**：验证等级必须与证据一致，静态检查不得写成运行时或用户验收通过。
+- **reproduction-gate**：缺陷修复必须先复现或明确采证计划，不能凭推理声称已修复。
+- **review-gate**：代码审查必须给出范围、代码定位、反例、严重度和验证建议。
+- **role-activation-gate**：每个角色必须有 `active`、`consulted` 或 `not_applicable` 的场景依据；不适用角色不得制造虚假产物或评分。
 - **no-legacy-contract**：主文档、模板、脚本和新 workspace 文档不得出现旧入口、旧短名或旧路径。
 
 涉及代码实现时还必须通过 `implementation-gate` 和 `test-gate`；最终交付必须通过 `delivery-gate`。
@@ -124,6 +131,7 @@ metadata:
 执行要求：
 
 - 先确认目标项目根目录和变更范围。
+- 先读取 `docs/methodologies/execution-methodology.md`，选择并记录执行档位。
 - 优先读取项目现有上下文、代码结构、测试命令和约定。
 - 保持改动聚焦，不做无关重构。
 - 遵循目标仓库既有框架、组件、状态管理、样式和测试模式。
@@ -132,13 +140,14 @@ metadata:
 
 ## 角色协作
 
-默认由当前 Agent 顺序编排所有角色，保证上下文连续。
+默认由当前 Agent 顺序编排 `rolePlan` 中已激活角色，保证上下文连续。
 
 当同时满足以下条件时，按工作流要求启动角色子 Agent 并由交付经理汇总：
 
 - 当前工作流 frontmatter 或阶段表标注 `execution_mode: hybrid`。
 - 阶段目标可以独立评估，例如产品范围评审、UI 走查、技术风险评审、测试策略评审。
 - 任务复杂度较高，或用户明确要求专家团队并行评审。
+- 输入已经冻结，且子 Agent 不会修改同一文件或依赖未决结论。
 
 子 Agent 输出必须包含：
 
@@ -151,6 +160,8 @@ metadata:
 | 需决策项 | 最多 3 个，需要用户或交付经理裁决的问题 |
 
 交付经理必须输出统一结论和裁决依据，不得把互相冲突的原始意见直接交给用户。
+
+实现代码默认由一个负责人修改。并行角色必须有独立问题边界、证据要求和文件所有权；发现冲突时停止并行并先裁决，不能用角色数量制造虚假的置信度。
 
 ## 外部能力规则
 
@@ -174,8 +185,10 @@ metadata:
 - 采用的工作流。
 - workspace 需求目录。
 - 参与角色。
+- 角色激活计划和不适用依据。
 - 已完成产出。
 - 验证结果和证据索引。
+- 执行档位、验证等级和结论边界。
 - 质量评分。
 - 业务影响、收益观测和复盘计划。
 - 决策日志、风险台账、角色交接状态。
@@ -193,5 +206,6 @@ metadata:
 - 新增或更新本地 CLI 能力时，修改 `external-cli/` 下对应能力卡；只记录能力摘要、适用角色、验证方式和安全边界，不记录密钥。
 - 修改 Node 版本、安装方式、入口文件或必需打包文件时，同步更新 `skill-runtime.json`、`schemas/skill-runtime.schema.json` 和 README 安装说明。
 - 新增方法论放入 `docs/methodologies/`。
+- 角色适用场景变化时，同步更新 `docs/methodologies/role-activation-methodology.md`、成员文件、状态模板和状态 Schema。
 - 新增研发硬约束放入 `docs/engineering-standards/`。
 - 修改结构或契约后运行 `npm test`。

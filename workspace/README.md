@@ -55,7 +55,8 @@ workspace/
 - `decision-log.md` 必须记录关键范围、技术取舍、上线风险和延期项。
 - `risk-register.md` 必须记录复杂度分级、风险台账；`L / XL` 项目必须记录里程碑、技术 spike、QA 策略、灰度、回滚和收益复盘。
 - `role-handoff.md` 必须记录阶段交接的背景、决策、待确认问题、风险、产物和验证。
-- `workflow-status.json` 必须记录阶段状态、负责人、门禁、产物路径和证据路径。
+- `workflow-status.json` 必须记录阶段状态、负责人、门禁、产物路径、证据路径和 `rolePlan`。
+- `workflow-status.json` 还必须记录 `executionProfile`（`lightweight` / `standard` / `assurance`）和 `verificationLevel`（`V0-V4`）；交付结论不得超过验证等级，未参与角色必须有不适用依据。
 - `evidence/` 用于保存验证命令、截图说明、日志摘要或人工验证记录，不保存密钥、Cookie、Token 或敏感数据。
 - 主文档、模板和新 workspace 文档不得出现旧快捷入口、旧项目短名或旧本地路径。
 

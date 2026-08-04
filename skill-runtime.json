@@ -4,7 +4,7 @@
   "skill": {
     "id": "ai-work-team",
     "name": "AI Work Team Skill",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "entry": "SKILL.md",
     "description": "Product, operations, UI, engineering, QA, and delivery expert-team workflow skill."
   },
@@ -57,14 +57,14 @@
       {
         "id": "local-copy",
         "label": "Local directory copy",
-        "command": "cp -R /path/to/ai-work-team /path/to/skills/ai-work-team",
-        "verify": "cd /path/to/skills/ai-work-team && npm test"
+        "command": "cp -R <source-dir> <skills-root>/ai-work-team",
+        "verify": "cd <skills-root>/ai-work-team && npm test"
       },
       {
         "id": "git-clone",
         "label": "Git repository clone",
-        "command": "git clone https://github.com/OWNER/REPO.git /path/to/skills/ai-work-team",
-        "verify": "cd /path/to/skills/ai-work-team && npm test"
+        "command": "git clone https://github.com/OWNER/REPO.git <skills-root>/ai-work-team",
+        "verify": "cd <skills-root>/ai-work-team && npm test"
       },
       {
         "id": "skill-market",
@@ -79,9 +79,11 @@
       "SKILL.md",
       "skill-runtime.json",
       "commands/team.md",
-      "workflows/route-table.md"
+      "workflows/route-table.md",
+      "docs/methodologies/role-activation-methodology.md"
     ],
     "environmentPolicy": "Run Node scripts from the skill root. Core workflows must not require credentials or external services.",
+    "roleActivationPolicy": "Treat workflow members as a candidate pool. Before loading role details, record active, consulted, or not_applicable roles with scenario evidence in rolePlan.",
     "externalSkillPolicy": "Only install external skills from external-skills/catalog.json after explicit user instruction or approval.",
     "externalCliPolicy": "Only use local CLI capabilities that are registered under external-cli/ and verified in the current user environment."
   },

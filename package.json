@@ -1,6 +1,6 @@
 {
   "name": "ai-work-team",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "description": "A product-engineering expert team skill with role members, workflows, commands, standards, templates, and structure validation.",
   "engines": {

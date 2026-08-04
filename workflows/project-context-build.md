@@ -38,7 +38,7 @@ outputs:
 
 ```text
 /team buildContext <工作目录> <用户需求或更新范围>
-/team buildContext /path/to/repo 为后续会员页需求建立上下文
+/team buildContext <project-root> 为后续会员页需求建立上下文
 /team buildContext ./workspace/demo --dry-run
 ```
 
@@ -68,13 +68,13 @@ outputs:
    - 后端语言、服务框架、接口/服务目录。
    - 测试框架、测试目录和验证命令。
    - 目录组织规范。
-4. 根据扫描结果识别相关角色：
+4. 根据扫描结果形成后续工作流可复用的角色激活候选：
    - `frontend-engineer`
    - `backend-engineer`
    - `ui-designer`
    - `qa-engineer`
    - `tech-lead`
-5. 输出内容必须服务后续工作流上下文传递，不替代真实代码阅读。
+5. 输出内容必须服务后续工作流上下文传递，不替代真实代码阅读。后续任务仍需按 `role-activation-methodology.md` 形成具体 `rolePlan`。
 
 ## 阶段表
 

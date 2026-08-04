@@ -19,8 +19,12 @@ members:
   - tech-lead
 execution_mode: hybrid
 quality_gates:
+  - role-activation-gate
   - design-gate
+  - technical-gate
   - test-gate
+  - evidence-gate
+  - verification-gate
   - delivery-gate
 outputs:
   - walkthrough-report
@@ -44,16 +48,16 @@ outputs:
 
 | 阶段 | 负责人 | 动作 | 产出 | 门禁 |
 | --- | --- | --- | --- | --- |
-| Scope Check | 产品经理 | 对照验收标准检查功能范围 | 产品走查结论 | delivery-gate |
-| UI Check | UI 设计师 | 检查视觉、交互、状态和响应式 | UI 走查结论 | design-gate |
-| QA Check | 测试工程师 | 检查测试覆盖和回归结果 | QA 走查结论 | test-gate |
-| Risk Check | 技术负责人 | 检查技术风险、兼容和回滚 | 技术风险 | technical-gate |
-| Decision | 交付经理 | 汇总通过、阻塞或需修复项 | `walkthrough-report` | delivery-gate |
+| Scope Check | 交付经理 + 产品经理 | 对照验收标准确认走查范围、验证等级和 `rolePlan` | 产品走查结论、角色激活结论 | role-activation-gate、delivery-gate |
+| UI Check | UI 设计师 | 仅在界面、交互、可访问性或响应式受影响时检查体验 | UI 走查结论或 N/A 依据 | design-gate |
+| QA Check | 测试工程师 | 检查测试覆盖、回归结果、证据和未覆盖路径 | QA 走查结论 | test-gate、evidence-gate、verification-gate |
+| Risk Check | 技术负责人 | 仅在兼容、性能、权限、数据或回滚风险存在时检查 | 技术风险或 N/A 依据 | technical-gate |
+| Decision | 交付经理 | 汇总通过、阻塞或需修复项，限制结论不超过验证等级 | `walkthrough-report.md`、`delivery-summary.md` | delivery-gate、verification-gate |
 
 ## 走查结论
 
 - `通过`：可交付。
-- `带风险通过`：风险已说明，用户或负责人接受。
+- `带风险通过`：仅允许已关闭 P0/P1 后的 P2 风险，且风险、接受人、复查条件和验证等级已记录。
 - `不通过`：列出阻塞项、责任角色和复查条件。
 
 ## 失败处理
@@ -67,4 +71,5 @@ outputs:
 
 - 产品、UI、QA 的结论已汇总。
 - 阻塞项有明确责任和修复条件。
+- P0/P1 已关闭；`rolePlan` 与验证等级和结论一致。
 - 最终交付状态可用于用户验收。

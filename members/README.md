@@ -23,6 +23,8 @@ quality_gates:
 正文必须包含：
 
 - 职责边界
+- 场景判断
+- 方法论
 - 输入
 - 输出
 - 工作逻辑
@@ -46,7 +48,8 @@ quality_gates:
 
 ## 引用规则
 
-- 工作流 frontmatter 的 `members` 必须引用本目录中的 `id`。
+- 工作流 frontmatter 的 `members` 必须引用本目录中的 `id`，但只表示候选池。
+- 每次执行先按 `docs/methodologies/role-activation-methodology.md` 将角色标记为 `active`、`consulted` 或 `not_applicable`，并记录理由。
 - 角色之间冲突时，由 `delivery-manager` 汇总问题并要求决策。
 - 成员只对自己的职责域给结论，不跨域替其他角色做最终判断。
 - 角色调用外部 Skill 时，必须先参考 `external-skills/role-map.md`，并把外部输出转成自身职责域内可执行、可验证的上下文。

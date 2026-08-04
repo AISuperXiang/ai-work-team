@@ -119,7 +119,7 @@ function usage() {
   node scripts/build-context.js <workdir> --json
 
 Examples:
-  node scripts/build-context.js /path/to/repo --request "为后续 /team build 构建上下文"
+  node scripts/build-context.js <project-root> --request "为后续 /team build 构建上下文"
   node scripts/build-context.js ./workspace/xxx/demo --dry-run
 `);
 }

@@ -28,6 +28,11 @@
 | Walkthrough | `walkthrough-report.md` | pending | 产品/UI/QA |
 | Delivery | `delivery-summary.md` | pending | 交付经理 |
 
+## 角色激活计划
+
+| 角色 | active / consulted / not_applicable | 场景依据 | 参与阶段 |
+| --- | --- | --- | --- |
+
 ## 代码落地记录
 
 | 项 | 内容 |

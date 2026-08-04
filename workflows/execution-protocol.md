@@ -26,19 +26,36 @@ execution_mode: sequential
 
 1. **确认输入**：列出已知信息、缺口和约束。
 2. **选择工作流**：引用 `route-table.md` 或 `commands/team.md` 的命中规则。
-3. **建立状态板**：阶段、负责人、状态、产出、门禁。
-4. **加载角色**：只读取当前阶段涉及的 `members/*.md`。
-5. **同步交接**：阶段切换前按 `docs/handoff-contract.md` 更新 `role-handoff.md`。
-6. **产出交付物**：优先使用 `assets/templates/` 中的模板。
-7. **记录决策**：关键范围、技术取舍、上线风险和延期项写入 `decision-log.md`。
-8. **检查门禁**：按 `docs/quality-gates.md` 验证阶段结果，包含 value、decision、handoff、complexity、evidence 和 no-legacy 约束。
-9. **处理阻塞**：能探索则探索，需取舍则问用户，无法继续则交付阻塞报告。
-10. **进入下一阶段**：上一阶段门禁未通过时不得默认继续。
-11. **最终交付**：输出范围、业务价值、决策、验证、风险、证据和后续建议。
+3. **选择执行档位**：实现、缺陷修复和代码审查先读 `docs/methodologies/execution-methodology.md`，按风险、未知度和影响范围确定 `lightweight`、`standard` 或 `assurance`。
+4. **激活角色**：读取 `docs/methodologies/role-activation-methodology.md`，形成 `rolePlan`，为每个角色记录模式、场景依据和参与阶段。
+5. **建立状态板**：阶段、负责人、状态、产出、门禁、`executionProfile`、`verificationLevel` 和 `rolePlan`。
+6. **加载角色**：只读取当前阶段且在 `rolePlan` 中为 `active` 或 `consulted` 的 `members/*.md` 与对应方法论。
+7. **同步交接**：阶段切换前按 `docs/handoff-contract.md` 更新 `role-handoff.md`，并记录角色计划变化。
+8. **产出交付物**：优先使用 `assets/templates/` 中的模板；`lightweight` 只保留能证明决策、改动和验证的最小产物。
+9. **记录决策**：关键范围、技术取舍、上线风险和延期项写入 `decision-log.md`。
+10. **检查门禁**：按 `docs/quality-gates.md` 验证阶段结果，包含 role activation、value、decision、handoff、complexity、evidence、verification 和 no-legacy 约束。
+11. **处理阻塞**：能探索则探索，需取舍则问用户，无法继续则交付阻塞报告。
+12. **进入下一阶段**：上一阶段门禁未通过时不得默认继续。
+13. **最终交付**：输出范围、角色激活计划、业务价值、决策、验证等级、风险、证据和后续建议。
+
+## 执行档位
+
+- `lightweight` 不是跳过工程纪律：必须读相关代码、记录目标行为和非目标、给出回归验证与剩余风险。
+- `standard` 是多模块或不确定变更的默认档位，使用工作流声明的核心产物与角色交接。
+- `assurance` 用于 `L/XL`、安全、数据、权限、外部副作用或高回滚成本变更，增加独立风险评审、灰度、回滚和运行时验证。
+- 发现新依赖、无法复现、验证失败、公开契约变化或 P0/P1 风险时，立即升级档位并更新状态板。
+
+## 角色激活
+
+- workflow frontmatter 中的成员是候选池，不代表每个角色都必须参与。
+- 先按任务信号形成 `rolePlan`，再为当前阶段加载 `active` 或 `consulted` 角色。
+- `not_applicable` 必须记录理由；没有界面变化时 UI、不涉及业务指标时运营、没有服务端影响时后端都可以不参与。
+- 发现跨端、接口、数据、权限、体验、用户预期或回归风险后，重新评估 `rolePlan`，不要沿用初始假设。
+- 角色未参与时，相应评分维度按 `quality-rubrics.md` 标记为 `N/A`，而不是给无证据的分数。
 
 ## 混合执行
 
-当工作流为 `execution_mode: hybrid` 且阶段可独立评审时：
+当工作流为 `execution_mode: hybrid` 且阶段可独立评审、输入已冻结且没有共享写入冲突时：
 
 - 产品范围评审可由产品经理子 Agent 执行。
 - UI 可用性评审可由 UI 设计师子 Agent 执行。
@@ -59,19 +76,23 @@ execution_mode: sequential
 
 交付经理只输出统一结论和裁决依据，不把互相冲突的原始意见直接交付给用户。
 
+实现代码默认由一个负责人修改。并行角色必须有独立问题边界、证据要求和文件所有权；发现冲突时停止并行并先裁决，不能用角色数量制造虚假的置信度。
+
 ## 失败处理
 
 - 门禁失败：停止进入下一阶段，说明失败项、修复动作和责任角色。
 - 验证命令失败：记录命令、失败类型、关键输出和下一步处理。
 - 缺少环境：说明缺失环境、影响范围和可替代检查。
 - 用户目标冲突：交付经理整理为二选一或三选一决策。
+- 无法复现缺陷：记录最小插桩、数据采集或环境补齐方案，状态保持 `blocked` 或 `review`，不得交付“已修复”。
 
 ## 完成定义
 
 工作流完成必须同时满足：
 
 - 所有必需阶段为 `completed`。
-- 质量门禁通过；不可绕过门禁必须有证据闭环。
+- 质量门禁通过；`role-activation-gate` 与其他不可绕过门禁均有证据闭环。
 - 验证结果明确。
+- `verificationLevel` 与结论范围一致，未覆盖路径和环境风险明确。
 - 业务价值、关键决策、交接记录、风险台账和证据索引明确。
 - 最终交付摘要可被用户直接用于验收、上线观测或继续推进。

@@ -23,8 +23,25 @@ const LEGACY_PATTERNS = [
 const LEGACY_SCAN_EXTENSIONS = new Set([".md", ".json", ".js", ".cjs", ".mjs", ".ts", ".tsx", ".jsx"]);
 const STAGE_STATUSES = new Set(["pending", "in_progress", "blocked", "review", "completed"]);
 const COMPLEXITY_LEVELS = new Set(["S", "M", "L", "XL"]);
+const EXECUTION_PROFILES = new Set(["lightweight", "standard", "assurance"]);
+const VERIFICATION_LEVELS = new Set(["V0", "V1", "V2", "V3", "V4"]);
+const ROLE_PLAN_MODES = new Set(["active", "consulted", "not_applicable"]);
+const MEMBER_IDS = new Set([
+  "product-manager",
+  "operations-manager",
+  "ui-designer",
+  "tech-lead",
+  "frontend-engineer",
+  "backend-engineer",
+  "qa-engineer",
+  "delivery-manager"
+]);
 const REQUIRED_STATUS_FIELDS = ["name", "owner", "status", "gates", "artifacts", "evidence"];
-const REQUIRED_STATUS_STAGES = ["Intake", "PRD", "UI/UX", "Tech Design", "Implementation", "QA", "Delivery"];
+const REQUIRED_STATUS_STAGES_BY_WORKFLOW = {
+  "requirement-end-to-end": ["Intake", "PRD", "UI/UX", "Tech Design", "Implementation", "QA", "Delivery"],
+  "bugfix-delivery": ["Triage", "Reproduce", "Diagnose", "Fix", "Regression", "Delivery"],
+  "code-review-delivery": ["Scope", "Behavior Review", "Domain Review", "Test Review", "Optimize", "Verify & Deliver"]
+};
 const REQUIRED_PRD_BUSINESS_ROWS = ["目标用户", "用户价值", "业务价值", "价值假设", "预期收益", "成本收益比"];
 const REQUIRED_PRD_METRIC_HEADERS = ["指标", "当前基线", "目标变化", "数据来源", "观察周期", "异常阈值"];
 const REQUIRED_DELIVERY_BUSINESS_ROWS = ["价值假设", "指标基线", "收益目标", "成本收益比", "上线后观测结果/计划"];
@@ -44,6 +61,11 @@ const checks = [
       "decision-log.md",
       "role-handoff.md",
       "S / M / L / XL",
+      "executionProfile",
+      "verificationLevel",
+      "rolePlan",
+      "role-activation-gate",
+      "code-review-delivery.md",
       "质量评分"
     ]
   },
@@ -79,6 +101,7 @@ const checks = [
       "risk-register.md",
       "role-handoff.md",
       "workflow-status.json",
+      "execution-methodology.md",
       "业务影响",
       "质量评分"
     ]
@@ -127,6 +150,7 @@ const checks = [
       "交接记录",
       "/team buildContext",
       "/team install",
+      "/team code-review",
       "external-skills/catalog.json"
     ]
   },
@@ -138,6 +162,11 @@ const checks = [
       "handoff-gate",
       "complexity-gate",
       "evidence-gate",
+      "reproduction-gate",
+      "review-gate",
+      "verification-gate",
+      "role-activation-gate",
+      "no-legacy-contract",
       "no-legacy-contract",
       "指标基线",
       "成本收益比",
@@ -237,6 +266,8 @@ const checks = [
     file: "assets/templates/workflow-status.json",
     mustContain: [
       "complexityLevel",
+      "executionProfile",
+      "verificationLevel",
       "value-gate",
       "decision-gate",
       "handoff-gate",
@@ -249,6 +280,8 @@ const checks = [
     mustContain: [
       "requirementFolder",
       "complexityLevel",
+      "executionProfile",
+      "verificationLevel",
       "stages",
       "artifacts",
       "evidence"
@@ -350,6 +383,47 @@ const checks = [
       "AGENTS.md",
       "ai-work-team:buildContext:start",
       "ai-work-team:buildContext:end"
+    ]
+  },
+  {
+    file: "workflows/bugfix-delivery.md",
+    mustContain: [
+      "Reproduce",
+      "reproduction-gate",
+      "decision-gate",
+      "verification-gate",
+      "不得交付“已修复”"
+    ]
+  },
+  {
+    file: "workflows/code-review-delivery.md",
+    mustContain: [
+      "/team code-review",
+      "review-gate",
+      "分级发现",
+      "用户未授权修改时",
+      "验证等级"
+    ]
+  },
+  {
+    file: "docs/methodologies/execution-methodology.md",
+    mustContain: [
+      "lightweight",
+      "standard",
+      "assurance",
+      "verificationLevel",
+      "V0",
+      "V4"
+    ]
+  },
+  {
+    file: "docs/methodologies/role-activation-methodology.md",
+    mustContain: [
+      "rolePlan",
+      "active",
+      "consulted",
+      "not_applicable",
+      "工作流最小组合"
     ]
   }
 ];
@@ -546,6 +620,66 @@ function collectFiles(dir, files = []) {
   return files;
 }
 
+function validateRolePlan(rolePlan, stageNames, relativePath, templateMode) {
+  if (!Array.isArray(rolePlan) || rolePlan.length === 0) {
+    fail(`${relativePath} rolePlan must be a non-empty array`);
+    return;
+  }
+
+  const roles = new Set();
+  for (const [index, item] of rolePlan.entries()) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      fail(`${relativePath} rolePlan item ${index} must be an object`);
+      continue;
+    }
+    if (MEMBER_IDS.has(item.role)) {
+      pass(`${relativePath} rolePlan item ${index} references existing role: ${item.role}`);
+    } else {
+      fail(`${relativePath} rolePlan item ${index} references unknown role: ${item.role || "missing"}`);
+    }
+    if (ROLE_PLAN_MODES.has(item.mode)) {
+      pass(`${relativePath} rolePlan ${item.role || index} mode is valid: ${item.mode}`);
+    } else {
+      fail(`${relativePath} rolePlan ${item.role || index} mode must be active/consulted/not_applicable`);
+    }
+    if (isMeaningful(item.reason)) {
+      pass(`${relativePath} rolePlan ${item.role || index} has scenario reason`);
+    } else {
+      fail(`${relativePath} rolePlan ${item.role || index} missing scenario reason`);
+    }
+    if (!Array.isArray(item.stages)) {
+      fail(`${relativePath} rolePlan ${item.role || index} stages must be an array`);
+      continue;
+    }
+    if (item.mode === "not_applicable" && item.stages.length === 0) {
+      pass(`${relativePath} not_applicable role ${item.role || index} has no execution stages`);
+    } else if (item.mode !== "not_applicable" && item.stages.length > 0) {
+      pass(`${relativePath} participating role ${item.role || index} has execution stages`);
+    } else {
+      fail(`${relativePath} rolePlan ${item.role || index} mode and stages are inconsistent`);
+    }
+    for (const stageName of item.stages) {
+      if (stageNames.has(stageName)) {
+        pass(`${relativePath} rolePlan ${item.role || index} references stage: ${stageName}`);
+      } else {
+        fail(`${relativePath} rolePlan ${item.role || index} references unknown stage: ${stageName}`);
+      }
+    }
+    if (MEMBER_IDS.has(item.role)) {
+      if (!roles.has(item.role)) {
+        pass(`${relativePath} rolePlan role is unique: ${item.role}`);
+        roles.add(item.role);
+      } else {
+        fail(`${relativePath} rolePlan has duplicate role: ${item.role}`);
+      }
+    }
+  }
+
+  if (!templateMode && !roles.has("delivery-manager")) {
+    fail(`${relativePath} rolePlan must include delivery-manager for a workspace workflow`);
+  }
+}
+
 function validateStatusObject(parsed, relativePath, options = {}) {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     fail(`${relativePath} must be a JSON object`);
@@ -553,7 +687,7 @@ function validateStatusObject(parsed, relativePath, options = {}) {
   }
 
   const templateMode = options.templateMode === true;
-  for (const field of ["workflow", "requirementFolder", "complexityLevel", "updatedAt", "stages"]) {
+  for (const field of ["workflow", "requirementFolder", "complexityLevel", "executionProfile", "verificationLevel", "rolePlan", "updatedAt", "stages"]) {
     if (hasOwn(parsed, field)) {
       pass(`${relativePath} has top-level field: ${field}`);
     } else {
@@ -575,6 +709,18 @@ function validateStatusObject(parsed, relativePath, options = {}) {
     pass(`${relativePath} complexityLevel is valid: ${parsed.complexityLevel}`);
   } else {
     fail(`${relativePath} complexityLevel must be one of S/M/L/XL`);
+  }
+
+  if (EXECUTION_PROFILES.has(parsed.executionProfile)) {
+    pass(`${relativePath} executionProfile is valid: ${parsed.executionProfile}`);
+  } else {
+    fail(`${relativePath} executionProfile must be lightweight/standard/assurance`);
+  }
+
+  if (VERIFICATION_LEVELS.has(parsed.verificationLevel)) {
+    pass(`${relativePath} verificationLevel is valid: ${parsed.verificationLevel}`);
+  } else {
+    fail(`${relativePath} verificationLevel must be V0/V1/V2/V3/V4`);
   }
 
   if (!Array.isArray(parsed.stages)) {
@@ -628,7 +774,15 @@ function validateStatusObject(parsed, relativePath, options = {}) {
     }
   }
 
-  for (const stageName of REQUIRED_STATUS_STAGES) {
+  validateRolePlan(parsed.rolePlan, stageNames, relativePath, templateMode);
+
+  const expectedStages = REQUIRED_STATUS_STAGES_BY_WORKFLOW[parsed.workflow] ||
+    (templateMode ? REQUIRED_STATUS_STAGES_BY_WORKFLOW["requirement-end-to-end"] : null);
+  if (!expectedStages) {
+    fail(`${relativePath} has unknown workflow stage contract: ${parsed.workflow}`);
+    return false;
+  }
+  for (const stageName of expectedStages) {
     if (stageNames.has(stageName)) {
       pass(`${relativePath} includes stage: ${stageName}`);
     } else {
@@ -644,7 +798,7 @@ function validateStatusSchemaContract() {
   if (!schema) return;
 
   const required = Array.isArray(schema.required) ? schema.required : [];
-  for (const field of ["workflow", "requirementFolder", "complexityLevel", "updatedAt", "stages"]) {
+  for (const field of ["workflow", "requirementFolder", "complexityLevel", "executionProfile", "verificationLevel", "rolePlan", "updatedAt", "stages"]) {
     if (required.includes(field)) {
       pass(`${relativePath} requires top-level field: ${field}`);
     } else {
@@ -662,10 +816,20 @@ function validateStatusSchemaContract() {
       fail(`${relativePath} stage does not require field: ${field}`);
     }
   }
+
+  const rolePlanRequired = schema.properties && schema.properties.rolePlan && schema.properties.rolePlan.items
+    ? schema.properties.rolePlan.items.required
+    : [];
+  for (const field of ["role", "mode", "reason", "stages"]) {
+    if (Array.isArray(rolePlanRequired) && rolePlanRequired.includes(field)) {
+      pass(`${relativePath} rolePlan item requires field: ${field}`);
+    } else {
+      fail(`${relativePath} rolePlan item does not require field: ${field}`);
+    }
+  }
 }
 
-function validateWorkflowStatusTemplate() {
-  const relativePath = "assets/templates/workflow-status.json";
+function validateWorkflowStatusTemplate(relativePath) {
   const parsed = parseJsonFile(relativePath);
   if (!parsed) return;
   validateStatusObject(parsed, relativePath, { templateMode: true });
@@ -697,10 +861,28 @@ function validateTemplateContracts() {
   requireTableRows("assets/templates/delivery-summary.md", "业务影响与收益观测", REQUIRED_DELIVERY_BUSINESS_ROWS);
   requireTableRows("assets/templates/delivery-summary.md", "质量评分", REQUIRED_QUALITY_DIMENSIONS);
   requireTableHeaders("assets/templates/delivery-summary.md", "证据索引", ["结论", "证据类型", "路径/来源", "说明"]);
+  requireTableHeaders("assets/templates/delivery-summary.md", "执行档位与验证等级", ["项", "内容"]);
+  requireTableHeaders("assets/templates/delivery-summary.md", "角色激活计划", ["角色", "模式", "场景依据", "实际贡献/未参与原因"]);
+  requireTableHeaders("assets/templates/technical-design.md", "事实与假设", ["类型", "内容", "证据/来源", "对方案的影响"]);
+  requireTableHeaders("assets/templates/technical-design.md", "决策与职责边界", ["决策", "候选方案", "最终选择与依据", "责任角色", "验证/回滚"]);
+  requireTableHeaders("assets/templates/test-plan.md", "风险与测试策略", ["风险/失效条件", "测试层级", "负责人", "最低验证等级", "不覆盖的影响"]);
+  requireTableHeaders("assets/templates/bug-analysis.md", "复现与基线证据", ["项", "内容"]);
+  requireTableHeaders("assets/templates/bug-analysis.md", "假设与排除", ["假设", "证据", "结论", "下一步"]);
+  requireTableHeaders("assets/templates/code-review.md", "分级发现", [
+    "严重度",
+    "代码位置",
+    "失效场景",
+    "证据",
+    "建议动作",
+    "验证方式",
+    "状态"
+  ]);
+  requireTableHeaders("assets/templates/code-review.md", "角色激活计划", ["角色", "模式", "审查维度/场景依据", "参与阶段"]);
 
   for (const heading of REQUIRED_HANDOFF_SECTIONS) {
     requireSectionExists("assets/templates/role-handoff.md", heading);
   }
+  requireTableHeaders("assets/templates/role-handoff.md", "角色激活计划", ["角色", "模式", "场景依据", "参与阶段"]);
   requireTableHeaders("assets/templates/role-handoff.md", "Hybrid 子 Agent 输出汇总", [
     "角色",
     "结论",
@@ -734,19 +916,79 @@ function parseScore(value) {
   return match ? Number(match[1]) : undefined;
 }
 
-function validateWorkspaceDeliverySummary(workspaceDir) {
+function validateWorkspaceRolePlanTable(relativePath, status, heading, requiredColumns) {
+  const table = findFirstTable(readText(relativePath), heading);
+  if (!table) {
+    fail(`${relativePath} missing rolePlan table: ${heading}`);
+    return;
+  }
+  for (const column of requiredColumns) {
+    if (table.headers.includes(column)) {
+      pass(`${relativePath} ${heading} table has header: ${column}`);
+    } else {
+      fail(`${relativePath} ${heading} table missing header: ${column}`);
+    }
+  }
+  const expectedCount = Array.isArray(status.rolePlan) ? status.rolePlan.length : 0;
+  if (
+    table.rows.length >= expectedCount &&
+    table.rows.every((row) => row.slice(0, requiredColumns.length).every(isMeaningful))
+  ) {
+    pass(`${relativePath} ${heading} records every rolePlan decision`);
+  } else {
+    fail(`${relativePath} ${heading} must contain a meaningful row for every rolePlan decision`);
+  }
+}
+
+function roleParticipates(status, role) {
+  return Array.isArray(status.rolePlan) && status.rolePlan.some(
+    (item) => item.role === role && (item.mode === "active" || item.mode === "consulted")
+  );
+}
+
+function scoreMayBeNotApplicable(dimension, status, row) {
+  const reason = String(row[2] || "").trim();
+  if (!isMeaningful(reason)) return false;
+  if (dimension === "UI 美观与可用性") return !roleParticipates(status, "ui-designer");
+  if (dimension === "业务影响") {
+    return /纯内部|缺陷修复|代码审查|不涉及.*业务|非业务变化/.test(reason);
+  }
+  return false;
+}
+
+function validateWorkspaceDeliverySummary(workspaceDir, status) {
   const relativePath = path.join(workspaceDir, "delivery-summary.md");
   if (!fs.existsSync(path.join(ROOT, relativePath))) {
     fail(`${relativePath} missing for completed Delivery stage`);
     return;
   }
-  requireMeaningfulRows(relativePath, "业务影响与收益观测", REQUIRED_DELIVERY_BUSINESS_ROWS, [1, 2, 3]);
+  if (status.workflow === "requirement-end-to-end") {
+    requireMeaningfulRows(relativePath, "业务影响与收益观测", REQUIRED_DELIVERY_BUSINESS_ROWS, [1, 2, 3]);
+  } else {
+    requireTableRows(relativePath, "业务影响与收益观测", REQUIRED_DELIVERY_BUSINESS_ROWS);
+  }
   const evidenceTable = findFirstTable(readText(relativePath), "证据索引");
   if (evidenceTable && evidenceTable.rows.length > 0 && evidenceTable.rows.every((row) => row.slice(0, 3).every(isMeaningful))) {
     pass(`${relativePath} has non-empty evidence index`);
   } else {
     fail(`${relativePath} missing non-empty evidence index`);
   }
+
+  const verificationTable = findFirstTable(readText(relativePath), "执行档位与验证等级");
+  const verificationRows = verificationTable ? tableRowsByFirstColumn(verificationTable) : new Map();
+  const profileRow = verificationRows.get("执行档位");
+  const levelRow = verificationRows.get("当前验证等级");
+  if (profileRow && profileRow[1] === status.executionProfile) {
+    pass(`${relativePath} executionProfile matches workflow status`);
+  } else {
+    fail(`${relativePath} executionProfile must match workflow status`);
+  }
+  if (levelRow && levelRow[1] === status.verificationLevel) {
+    pass(`${relativePath} verificationLevel matches workflow status`);
+  } else {
+    fail(`${relativePath} verificationLevel must match workflow status`);
+  }
+  validateWorkspaceRolePlanTable(relativePath, status, "角色激活计划", ["角色", "模式", "场景依据", "实际贡献/未参与原因"]);
 
   const qualityTable = requireTableRows(relativePath, "质量评分", REQUIRED_QUALITY_DIMENSIONS);
   if (!qualityTable) return;
@@ -763,15 +1005,15 @@ function validateWorkspaceDeliverySummary(workspaceDir) {
     const row = rows.get(dimension);
     if (!row) continue;
     const score = parseScore(row[1]);
-    if (dimension === "UI 美观与可用性" && score === null) {
-      pass(`${relativePath} ${dimension} is N/A`);
+    if (score === null && scoreMayBeNotApplicable(dimension, status, row)) {
+      pass(`${relativePath} ${dimension} is N/A with rolePlan basis`);
       continue;
     }
     const minimum = minimums.get(dimension) || 4;
     if (typeof score === "number" && score >= minimum) {
       pass(`${relativePath} ${dimension} score meets minimum ${minimum}`);
     } else {
-      fail(`${relativePath} ${dimension} score must be >= ${minimum} or valid N/A`);
+      fail(`${relativePath} ${dimension} score must be >= ${minimum} or valid rolePlan-backed N/A`);
     }
   }
 }
@@ -801,6 +1043,11 @@ function validateWorkspaceHandoff(workspaceDir) {
     } else {
       fail(`${relativePath} ${heading} table missing rows`);
     }
+  }
+  const statusPath = path.join(workspaceDir, "workflow-status.json");
+  const status = parseJsonFile(statusPath);
+  if (status) {
+    validateWorkspaceRolePlanTable(relativePath, status, "角色激活计划", ["角色", "模式", "场景依据", "参与阶段"]);
   }
   if (tableHasRows(relativePath, "Hybrid 子 Agent 输出汇总")) {
     pass(`${relativePath} has hybrid sub-agent output summary`);
@@ -857,7 +1104,7 @@ function validateWorkspaceStatuses() {
 
     const completedStages = new Set((status.stages || []).filter((stage) => stage.status === "completed").map((stage) => stage.name));
     if (completedStages.has("PRD")) validateWorkspacePrd(workspaceDir);
-    if (completedStages.has("Delivery")) validateWorkspaceDeliverySummary(workspaceDir);
+    if (completedStages.has("Delivery")) validateWorkspaceDeliverySummary(workspaceDir, status);
     if ((status.stages || []).some((stage) => stage.status === "completed" && Array.isArray(stage.gates) && stage.gates.includes("handoff-gate"))) {
       validateWorkspaceHandoff(workspaceDir);
     }
@@ -923,7 +1170,9 @@ function validateNoLegacyContract() {
 }
 
 validateStatusSchemaContract();
-validateWorkflowStatusTemplate();
+validateWorkflowStatusTemplate("assets/templates/workflow-status.json");
+validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
+validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
 validateBusinessImpactRubric();
 validateTemplateContracts();
 validateWorkspaceStatuses();

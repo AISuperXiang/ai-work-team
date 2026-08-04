@@ -2,13 +2,65 @@
   "workflow": "",
   "requirementFolder": "",
   "complexityLevel": "S",
+  "executionProfile": "standard",
+  "verificationLevel": "V0",
+  "rolePlan": [
+    {
+      "role": "delivery-manager",
+      "mode": "active",
+      "reason": "维护工作流状态、决策、证据和交付结论。",
+      "stages": ["Intake", "Delivery"]
+    },
+    {
+      "role": "product-manager",
+      "mode": "active",
+      "reason": "需求包含用户可见行为和验收标准。",
+      "stages": ["Intake", "PRD"]
+    },
+    {
+      "role": "operations-manager",
+      "mode": "not_applicable",
+      "reason": "未影响运营配置、指标、实验或发布节奏。",
+      "stages": []
+    },
+    {
+      "role": "ui-designer",
+      "mode": "consulted",
+      "reason": "仅需确认既有 UI 状态和可访问性约束。",
+      "stages": ["UI/UX"]
+    },
+    {
+      "role": "tech-lead",
+      "mode": "active",
+      "reason": "需要评审跨模块风险和实现方案。",
+      "stages": ["Tech Design"]
+    },
+    {
+      "role": "frontend-engineer",
+      "mode": "active",
+      "reason": "需求影响客户端页面和状态。",
+      "stages": ["Implementation"]
+    },
+    {
+      "role": "backend-engineer",
+      "mode": "not_applicable",
+      "reason": "未影响 API、服务端数据或权限。",
+      "stages": []
+    },
+    {
+      "role": "qa-engineer",
+      "mode": "active",
+      "reason": "需要验证用户行为和回归范围。",
+      "stages": ["QA"]
+    }
+  ],
   "updatedAt": "",
   "stages": [
     {
       "name": "Intake",
       "owner": "delivery-manager,product-manager",
       "status": "pending",
-      "gates": ["requirement-gate", "complexity-gate"],
+      "gates": ["requirement-gate", "role-activation-gate", "complexity-gate"],
       "artifacts": ["requirement-brief.md", "risk-register.md"],
       "evidence": []
     },

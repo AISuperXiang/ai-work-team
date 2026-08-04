@@ -11,6 +11,7 @@
   - `sequential`：当前 Agent 顺序执行。
   - `hybrid`：默认顺序执行，复杂独立评审阶段可启动角色子 Agent。
 - 工作流必须定义输入契约、阶段表、质量门禁、失败处理和完成定义。
+- `members` 是候选角色池；执行前必须按 `docs/methodologies/role-activation-methodology.md` 形成 `rolePlan`，只加载实际参与角色。
 
 ## 当前工作流
 
@@ -21,9 +22,10 @@
 | 需求评审 | `requirement-review.md` | 评审 PRD 或模糊需求 |
 | 技术方案评审 | `technical-design-review.md` | 评审架构、接口、数据、测试策略 |
 | 缺陷修复交付 | `bugfix-delivery.md` | 复现、定位、修复、回归、交付 |
+| 代码审查与优化交付 | `code-review-delivery.md` | 审查 diff/代码逻辑，必要时完成最小优化与验证 |
 | 产品/UI/QA 走查 | `product-ui-qa-walkthrough.md` | 对实现结果做联合走查 |
 | 外部优质 Skill 安装 | `external-skill-install.md` | 基于角色和任务安装推荐开源 Skill |
 
 ## 执行入口
 
-先读 [`route-table.md`](route-table.md) 匹配工作流，再读 [`execution-protocol.md`](execution-protocol.md) 执行通用协议。
+先读 [`route-table.md`](route-table.md) 匹配工作流，再读 [`execution-protocol.md`](execution-protocol.md) 和 [`../docs/methodologies/role-activation-methodology.md`](../docs/methodologies/role-activation-methodology.md) 形成执行与角色计划。

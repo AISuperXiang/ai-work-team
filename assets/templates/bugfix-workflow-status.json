@@ -1,0 +1,96 @@
+{
+  "workflow": "bugfix-delivery",
+  "requirementFolder": "",
+  "complexityLevel": "S",
+  "executionProfile": "lightweight",
+  "verificationLevel": "V0",
+  "rolePlan": [
+    {
+      "role": "delivery-manager",
+      "mode": "active",
+      "reason": "维护缺陷状态、阻塞、证据和交付结论。",
+      "stages": ["Triage", "Delivery"]
+    },
+    {
+      "role": "product-manager",
+      "mode": "consulted",
+      "reason": "仅在期望行为或用户影响不清时确认。",
+      "stages": ["Triage"]
+    },
+    {
+      "role": "tech-lead",
+      "mode": "consulted",
+      "reason": "仅在根因跨模块、风险较高或方案存在取舍时介入。",
+      "stages": ["Diagnose"]
+    },
+    {
+      "role": "frontend-engineer",
+      "mode": "active",
+      "reason": "示例缺陷归属客户端代码。",
+      "stages": ["Reproduce", "Fix"]
+    },
+    {
+      "role": "backend-engineer",
+      "mode": "not_applicable",
+      "reason": "未影响 API、服务端数据或权限。",
+      "stages": []
+    },
+    {
+      "role": "qa-engineer",
+      "mode": "active",
+      "reason": "需要复现、回归和记录验证证据。",
+      "stages": ["Reproduce", "Regression"]
+    }
+  ],
+  "updatedAt": "",
+  "stages": [
+    {
+      "name": "Triage",
+      "owner": "delivery-manager,product-manager",
+      "status": "pending",
+      "gates": ["requirement-gate", "role-activation-gate"],
+      "artifacts": ["bug-analysis.md"],
+      "evidence": []
+    },
+    {
+      "name": "Reproduce",
+      "owner": "qa-engineer,frontend-engineer,backend-engineer",
+      "status": "pending",
+      "gates": ["reproduction-gate", "evidence-gate"],
+      "artifacts": ["bug-analysis.md", "evidence/README.md"],
+      "evidence": []
+    },
+    {
+      "name": "Diagnose",
+      "owner": "tech-lead",
+      "status": "pending",
+      "gates": ["technical-gate", "decision-gate"],
+      "artifacts": ["bug-analysis.md", "decision-log.md"],
+      "evidence": []
+    },
+    {
+      "name": "Fix",
+      "owner": "frontend-engineer,backend-engineer",
+      "status": "pending",
+      "gates": ["implementation-gate"],
+      "artifacts": ["implementation-plan.md"],
+      "evidence": []
+    },
+    {
+      "name": "Regression",
+      "owner": "qa-engineer",
+      "status": "pending",
+      "gates": ["test-gate", "evidence-gate", "verification-gate"],
+      "artifacts": ["test-plan.md", "evidence/README.md"],
+      "evidence": []
+    },
+    {
+      "name": "Delivery",
+      "owner": "delivery-manager",
+      "status": "pending",
+      "gates": ["handoff-gate", "delivery-gate", "verification-gate"],
+      "artifacts": ["role-handoff.md", "delivery-summary.md"],
+      "evidence": []
+    }
+  ]
+}

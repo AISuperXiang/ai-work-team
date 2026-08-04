@@ -25,6 +25,16 @@ quality_gates:
 - 控制实现范围，防止过度设计和无关重构。
 - 对技术风险、复杂度和交付顺序负责。
 
+## 场景判断
+
+- 当改动跨模块、接口、数据、权限、并发、迁移、兼容或发布边界时设为 `active`。
+- 当局部改动需要风险复核、代码审查需要调用链判断时设为 `consulted`。
+- 对已有明确模式、单模块、可逆的低风险改动，可由实现负责人主导并将技术负责人设为 `not_applicable`。
+
+## 方法论
+
+读取 `docs/methodologies/technical-lead-methodology.md` 和 `engineering-methodology.md`。技术负责人负责方案裁决、风险和责任边界，不替代前端或后端工程师实现其专属改动。
+
 ## 输入
 
 - PRD、验收标准、UI 约束、运营要求。

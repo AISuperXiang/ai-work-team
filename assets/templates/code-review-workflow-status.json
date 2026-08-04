@@ -1,0 +1,90 @@
+{
+  "workflow": "code-review-delivery",
+  "requirementFolder": "",
+  "complexityLevel": "S",
+  "executionProfile": "lightweight",
+  "verificationLevel": "V0",
+  "rolePlan": [
+    {
+      "role": "delivery-manager",
+      "mode": "active",
+      "reason": "固定范围、跟踪证据和交付审查结论。",
+      "stages": ["Scope", "Verify & Deliver"]
+    },
+    {
+      "role": "tech-lead",
+      "mode": "active",
+      "reason": "需要从调用链审查行为正确性和跨模块风险。",
+      "stages": ["Scope", "Behavior Review"]
+    },
+    {
+      "role": "frontend-engineer",
+      "mode": "active",
+      "reason": "示例审查范围命中客户端代码。",
+      "stages": ["Domain Review", "Optimize"]
+    },
+    {
+      "role": "backend-engineer",
+      "mode": "not_applicable",
+      "reason": "审查范围未涉及 API、服务端数据或权限。",
+      "stages": []
+    },
+    {
+      "role": "qa-engineer",
+      "mode": "consulted",
+      "reason": "需要映射核心发现的回归范围和验证等级。",
+      "stages": ["Test Review", "Verify & Deliver"]
+    }
+  ],
+  "updatedAt": "",
+  "stages": [
+    {
+      "name": "Scope",
+      "owner": "delivery-manager,tech-lead",
+      "status": "pending",
+      "gates": ["role-activation-gate", "review-gate"],
+      "artifacts": ["code-review.md"],
+      "evidence": []
+    },
+    {
+      "name": "Behavior Review",
+      "owner": "tech-lead",
+      "status": "pending",
+      "gates": ["review-gate", "technical-gate"],
+      "artifacts": ["code-review.md"],
+      "evidence": []
+    },
+    {
+      "name": "Domain Review",
+      "owner": "frontend-engineer",
+      "status": "pending",
+      "gates": ["review-gate"],
+      "artifacts": ["code-review.md"],
+      "evidence": []
+    },
+    {
+      "name": "Test Review",
+      "owner": "qa-engineer",
+      "status": "pending",
+      "gates": ["test-gate", "evidence-gate"],
+      "artifacts": ["test-plan.md", "code-review.md"],
+      "evidence": []
+    },
+    {
+      "name": "Optimize",
+      "owner": "frontend-engineer",
+      "status": "pending",
+      "gates": ["implementation-gate"],
+      "artifacts": ["implementation-plan.md"],
+      "evidence": []
+    },
+    {
+      "name": "Verify & Deliver",
+      "owner": "qa-engineer,delivery-manager",
+      "status": "pending",
+      "gates": ["verification-gate", "delivery-gate"],
+      "artifacts": ["delivery-summary.md"],
+      "evidence": []
+    }
+  ]
+}

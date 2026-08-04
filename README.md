@@ -9,6 +9,7 @@
 - 需求只有一句话，需要先收口目标用户、业务价值、范围边界和验收标准。
 - 功能要从 PRD、UI/UX、技术方案、代码实现、测试验证一路推进到交付。
 - 缺陷修复不能只改代码，还要说明根因、影响面、回归证据和剩余风险。
+- 代码审查和优化需要区分行为缺陷、风险与风格偏好，并把发现映射到可验证修复。
 - 产品、UI、研发、QA 需要联合走查，形成统一的可交付结论。
 - 项目需要生成 `AGENTS.md`，让后续 Agent 快速理解目录、技术栈、约束和验证命令。
 - 团队需要登记可复用的外部 Skills 或本地 CLI 能力，并明确角色使用边界。
@@ -28,6 +29,7 @@
 /team build <需求>
 /team buildContext <工作目录> [需求/范围]
 /team bugfix <问题>
+/team code-review <路径|diff|提交|PR>
 /team walk <实现/页面/改动>
 /team deliver <上下文>
 /team install [skill-id|role task]
@@ -41,7 +43,8 @@
 /team build 做一个会员续费页，支持优惠券和续费成功反馈
 /team review 评审这份 PRD，重点看业务价值和验收标准
 /team bugfix 修复订单提交失败，并补充回归验证
-/team buildContext /path/to/repo 为后续需求建立 Agent 上下文
+/team code-review 审查当前 diff，重点检查状态竞争和回归风险
+/team buildContext <project-root> 为后续需求建立 Agent 上下文
 ```
 
 完整命令说明见 [`commands/team.md`](commands/team.md)。
@@ -52,12 +55,15 @@
 
 1. **Intake**：复述目标、成功标准、约束和信息缺口。
 2. **Route**：选择端到端需求交付、需求评审、缺陷修复、走查等主工作流。
-3. **Plan**：建立阶段、负责人、产出、门禁状态板。
-4. **Workspace**：为需求创建独立交付目录。
-5. **Execute**：按产品、运营、UI、研发、QA、交付经理角色逐阶段产出。
-6. **Verify**：运行可用验证，无法验证时说明原因和替代检查。
-7. **Score**：按业务影响、健壮性、测试可信度、交付完整度等维度评分。
-8. **Deliver**：输出变更范围、业务价值、关键决策、验证证据、风险和后续建议。
+3. **Activate Roles**：按场景形成 `rolePlan`，仅加载实际负责的角色，并记录不适用依据。
+4. **Plan**：建立阶段、负责人、产出、门禁状态板。
+5. **Workspace**：为需求创建独立交付目录。
+6. **Execute**：由已激活的产品、运营、UI、研发、QA、交付角色逐阶段产出。
+7. **Verify**：运行可用验证，记录 `V0-V4` 验证等级；无法验证时说明原因和替代检查。
+8. **Score**：按业务影响、健壮性、测试可信度、交付完整度等维度评分；不适用维度必须说明原因。
+9. **Deliver**：输出变更范围、角色计划、业务价值、关键决策、验证证据、风险和后续建议。
+
+对实现、缺陷修复和代码审查，团队会先选择 `lightweight`、`standard` 或 `assurance` 执行档位。档位由风险、未知度和影响范围决定，不由任务紧急程度决定；静态检查通过不会被表述为运行时或用户验收通过。
 
 ## 交付物长什么样
 
@@ -96,9 +102,13 @@ workspace/
 - `handoff-gate`：角色切换必须写入 `role-handoff.md`，不能只在对话里口头交接。
 - `complexity-gate`：需求必须按 `S / M / L / XL` 分级；`L / XL` 必须拆里程碑、技术 spike、QA 策略、灰度、回滚和收益复盘。
 - `evidence-gate`：所有“已完成”“已验证”“可交付”“收益可观测”的结论必须有命令、截图、日志、数据来源或人工验收记录。
+- `reproduction-gate`：缺陷修复必须先复现或记录可执行采证计划。
+- `review-gate`：代码审查必须输出范围、代码位置、反例、严重度和验证建议。
+- `verification-gate`：结论不得超过当前 `V0-V4` 验证等级所支持的范围。
+- `role-activation-gate`：每个角色必须有参与、咨询或不适用的场景依据；不适用角色不产生虚假文档或评分。
 - `no-legacy-contract`：主文档、模板、脚本和新 workspace 文档不得出现旧入口、旧短名或旧路径。
 
-涉及实现交付时，还会按 [`docs/quality-rubrics.md`](docs/quality-rubrics.md) 评分；业务影响最低要求为 `>= 4`。
+涉及实现交付时，还会按 [`docs/quality-rubrics.md`](docs/quality-rubrics.md) 评分；面向用户或业务的变更，业务影响最低要求为 `>= 4`；纯内部工程改动必须在 `rolePlan` 中说明 N/A 依据。
 
 ## 安装与运行
 
@@ -112,8 +122,8 @@ workspace/
 本地目录安装示例：
 
 ```bash
-SKILLS_DIR="/path/to/skills"
-SOURCE_DIR="/path/to/ai-work-team"
+SKILLS_DIR="${SKILLS_DIR:?set SKILLS_DIR to your skills directory}"
+SOURCE_DIR="${SOURCE_DIR:?set SOURCE_DIR to the ai-work-team source directory}"
 mkdir -p "$SKILLS_DIR"
 cp -R "$SOURCE_DIR" "$SKILLS_DIR/ai-work-team"
 cd "$SKILLS_DIR/ai-work-team"
@@ -130,7 +140,7 @@ https://github.com/AISuperXiang/ai-work-team.git
 ```
 
 ```bash
-SKILLS_DIR="/path/to/skills"
+SKILLS_DIR="${SKILLS_DIR:?set SKILLS_DIR to your skills directory}"
 REPO_URL="https://github.com/AISuperXiang/ai-work-team.git"
 mkdir -p "$SKILLS_DIR"
 git clone "$REPO_URL" "$SKILLS_DIR/ai-work-team"

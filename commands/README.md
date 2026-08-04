@@ -8,7 +8,7 @@
 
 ```text
 /team build 做一个会员续费页
-/team buildContext /path/to/repo 为后续需求建立项目上下文
+/team buildContext <project-root> 为后续需求建立项目上下文
 /team review 评审这份 PRD
 /team bugfix 修复订单提交失败
 /team walk 走查这个页面改动

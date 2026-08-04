@@ -61,6 +61,7 @@ const workflowFiles = [
   "workflows/requirement-review.md",
   "workflows/technical-design-review.md",
   "workflows/bugfix-delivery.md",
+  "workflows/code-review-delivery.md",
   "workflows/product-ui-qa-walkthrough.md",
   "workflows/external-skill-install.md",
   "workflows/project-context-build.md"
@@ -81,6 +82,10 @@ const templateFiles = [
   "assets/templates/risk-register.md",
   "assets/templates/role-handoff.md",
   "assets/templates/workflow-status.json",
+  "assets/templates/bugfix-workflow-status.json",
+  "assets/templates/code-review-workflow-status.json",
+  "assets/templates/bug-analysis.md",
+  "assets/templates/code-review.md",
   "assets/templates/ui-review.md",
   "assets/templates/technical-design.md",
   "assets/templates/implementation-plan.md",
@@ -98,8 +103,13 @@ const methodologyFiles = [
   "docs/methodologies/operations-methodology.md",
   "docs/methodologies/ui-methodology.md",
   "docs/methodologies/engineering-methodology.md",
+  "docs/methodologies/technical-lead-methodology.md",
+  "docs/methodologies/frontend-engineering-methodology.md",
+  "docs/methodologies/backend-engineering-methodology.md",
   "docs/methodologies/qa-methodology.md",
-  "docs/methodologies/delivery-methodology.md"
+  "docs/methodologies/delivery-methodology.md",
+  "docs/methodologies/execution-methodology.md",
+  "docs/methodologies/role-activation-methodology.md"
 ];
 
 const standardFiles = [
@@ -316,6 +326,10 @@ if (existsFile("skill-runtime.json")) {
     runtimeConfig && runtimeConfig.privacy && runtimeConfig.privacy.omitLocalSkillNames === true,
     "skill-runtime.json declares local skill name privacy policy"
   );
+  record(
+    runtimeConfig && !JSON.stringify(runtimeConfig).includes(["/path", "to/"].join("/")),
+    "skill-runtime.json omits local absolute path placeholders"
+  );
   if (runtimeConfig && runtimeConfig.install && Array.isArray(runtimeConfig.install.requiredFiles)) {
     for (const requiredFile of runtimeConfig.install.requiredFiles) {
       const normalized = requiredFile.replace(/\/$/, "");
@@ -375,6 +389,47 @@ if (existsFile("external-skills/catalog.json")) {
         skillIds.add(skill.id);
       }
     }
+  }
+}
+
+function parseTableLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return null;
+  return trimmed.slice(1, -1).split("|").map((cell) => cell.trim());
+}
+
+function stageTableGates(content) {
+  const lines = content.split(/\r?\n/);
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    const headers = parseTableLine(lines[index]);
+    const separator = parseTableLine(lines[index + 1]);
+    if (!headers || !separator || !separator.every((cell) => /^:?-{3,}:?$/.test(cell))) continue;
+    const gateIndex = headers.indexOf("门禁");
+    if (headers.indexOf("阶段") === -1 || gateIndex === -1) continue;
+
+    const gates = new Set();
+    for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex += 1) {
+      const row = parseTableLine(lines[rowIndex]);
+      if (!row) break;
+      for (const gate of String(row[gateIndex] || "").split(/[、，,]/)) {
+        const normalized = gate.replace(/`/g, "").trim();
+        if (normalized) gates.add(normalized);
+      }
+    }
+    return gates;
+  }
+  return null;
+}
+
+for (const file of workflowFiles) {
+  if (!existsFile(file)) continue;
+  const content = read(file);
+  const data = parseFrontmatter(content);
+  const declaredGates = data && Array.isArray(data.quality_gates) ? data.quality_gates : [];
+  const stageGates = stageTableGates(content);
+  if (declaredGates.length === 0 || !stageGates) continue;
+  for (const gate of declaredGates) {
+    record(stageGates.has(gate), `${file} declared quality gate appears in a stage: ${gate}`);
   }
 }
 

@@ -19,14 +19,22 @@ members:
 execution_mode: hybrid
 quality_gates:
   - requirement-gate
+  - role-activation-gate
+  - reproduction-gate
   - technical-gate
+  - decision-gate
   - implementation-gate
   - test-gate
+  - evidence-gate
+  - verification-gate
+  - handoff-gate
   - delivery-gate
 outputs:
   - bug-analysis
+  - decision-log
   - implementation-plan
   - test-plan
+  - role-handoff
   - delivery-summary
 ---
 
@@ -47,12 +55,12 @@ outputs:
 
 | 阶段 | 负责人 | 动作 | 产出 | 门禁 |
 | --- | --- | --- | --- | --- |
-| Triage | 交付经理 + 产品经理 | 确认影响范围、严重级别、期望行为 | 缺陷摘要 | requirement-gate |
-| Reproduce | QA + 研发 | 复现问题，收集证据 | 复现结论 | test-gate |
-| Diagnose | 技术负责人 | 定位根因，排除无关假设 | `bug-analysis` | technical-gate |
-| Fix | 前端/后端工程师 | 最小修复，避免无关改动 | 修复实现 | implementation-gate |
-| Regression | QA | 验证原问题和相关回归路径 | 验证报告 | test-gate |
-| Delivery | 交付经理 | 总结根因、修复、验证、风险 | `delivery-summary` | delivery-gate |
+| Triage | 交付经理 + 产品经理 | 确认影响、严重级别、期望行为、执行档位和 `rolePlan`；预期行为已明确时产品可不参与 | `bug-analysis.md`、角色激活结论 | requirement-gate、role-activation-gate |
+| Reproduce | QA + 问题归属研发 | 由命中前端或后端角色复现问题或明确采证/插桩计划，收集基线证据 | `bug-analysis.md`、`evidence/README.md` | reproduction-gate、evidence-gate |
+| Diagnose | 技术负责人 + 问题归属研发 | 比较假设、定位根因、排除无关解释并记录取舍；低风险局部问题可由研发主导 | `bug-analysis.md`、`decision-log.md` | technical-gate、decision-gate |
+| Fix | 问题归属工程师 | 最小修复，避免无关改动，记录影响面与回滚 | 修复实现、`implementation-plan.md` | implementation-gate |
+| Regression | QA | 复跑原复现路径和相关回归路径，标记验证等级 | `test-plan.md`、`evidence/README.md` | test-gate、evidence-gate、verification-gate |
+| Delivery | 交付经理 | 总结根因、修复、验证等级、风险和交接 | `role-handoff.md`、`delivery-summary.md` | handoff-gate、delivery-gate、verification-gate |
 
 ## 缺陷原则
 
@@ -60,10 +68,11 @@ outputs:
 - 优先最小修复，不做无关重构。
 - 每个修复必须有对应验证。
 - 不能复现时说明证据缺口和下一步采集方式。
+- 不把“理论上应修复”写成“已修复”；无法复现时不得交付“已修复”，验证等级决定交付结论上限。
 
 ## 失败处理
 
-- 无法复现：输出缺少的环境、数据、账号或日志。
+- 无法复现：输出缺少的环境、数据、账号或日志，以及最小插桩、采集字段和复查条件。
 - 根因不明：增加观测或缩小复现范围。
 - 修复引入回归：回退或重新裁剪方案。
 - 验证不可运行：给出替代验证和残余风险。
@@ -72,4 +81,5 @@ outputs:
 
 - 原缺陷已修复或有明确阻塞原因。
 - 回归范围已验证。
-- 修复范围、根因、风险和验证结果可交付。
+- 修复范围、根因、风险、验证等级和未覆盖范围可交付。
+- `rolePlan` 能说明产品、技术负责人、前端或后端为何参与或不适用。

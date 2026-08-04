@@ -19,8 +19,11 @@ members:
 execution_mode: hybrid
 quality_gates:
   - requirement-gate
+  - role-activation-gate
   - design-gate
   - technical-gate
+  - test-gate
+  - delivery-gate
 outputs:
   - requirement-brief
   - prd
@@ -43,13 +46,13 @@ outputs:
 
 | 阶段 | 负责人 | 动作 | 产出 | 门禁 |
 | --- | --- | --- | --- | --- |
-| Intake | 交付经理 | 识别评审目标和缺口 | 状态板 | requirement-gate |
-| Product Review | 产品经理 | 明确用户、范围、验收标准 | `requirement-brief` | requirement-gate |
-| Operation Review | 运营经理 | 明确指标、上线节奏、运营风险 | 运营风险 | requirement-gate |
-| UI Feasibility | UI 设计师 | 判断用户路径、状态和可用性缺口 | UI 评审 | design-gate |
-| Tech Feasibility | 技术负责人 | 判断技术风险、依赖和拆分方式 | 技术风险 | technical-gate |
-| QA Feasibility | 测试工程师 | 判断验收标准是否可测试 | 测试风险 | test-gate |
-| Decision | 交付经理 | 汇总通过、修改后通过或拒绝 | 评审结论 | delivery-gate |
+| Intake | 交付经理 | 识别评审目标、输入缺口和 `rolePlan` | 状态板、角色激活结论 | requirement-gate、role-activation-gate |
+| Product Review | 产品经理 | 仅在产品角色激活时明确用户、范围和验收标准 | `requirement-brief` | requirement-gate |
+| Operation Review | 运营经理 | 仅在指标、上线节奏或运营风险受影响时明确口径 | 运营风险或 N/A 依据 | requirement-gate |
+| UI Feasibility | UI 设计师 | 仅在 UI/交互变化时判断用户路径、状态和可用性缺口 | UI 评审或 N/A 依据 | design-gate |
+| Tech Feasibility | 技术负责人 | 判断技术风险、依赖和最小交付切片 | 技术风险 | technical-gate |
+| QA Feasibility | 测试工程师 | 判断验收标准是否可测试和最低验证等级 | 测试风险 | test-gate |
+| Decision | 交付经理 | 汇总通过、修改后通过或暂缓，并说明下一工作流 | 评审结论、角色交接 | delivery-gate |
 
 ## 评审结论格式
 
@@ -67,5 +70,6 @@ outputs:
 ## 完成定义
 
 - 给出明确评审结论。
+- 已记录角色激活计划及不适用依据。
 - 风险和开放问题有责任角色。
 - 下一步工作流建议明确：设计、端到端交付、暂缓或拆分。

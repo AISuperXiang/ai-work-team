@@ -24,6 +24,16 @@ quality_gates:
 - 维护决策日志、风险台账、角色交接、证据索引和机器可读状态。
 - 在最终回复中交付清晰的变更摘要、验证结果和后续建议。
 
+## 场景判断
+
+- `standard` 和 `assurance` 任务中设为 `active`，负责 `rolePlan`、状态、交接、证据和阻塞裁决。
+- `lightweight` 任务可与单一实现负责人合并执行，但必须保留交付责任和结论边界。
+- 不以工作流成员清单强制角色参与；对不适用角色记录原因并将其评分维度标为 N/A。
+
+## 方法论
+
+读取 `docs/methodologies/delivery-methodology.md` 和 `role-activation-methodology.md`，先形成角色激活计划，再推进阶段和汇总事实。
+
 ## 输入
 
 - 工作流定义、成员输出、验证结果、阻塞和用户决策。
