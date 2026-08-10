@@ -8,6 +8,7 @@ const ROOT = path.resolve(__dirname, "..");
 const requiredFiles = [
   "SKILL.md",
   "README.md",
+  "README_EN.md",
   "package.json",
   "skill-runtime.json",
   "members/README.md",

@@ -23,7 +23,9 @@ metadata:
 ## 文件职责
 
 - `SKILL.md`：面向 Agent，定义触发、路由、加载顺序、执行协议、门禁和输出契约。
-- `README.md`：面向用户，说明这个 Skill 是什么、解决什么问题、如何安装和触发。除非用户询问安装或文档维护，否则执行工作流时不要优先加载 README。
+- `README.md`：默认中文用户文档，说明这个 Skill 是什么、解决什么问题、如何安装和触发。
+- `README_EN.md`：与中文主文档对应的英文用户文档。
+- 除非用户询问安装或文档维护，否则执行工作流时不要优先加载 README。
 - `skill-runtime.json`：面向安装器和通用 Agent，提供机器可读的入口、运行环境、安装方式和发布安全策略。
 
 ## 触发边界
@@ -67,7 +69,7 @@ metadata:
 | `/team buildContext` | `workflows/project-context-build.md`、`assets/templates/agents-context.md` | `scripts/build-context.js`、目标仓库现有 `AGENTS.md` |
 | `/team install` | `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md`、`external-skills/role-map.md` | `external-skills/README.md`、`scripts/list-external-skills.js`、`scripts/install-external-skills.js` |
 | `/team register-cli` | `external-cli/README.md` | 已存在的 `external-cli/<cli-id>.md` |
-| 安装、发布、运行环境维护 | `skill-runtime.json`、`package.json` | `schemas/skill-runtime.schema.json`、`README.md` |
+| 安装、发布、运行环境维护 | `skill-runtime.json`、`package.json` | `schemas/skill-runtime.schema.json`、`README.md`、`README_EN.md` |
 
 ## 执行循环
 
@@ -205,6 +207,7 @@ metadata:
 - 新增外部 Skill 时修改 `external-skills/catalog.json`，并同步更新 `external-skills/role-map.md` 和相关成员文件。
 - 新增或更新本地 CLI 能力时，修改 `external-cli/` 下对应能力卡；只记录能力摘要、适用角色、验证方式和安全边界，不记录密钥。
 - 修改 Node 版本、安装方式、入口文件或必需打包文件时，同步更新 `skill-runtime.json`、`schemas/skill-runtime.schema.json` 和 README 安装说明。
+- 修改面向用户的功能、安装方式或命令示例时，同步维护 `README.md` 与 `README_EN.md`。
 - 新增方法论放入 `docs/methodologies/`。
 - 角色适用场景变化时，同步更新 `docs/methodologies/role-activation-methodology.md`、成员文件、状态模板和状态 Schema。
 - 新增研发硬约束放入 `docs/engineering-standards/`。
