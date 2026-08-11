@@ -23,6 +23,7 @@ metadata:
 ## 文件职责
 
 - `SKILL.md`：面向 Agent，定义触发、路由、加载顺序、执行协议、门禁和输出契约。
+- `AGENTS.md`：面向仓库内代码 Agent，定义 CLI 输入、文件写入、测试、突变、CI 和文档同步硬约束。
 - `README.md`：默认中文用户文档，说明这个 Skill 是什么、解决什么问题、如何安装和触发。
 - `README_EN.md`：与中文主文档对应的英文用户文档。
 - 除非用户询问安装或文档维护，否则执行工作流时不要优先加载 README。
@@ -133,6 +134,7 @@ metadata:
 执行要求：
 
 - 先确认目标项目根目录和变更范围。
+- 修改本仓库 Node CLI、测试或 CI 时先读取 `AGENTS.md` 和 `docs/engineering-standards/cli-quality-architecture.md`。
 - 先读取 `docs/methodologies/execution-methodology.md`，选择并记录执行档位。
 - 优先读取项目现有上下文、代码结构、测试命令和约定。
 - 保持改动聚焦，不做无关重构。
@@ -212,3 +214,5 @@ metadata:
 - 角色适用场景变化时，同步更新 `docs/methodologies/role-activation-methodology.md`、成员文件、状态模板和状态 Schema。
 - 新增研发硬约束放入 `docs/engineering-standards/`。
 - 修改结构或契约后运行 `npm test`。
+- 修改 Node CLI 关键分支后运行 `npm run test:mutation`，总体检出率不得低于 85%，关键 mutant 必须零存活。
+- 历史 workspace 审计使用 `npm run validate:workspaces`，不得重新并入核心 `validate:contracts` 发布门禁。

@@ -4,7 +4,9 @@ const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
 const CATALOG_PATH = path.join(ROOT, "external-skills", "catalog.json");
-const PACKAGE_PATTERN = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+$/;
+const PACKAGE_PATTERN =
+  /^([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)@([a-zA-Z0-9_.-]+)$/;
+const INVALID_PACKAGE_PARTS = new Set([".", ".."]);
 
 function readCatalog() {
   return JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
@@ -49,7 +51,11 @@ function collectSkillIds(catalog) {
 }
 
 function isPackageValid(packageName) {
-  return PACKAGE_PATTERN.test(packageName);
+  const match = PACKAGE_PATTERN.exec(packageName);
+  return Boolean(
+    match &&
+      match.slice(1).every((part) => !INVALID_PACKAGE_PARTS.has(part)),
+  );
 }
 
 function scoreSkill(skill, options = {}) {

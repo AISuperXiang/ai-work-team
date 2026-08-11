@@ -11,6 +11,11 @@ const {
   matchSkills,
   resolveLocalSkillStatus,
 } = require("./external-skill-utils");
+const {
+  CliArgumentError,
+  assertNoConflict,
+  parseCliArgs,
+} = require("./cli-args");
 
 const ROOT = path.resolve(__dirname, "..");
 const CATALOG_PATH = path.join(ROOT, "external-skills", "catalog.json");
@@ -39,48 +44,94 @@ function readCatalog() {
   return JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
 }
 
-const args = process.argv.slice(2);
-if (args.includes("--help") || args.includes("-h")) {
+function parseCommandLine(argv) {
+  const parsed = parseCliArgs(argv, {
+    options: {
+      "--help": { key: "help", type: "boolean", aliases: ["-h"] },
+      "--dry-run": { key: "dryRun", type: "boolean" },
+      "--allow-candidate": { key: "allowCandidate", type: "boolean" },
+      "--force-external": { key: "forceExternal", type: "boolean" },
+      "--all": { key: "allCatalog", type: "boolean" },
+      "--list": { key: "listOnly", type: "boolean" },
+      "--role": { key: "role", type: "value" },
+      "--task": { key: "task", type: "value" },
+      "--query": { key: "query", type: "value" },
+      "--skill": { key: "skillId", type: "value" },
+    },
+  });
+  const { options, positionals } = parsed;
+
+  if (options.help) {
+    if (positionals.length > 0 || Object.keys(options).length > 1) {
+      throw new CliArgumentError("--help cannot be combined with other arguments");
+    }
+    return { help: true };
+  }
+  assertNoConflict(
+    options,
+    ["task", "query"],
+    "--task and --query cannot be combined",
+  );
+  if (options.listOnly && (positionals.length > 0 || Object.keys(options).length > 1)) {
+    throw new CliArgumentError("--list cannot be combined with other arguments");
+  }
+  if (
+    options.allCatalog &&
+    (positionals.length > 0 ||
+      options.role ||
+      options.task ||
+      options.query ||
+      options.skillId)
+  ) {
+    throw new CliArgumentError("--all cannot be combined with a selector");
+  }
+  if (options.skillId && positionals.length > 0) {
+    throw new CliArgumentError("--skill cannot be combined with positional input");
+  }
+
+  return {
+    help: false,
+    dryRun: Boolean(options.dryRun),
+    allowCandidate: Boolean(options.allowCandidate),
+    forceExternal: Boolean(options.forceExternal),
+    allCatalog: Boolean(options.allCatalog),
+    listOnly: Boolean(options.listOnly),
+    role: options.role,
+    task: options.task || options.query,
+    skillId: options.skillId,
+    positionals,
+  };
+}
+
+const rawArgs = process.argv.slice(2);
+let command;
+try {
+  command = parseCommandLine(rawArgs);
+} catch (error) {
+  console.error(error.message);
+  process.exit(error instanceof CliArgumentError ? error.exitCode : 1);
+}
+
+if (command.help) {
   usage();
   process.exit(0);
 }
 
-const dryRun = args.includes("--dry-run");
-const allowCandidate = args.includes("--allow-candidate");
-const forceExternal = args.includes("--force-external");
-const allCatalog = args.includes("--all");
-const listOnly = args.includes("--list");
-
-function getArgValue(flag) {
-  const index = args.indexOf(flag);
-  if (index === -1) return undefined;
-  return args[index + 1];
-}
-
-function positionalArgs() {
-  const flagsWithValue = new Set(["--role", "--task", "--query", "--skill"]);
-  const result = [];
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (flagsWithValue.has(arg)) {
-      index += 1;
-      continue;
-    }
-    if (arg.startsWith("--")) {
-      continue;
-    }
-    result.push(arg);
-  }
-  return result;
-}
+const {
+  dryRun,
+  allowCandidate,
+  forceExternal,
+  allCatalog,
+  listOnly,
+} = command;
 
 const catalog = readCatalog();
 const roleIds = collectRoleIds(catalog);
 const skillIds = collectSkillIds(catalog);
-const positionals = positionalArgs();
-let role = getArgValue("--role");
-let task = getArgValue("--task") || getArgValue("--query");
-let skillId = getArgValue("--skill");
+const positionals = [...command.positionals];
+let role = command.role;
+let task = command.task;
+let skillId = command.skillId;
 
 function installCommandFor(skill) {
   return ["npx", "skills", "add", skill.package, "-g", "-y"];
@@ -282,15 +333,37 @@ if (!skillId && positionals[0] && skillIds.has(positionals[0])) {
   skillId = positionals.shift();
 }
 
+if (role && !roleIds.includes(role)) {
+  console.error(`Invalid role: ${role}`);
+  process.exit(2);
+}
+
 if (!skillId && !role && positionals[0] && roleIds.includes(positionals[0])) {
   role = positionals.shift();
+}
+
+if (task && positionals.length > 0) {
+  console.error(
+    "task text cannot be provided both positionally and with --task/--query",
+  );
+  process.exit(2);
 }
 
 if (!task && positionals.length > 0) {
   task = positionals.join(" ");
 }
 
-const installCatalog = allCatalog || (!skillId && !role && !task);
+const hasSelector = Boolean(skillId || role || task);
+const defaultCatalogMode =
+  rawArgs.length === 0 || (rawArgs.length === 1 && dryRun);
+const installCatalog = allCatalog || defaultCatalogMode;
+
+if (!hasSelector && !installCatalog) {
+  console.error(
+    "Installation modifiers require a skill/role/task selector or explicit --all.",
+  );
+  process.exit(2);
+}
 
 if (installCatalog) {
   const matches = catalogMatches();

@@ -317,6 +317,20 @@ node scripts/install-external-skills.js web-design-guidelines --dry-run
   --verify "gh --version"
 ```
 
+## 工程质量架构
+
+Node CLI 遵循 [`cli-quality-architecture.md`](./docs/engineering-standards/cli-quality-architecture.md)：
+
+- 未知参数、缺值、重复参数和冲突参数统一退出 `2`，不得退化为默认批量安装。
+- 用户输出只允许写入目标根目录内的普通相对文件；拒绝路径穿越、绝对路径和 symlink。
+- 已有受管文件超过 256 KiB 时失败关闭，不覆盖原内容。
+- 行为测试使用 `node:test`、临时目录和 fake `npx`，不访问网络或真实全局 Skill 环境。
+- 突变检出率必须不低于 85%，参数、写入、安装和 CLI kill-switch 等关键 mutant 零存活。
+- Node 18.20.8、20.20.2、22.22.2 在 CI 中分别执行核心质量门禁。
+- 核心契约与历史 workspace 审计分离，避免本地交付物污染发布门禁。
+
+仓库级 Agent 规则见 [`AGENTS.md`](./AGENTS.md)。
+
 ## 维护与验证
 
 常见维护入口：
@@ -339,6 +353,9 @@ npm test
 ```bash
 npm run validate:structure
 npm run validate:contracts
+npm run test:behavior
+npm run test:mutation
+npm run validate:workspaces
 ```
 
 ## 文档职责

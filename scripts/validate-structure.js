@@ -7,6 +7,7 @@ const ROOT = path.resolve(__dirname, "..");
 
 const requiredFiles = [
   "SKILL.md",
+  "AGENTS.md",
   "README.md",
   "README_EN.md",
   "package.json",
@@ -24,7 +25,16 @@ const requiredFiles = [
   "docs/quality-rubrics.md",
   "docs/business-impact-rubric.md",
   "docs/handoff-contract.md",
+  "docs/engineering-standards/cli-quality-architecture.md",
   "scripts/README.md",
+  "scripts/cli-args.js",
+  "scripts/run-mutation-tests.js",
+  "test/build-context.test.js",
+  "test/external-skill-utils.test.js",
+  "test/install-external-skills.test.js",
+  "test/list-external-skills.test.js",
+  "test/validate-contracts.test.js",
+  ".github/workflows/ci.yml",
   "workspace/README.md"
 ];
 
@@ -40,7 +50,9 @@ const requiredDirs = [
   "schemas",
   "assets/templates",
   "workspace",
-  "scripts"
+  "scripts",
+  "test",
+  ".github/workflows"
 ];
 
 const memberFiles = [
@@ -120,7 +132,8 @@ const standardFiles = [
   "docs/engineering-standards/testing-standard.md",
   "docs/engineering-standards/review-standard.md",
   "docs/engineering-standards/release-standard.md",
-  "docs/engineering-standards/security-standard.md"
+  "docs/engineering-standards/security-standard.md",
+  "docs/engineering-standards/cli-quality-architecture.md"
 ];
 
 const integrationFiles = [
@@ -139,7 +152,9 @@ const externalSkillFiles = [
   "scripts/list-external-skills.js",
   "scripts/install-external-skills.js",
   "scripts/external-skill-utils.js",
-  "scripts/build-context.js"
+  "scripts/build-context.js",
+  "scripts/cli-args.js",
+  "scripts/run-mutation-tests.js"
 ];
 
 const commandFiles = ["commands/team.md"];
@@ -303,6 +318,10 @@ if (existsFile("skill-runtime.json")) {
   record(packageJson && packageJson.name === "ai-work-team", "package.json name is ai-work-team");
   record(runtimeConfig && runtimeConfig.skill && runtimeConfig.skill.id === "ai-work-team", "skill-runtime.json skill id is ai-work-team");
   record(runtimeConfig && runtimeConfig.skill && runtimeConfig.skill.entry === "SKILL.md", "skill-runtime.json entry is SKILL.md");
+  record(
+    runtimeConfig && runtimeConfig.entrypoints && runtimeConfig.entrypoints.agents === "AGENTS.md",
+    "skill-runtime.json agents entry is AGENTS.md"
+  );
   record(
     runtimeConfig && packageJson && runtimeConfig.skill && runtimeConfig.skill.version === packageJson.version,
     "skill-runtime.json version matches package.json"

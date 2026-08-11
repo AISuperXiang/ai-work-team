@@ -87,6 +87,9 @@
         "skill": {
           "type": "string"
         },
+        "agents": {
+          "type": "string"
+        },
         "readme": {
           "type": "string"
         },

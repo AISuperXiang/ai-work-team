@@ -11,6 +11,8 @@
 
 测试层级由风险而不是测试偏好决定。每个高风险失效条件要记录负责人、最低验证等级、未覆盖影响和下一步采证动作。
 
+本仓库 Node CLI 的行为测试、fake `npx`、突变阈值和 Node 版本矩阵还必须满足 [`cli-quality-architecture.md`](cli-quality-architecture.md)。
+
 ## 必测内容
 
 - 正常路径。

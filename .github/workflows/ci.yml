@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    name: Core / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - 18.20.8
+          - 20.20.2
+          - 22.22.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Run core quality gate
+        run: npm test
+
+      - name: Verify tests leave no files behind
+        run: test -z "$(git status --porcelain)"
+
+  mutation:
+    name: Mutation / Node 22
+    runs-on: ubuntu-latest
+    needs: core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+
+      - name: Run mutation gate
+        run: npm run test:mutation

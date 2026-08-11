@@ -12,6 +12,7 @@
 - `methodologies/role-activation-methodology.md`：按场景选择角色，记录 `active`、`consulted` 和 `not_applicable` 依据。
 - `methodologies/`：各角色工作方法论。
 - `engineering-standards/`：研发实现、评审、测试、发布和安全规范。
+- `engineering-standards/cli-quality-architecture.md`：Node CLI 输入、写入、行为测试、突变与 CI 架构。
 - `integrations/`：飞书、Issue Tracker、代码平台等外部系统预留契约。
 
 ## 使用原则

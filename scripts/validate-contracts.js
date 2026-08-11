@@ -2,9 +2,66 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  CliArgumentError,
+  assertNoConflict,
+  parseCliArgs,
+} = require("./cli-args");
 
 const ROOT = path.resolve(__dirname, "..");
 const SKIP_DIRS = new Set([".git", "node_modules", "dist", "build", "coverage", ".next", ".turbo"]);
+
+function usage() {
+  console.log(`Usage:
+  node scripts/validate-contracts.js
+  node scripts/validate-contracts.js --workspace workspace/<requirement-folder>
+  node scripts/validate-contracts.js --all-workspaces
+`);
+}
+
+function parseCommandLine(argv) {
+  const parsed = parseCliArgs(argv, {
+    options: {
+      "--help": { key: "help", type: "boolean", aliases: ["-h"] },
+      "--workspace": { key: "workspace", type: "value" },
+      "--all-workspaces": { key: "allWorkspaces", type: "boolean" },
+    },
+  });
+  const { options, positionals } = parsed;
+  if (positionals.length > 0) {
+    throw new CliArgumentError(
+      `Unexpected positional input: ${positionals.join(" ")}`,
+    );
+  }
+  if (options.help) {
+    if (Object.keys(options).length > 1) {
+      throw new CliArgumentError("--help cannot be combined with other arguments");
+    }
+    return { help: true };
+  }
+  assertNoConflict(
+    options,
+    ["workspace", "allWorkspaces"],
+    "--workspace and --all-workspaces cannot be combined",
+  );
+  return {
+    help: false,
+    workspace: options.workspace,
+    allWorkspaces: Boolean(options.allWorkspaces),
+  };
+}
+
+let command;
+try {
+  command = parseCommandLine(process.argv.slice(2));
+} catch (error) {
+  console.error(error.message);
+  process.exit(error instanceof CliArgumentError ? error.exitCode : 1);
+}
+if (command.help) {
+  usage();
+  process.exit(0);
+}
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -40,7 +97,8 @@ const REQUIRED_STATUS_FIELDS = ["name", "owner", "status", "gates", "artifacts",
 const REQUIRED_STATUS_STAGES_BY_WORKFLOW = {
   "requirement-end-to-end": ["Intake", "PRD", "UI/UX", "Tech Design", "Implementation", "QA", "Delivery"],
   "bugfix-delivery": ["Triage", "Reproduce", "Diagnose", "Fix", "Regression", "Delivery"],
-  "code-review-delivery": ["Scope", "Behavior Review", "Domain Review", "Test Review", "Optimize", "Verify & Deliver"]
+  "code-review-delivery": ["Scope", "Behavior Review", "Domain Review", "Test Review", "Optimize", "Verify & Deliver"],
+  "technical-design-review": ["Context", "Architecture", "QA Review", "Decision"]
 };
 const REQUIRED_PRD_BUSINESS_ROWS = ["目标用户", "用户价值", "业务价值", "价值假设", "预期收益", "成本收益比"];
 const REQUIRED_PRD_METRIC_HEADERS = ["指标", "当前基线", "目标变化", "数据来源", "观察周期", "异常阈值"];
@@ -67,6 +125,76 @@ const checks = [
       "role-activation-gate",
       "code-review-delivery.md",
       "质量评分"
+    ]
+  },
+  {
+    file: "AGENTS.md",
+    mustContain: [
+      "scripts/cli-args.js",
+      "exit with code `2`",
+      "256 KiB",
+      "node:test",
+      "fake `npx`",
+      "at least 85%",
+      "zero survivors",
+      "npm run validate:workspaces",
+      "Node 18.20.8, 20.20.2, and 22.22.2"
+    ]
+  },
+  {
+    file: "docs/engineering-standards/cli-quality-architecture.md",
+    mustContain: [
+      "严格参数契约",
+      "文件写入边界",
+      "行为测试",
+      "突变门禁",
+      "契约校验边界",
+      "持续集成",
+      "mutation score",
+      "85%",
+      "Node 18.20.8、20.20.2、22.22.2"
+    ]
+  },
+  {
+    file: "README.md",
+    mustContain: [
+      "工程质量架构",
+      "AGENTS.md",
+      "fake `npx`",
+      "85%",
+      "Node 18.20.8、20.20.2、22.22.2",
+      "npm run validate:workspaces"
+    ]
+  },
+  {
+    file: "README_EN.md",
+    mustContain: [
+      "Engineering Quality Architecture",
+      "AGENTS.md",
+      "fake `npx`",
+      "85%",
+      "Node 18.20.8, 20.20.2, and 22.22.2",
+      "npm run validate:workspaces"
+    ]
+  },
+  {
+    file: "package.json",
+    mustContain: [
+      "\"test:behavior\"",
+      "\"test:mutation\"",
+      "\"validate:workspaces\"",
+      "\"test:ci\""
+    ]
+  },
+  {
+    file: ".github/workflows/ci.yml",
+    mustContain: [
+      "18.20.8",
+      "20.20.2",
+      "22.22.2",
+      "npm test",
+      "npm run test:mutation",
+      "git status --porcelain"
     ]
   },
   {
@@ -605,12 +733,19 @@ for (const check of checks) {
   }
 }
 
-function collectFiles(dir, files = []) {
+function collectFiles(dir, files = [], options = {}) {
+  const relativeDir = path.relative(ROOT, dir).split(path.sep).join("/");
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_DIRS.has(entry.name)) continue;
     const absolute = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      collectFiles(absolute, files);
+      if (
+        !options.includeWorkspaceGenerated &&
+        relativeDir === "workspace"
+      ) {
+        continue;
+      }
+      collectFiles(absolute, files, options);
       continue;
     }
     if (!entry.isFile()) continue;
@@ -1085,29 +1220,78 @@ function validateCompletedWorkspaceArtifacts(workspaceDir, status) {
   }
 }
 
-function validateWorkspaceStatuses() {
+function validateWorkspaceStatus(workspaceDir) {
+  const statusPath = path.join(workspaceDir, "workflow-status.json");
+  if (!fs.existsSync(path.join(ROOT, statusPath))) {
+    fail(`${statusPath} missing`);
+    return false;
+  }
+
+  const status = parseJsonFile(statusPath);
+  if (!status) return true;
+  validateStatusObject(status, statusPath, { templateMode: false });
+  validateCompletedWorkspaceArtifacts(workspaceDir, status);
+
+  const completedStages = new Set(
+    (status.stages || [])
+      .filter((stage) => stage.status === "completed")
+      .map((stage) => stage.name),
+  );
+  if (completedStages.has("PRD")) validateWorkspacePrd(workspaceDir);
+  if (completedStages.has("Delivery")) {
+    validateWorkspaceDeliverySummary(workspaceDir, status);
+  }
+  if (
+    (status.stages || []).some(
+      (stage) =>
+        stage.status === "completed" &&
+        Array.isArray(stage.gates) &&
+        stage.gates.includes("handoff-gate"),
+    )
+  ) {
+    validateWorkspaceHandoff(workspaceDir);
+  }
+  return true;
+}
+
+function normalizeWorkspaceDir(value) {
+  const workspaceRoot = path.join(ROOT, "workspace");
+  if (path.isAbsolute(value)) {
+    throw new CliArgumentError("--workspace must be a relative path");
+  }
+  const absolute = path.resolve(ROOT, value);
+  if (
+    absolute === workspaceRoot ||
+    !absolute.startsWith(`${workspaceRoot}${path.sep}`)
+  ) {
+    throw new CliArgumentError(
+      "--workspace must resolve inside the workspace directory",
+    );
+  }
+  return path.relative(ROOT, absolute);
+}
+
+function validateWorkspaceStatuses(workspaceDirs) {
   const workspaceRoot = path.join(ROOT, "workspace");
   if (!fs.existsSync(workspaceRoot)) return;
+
+  if (Array.isArray(workspaceDirs)) {
+    let checked = 0;
+    for (const workspaceDir of workspaceDirs) {
+      if (validateWorkspaceStatus(workspaceDir)) checked += 1;
+    }
+    pass(`validated ${checked} workspace status file(s)`);
+    return;
+  }
 
   const entries = fs.readdirSync(workspaceRoot, { withFileTypes: true });
   let checked = 0;
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     const workspaceDir = path.join("workspace", entry.name);
-    const statusPath = path.join(workspaceDir, "workflow-status.json");
-    if (!fs.existsSync(path.join(ROOT, statusPath))) continue;
-    checked += 1;
-    const status = parseJsonFile(statusPath);
-    if (!status) continue;
-    validateStatusObject(status, statusPath, { templateMode: false });
-    validateCompletedWorkspaceArtifacts(workspaceDir, status);
-
-    const completedStages = new Set((status.stages || []).filter((stage) => stage.status === "completed").map((stage) => stage.name));
-    if (completedStages.has("PRD")) validateWorkspacePrd(workspaceDir);
-    if (completedStages.has("Delivery")) validateWorkspaceDeliverySummary(workspaceDir, status);
-    if ((status.stages || []).some((stage) => stage.status === "completed" && Array.isArray(stage.gates) && stage.gates.includes("handoff-gate"))) {
-      validateWorkspaceHandoff(workspaceDir);
-    }
+    const statusPath = path.join(ROOT, workspaceDir, "workflow-status.json");
+    if (!fs.existsSync(statusPath)) continue;
+    if (validateWorkspaceStatus(workspaceDir)) checked += 1;
   }
 
   if (checked === 0) {
@@ -1175,7 +1359,16 @@ validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
 validateBusinessImpactRubric();
 validateTemplateContracts();
-validateWorkspaceStatuses();
+try {
+  if (command.workspace) {
+    validateWorkspaceStatuses([normalizeWorkspaceDir(command.workspace)]);
+  } else if (command.allWorkspaces) {
+    validateWorkspaceStatuses();
+  }
+} catch (error) {
+  console.error(error.message);
+  process.exit(error instanceof CliArgumentError ? error.exitCode : 1);
+}
 validateLegacyPatternContract();
 validateNoLegacyContract();
 

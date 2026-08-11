@@ -2,6 +2,11 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  CliArgumentError,
+  assertNoConflict,
+  parseCliArgs,
+} = require("./cli-args");
 
 const START_MARKER = "<!-- ai-work-team:buildContext:start -->";
 const END_MARKER = "<!-- ai-work-team:buildContext:end -->";
@@ -124,25 +129,60 @@ Examples:
 `);
 }
 
-function getArgValue(flag) {
-  const index = process.argv.indexOf(flag);
-  if (index === -1) return undefined;
-  return process.argv[index + 1];
-}
+function parseCommandLine(argv) {
+  const parsed = parseCliArgs(argv, {
+    options: {
+      "--help": { key: "help", type: "boolean", aliases: ["-h"] },
+      "--request": {
+        key: "request",
+        type: "value",
+        validate: (value) => value.trim().length > 0,
+      },
+      "--output": {
+        key: "output",
+        type: "value",
+        validate: (value) => value.trim().length > 0,
+      },
+      "--dry-run": { key: "dryRun", type: "boolean" },
+      "--json": { key: "json", type: "boolean" },
+    },
+  });
+  const { options, positionals } = parsed;
 
-function positionalArgs() {
-  const flagsWithValue = new Set(["--request", "--output"]);
-  const result = [];
-  for (let index = 2; index < process.argv.length; index += 1) {
-    const arg = process.argv[index];
-    if (flagsWithValue.has(arg)) {
-      index += 1;
-      continue;
+  if (options.help) {
+    if (positionals.length > 0 || Object.keys(options).length > 1) {
+      throw new CliArgumentError("--help cannot be combined with other arguments");
     }
-    if (arg.startsWith("--")) continue;
-    result.push(arg);
+    return { help: true };
   }
-  return result;
+
+  assertNoConflict(
+    options,
+    ["dryRun", "json"],
+    "--dry-run and --json cannot be combined",
+  );
+  if (options.json && options.output) {
+    throw new CliArgumentError("--output cannot be combined with --json");
+  }
+  if (positionals.length === 0) {
+    throw new CliArgumentError("workdir is required");
+  }
+
+  const [target, ...requestParts] = positionals;
+  if (options.request && requestParts.length > 0) {
+    throw new CliArgumentError(
+      "request text cannot be provided both positionally and with --request",
+    );
+  }
+
+  return {
+    help: false,
+    target,
+    request: options.request || requestParts.join(" "),
+    outputName: options.output || "AGENTS.md",
+    dryRun: Boolean(options.dryRun),
+    json: Boolean(options.json),
+  };
 }
 
 function safeRead(filePath) {
@@ -153,6 +193,60 @@ function safeRead(filePath) {
   } catch {
     return "";
   }
+}
+
+function isInsideRoot(root, candidate) {
+  return candidate !== root && candidate.startsWith(`${root}${path.sep}`);
+}
+
+function resolveOutputPath(root, outputName) {
+  if (path.isAbsolute(outputName)) {
+    throw new CliArgumentError("--output must be a relative path");
+  }
+
+  const realRoot = fs.realpathSync(root);
+  const candidate = path.resolve(realRoot, outputName);
+  if (!isInsideRoot(realRoot, candidate)) {
+    throw new CliArgumentError("--output must resolve inside the workdir");
+  }
+
+  const parent = path.dirname(candidate);
+  if (!fs.existsSync(parent) || !fs.statSync(parent).isDirectory()) {
+    throw new CliArgumentError("--output parent directory must exist");
+  }
+  const realParent = fs.realpathSync(parent);
+  if (realParent !== realRoot && !isInsideRoot(realRoot, realParent)) {
+    throw new CliArgumentError("--output must resolve inside the workdir");
+  }
+
+  const outputPath = path.join(realParent, path.basename(candidate));
+  if (fs.existsSync(outputPath)) {
+    const stat = fs.lstatSync(outputPath);
+    if (stat.isSymbolicLink()) {
+      throw new CliArgumentError("--output must not be a symbolic link");
+    }
+    if (!stat.isFile()) {
+      throw new CliArgumentError("--output must reference a regular file");
+    }
+  }
+  return outputPath;
+}
+
+function readManagedOutput(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return "# AGENTS.md\n";
+  }
+
+  const stat = fs.lstatSync(filePath);
+  if (!stat.isFile()) {
+    throw new CliArgumentError("--output must reference a regular file");
+  }
+  if (stat.size > MAX_READ_BYTES) {
+    throw new CliArgumentError(
+      `Existing output exceeds the 256 KiB safety limit: ${filePath}`,
+    );
+  }
+  return fs.readFileSync(filePath, "utf8");
 }
 
 function walk(root) {
@@ -965,53 +1059,61 @@ function mergeAgents(existing, generatedBlock) {
   return `${existing}${separator}${generatedBlock}\n`;
 }
 
-function main() {
-  if (process.argv.includes("--help") || process.argv.includes("-h")) {
-    usage();
-    return;
+function main(argv = process.argv.slice(2)) {
+  try {
+    const command = parseCommandLine(argv);
+    if (command.help) {
+      usage();
+      return 0;
+    }
+
+    const root = path.resolve(process.cwd(), command.target);
+    if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
+      throw new CliArgumentError(`Invalid workdir: ${root}`);
+    }
+
+    const context = buildContext(root, command.request);
+    if (command.json) {
+      console.log(JSON.stringify(context, null, 2));
+      return 0;
+    }
+
+    const outputPath = resolveOutputPath(root, command.outputName);
+    const generatedBlock = renderContext(context);
+    const existing = readManagedOutput(outputPath);
+    const nextContent = mergeAgents(existing, generatedBlock);
+
+    if (command.dryRun) {
+      console.log(nextContent);
+      return 0;
+    }
+
+    fs.writeFileSync(outputPath, nextContent, "utf8");
+    console.log(`Updated ${outputPath}`);
+    console.log(`Scanned ${context.filesScanned} files.`);
+    console.log(
+      `Roles: ${context.roles.map((item) => item.role).join(", ") || "tech-lead"}`,
+    );
+    return 0;
+  } catch (error) {
+    console.error(error.message);
+    if (error instanceof CliArgumentError) {
+      return error.exitCode;
+    }
+    return 1;
   }
-
-  const args = positionalArgs();
-  const target = args[0];
-  if (!target) {
-    usage();
-    process.exit(1);
-  }
-
-  const root = path.resolve(process.cwd(), target);
-  if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
-    console.error(`Invalid workdir: ${root}`);
-    process.exit(1);
-  }
-
-  const request = getArgValue("--request") || args.slice(1).join(" ");
-  const dryRun = process.argv.includes("--dry-run");
-  const json = process.argv.includes("--json");
-  const outputName = getArgValue("--output") || "AGENTS.md";
-  const outputPath = path.join(root, outputName);
-  const context = buildContext(root, request);
-  const generatedBlock = renderContext(context);
-  const existing = fs.existsSync(outputPath)
-    ? safeRead(outputPath)
-    : "# AGENTS.md\n";
-  const nextContent = mergeAgents(existing, generatedBlock);
-
-  if (json) {
-    console.log(JSON.stringify(context, null, 2));
-    return;
-  }
-
-  if (dryRun) {
-    console.log(nextContent);
-    return;
-  }
-
-  fs.writeFileSync(outputPath, nextContent, "utf8");
-  console.log(`Updated ${outputPath}`);
-  console.log(`Scanned ${context.filesScanned} files.`);
-  console.log(
-    `Roles: ${context.roles.map((item) => item.role).join(", ") || "tech-lead"}`,
-  );
 }
 
-main();
+if (require.main === module) {
+  process.exitCode = main();
+}
+
+module.exports = {
+  buildContext,
+  main,
+  mergeAgents,
+  parseCommandLine,
+  readManagedOutput,
+  renderContext,
+  resolveOutputPath,
+};

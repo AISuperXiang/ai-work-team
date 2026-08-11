@@ -10,10 +10,14 @@
     "validate": "node scripts/validate-structure.js",
     "validate:structure": "node scripts/validate-structure.js",
     "validate:contracts": "node scripts/validate-contracts.js",
+    "validate:workspaces": "node scripts/validate-contracts.js --all-workspaces",
+    "test:behavior": "node --test test/*.test.js",
+    "test:mutation": "node scripts/run-mutation-tests.js",
+    "test:ci": "npm test && npm run test:mutation",
     "skills:list": "node scripts/list-external-skills.js",
     "skills:install": "node scripts/install-external-skills.js",
     "context:build": "node scripts/build-context.js",
-    "test": "npm run validate:structure && npm run validate:contracts"
+    "test": "npm run validate:structure && npm run validate:contracts && npm run test:behavior"
   },
   "license": "UNLICENSED"
 }

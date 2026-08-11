@@ -10,6 +10,7 @@
 - `review-standard.md`：评审规范。
 - `release-standard.md`：发布规范。
 - `security-standard.md`：安全规范。
+- `cli-quality-architecture.md`：CLI 严格参数、文件写入、行为测试、突变和 CI 架构。
 
 ## 原则
 

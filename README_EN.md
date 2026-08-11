@@ -317,6 +317,20 @@ No external Skill is installed without explicit user approval.
   --verify "gh --version"
 ```
 
+## Engineering Quality Architecture
+
+Node CLIs follow [`cli-quality-architecture.md`](./docs/engineering-standards/cli-quality-architecture.md):
+
+- Unknown options, missing values, duplicate options, and conflicts exit with code `2`; invalid input never falls back to bulk installation.
+- User-controlled output is limited to regular relative files inside the target root; traversal, absolute paths, and symlinks are rejected.
+- Existing managed files larger than 256 KiB fail closed and are never overwritten.
+- Behavior tests use `node:test`, temporary directories, and a fake `npx` without network or real global Skill changes.
+- Mutation detection must remain at or above 85%, with zero critical survivors for argument, write, install, and CLI kill-switch mutants.
+- Node 18.20.8, 20.20.2, and 22.22.2 run the core quality gate independently in CI.
+- Core contracts and historical workspace audits are separate so local delivery artifacts cannot contaminate release validation.
+
+Repository-level Agent rules are defined in [`AGENTS.md`](./AGENTS.md).
+
 ## Maintenance and Validation
 
 Common maintenance entrypoints:
@@ -339,6 +353,9 @@ Or run the checks separately:
 ```bash
 npm run validate:structure
 npm run validate:contracts
+npm run test:behavior
+npm run test:mutation
+npm run validate:workspaces
 ```
 
 ## Document Responsibilities

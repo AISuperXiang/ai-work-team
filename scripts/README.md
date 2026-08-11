@@ -1,6 +1,7 @@
 # Scripts
 
-本目录维护 deterministic 校验脚本。
+本目录维护 deterministic 校验与 CLI 脚本。所有 CLI 遵循
+[`cli-quality-architecture.md`](../docs/engineering-standards/cli-quality-architecture.md)。
 
 ## validate-structure.js
 
@@ -36,7 +37,14 @@ npm test
 node scripts/validate-contracts.js
 ```
 
-脚本检查代码落地契约是否仍被关键文件引用，并对关键模板和完成态 workspace 做结构化校验，包括：
+默认命令只检查可发布核心契约。workspace 审计必须显式执行：
+
+```bash
+node scripts/validate-contracts.js --workspace workspace/<requirement-folder>
+npm run validate:workspaces
+```
+
+脚本检查代码落地契约是否仍被关键文件引用，并按所选模式对模板或 workspace 做结构化校验，包括：
 
 - `workspace/` 一需求一目录规则。
 - `implementation-protocol.md` 强制代码落地闭环。
@@ -66,6 +74,8 @@ node scripts/list-external-skills.js --skill frontend-design
 
 脚本用于查看当前 catalog 中已收录的外部 Skill。传入 task/query 时，脚本会基于 `keywords`、`scenarios`、`useWhen`、`trustScore` 和角色进行打分匹配，并输出本地同能力 Skill 的优先级和更新建议。
 
+未知参数、缺值、重复参数、非法 `quality` 或非法 `top` 会退出 `2`。
+
 ## install-external-skills.js
 
 运行：
@@ -81,6 +91,8 @@ node scripts/install-external-skills.js frontend-design --force-external
 
 脚本只允许安装 `external-skills/catalog.json` 中的条目。无参数时进入 catalog 批量安装模式，处理所有 `recommended` 条目，语义等同根据项目配置安装内置 external skills；`candidate` 条目默认拒绝安装，除非显式传入 `--allow-candidate`。若检测到本地已有同能力 Skill，默认跳过外部安装，并用固定结构提示用户自行执行更新检查；确需安装外部版本时使用 `--force-external`。
 
+未知参数、缺值和冲突参数会在启动任何子进程前退出 `2`。`--force-external` 或 `--allow-candidate` 没有 selector 时必须显式使用 `--all`，防止错误参数退化为批量安装。
+
 ## build-context.js
 
 运行：
@@ -93,6 +105,8 @@ node scripts/build-context.js <workdir> --json
 
 脚本用于静态扫描代码仓库或工作区，并创建/更新目标目录的 `AGENTS.md`。如果目标目录已有 `AGENTS.md`，脚本只维护 `<!-- ai-work-team:buildContext:start -->` 到 `<!-- ai-work-team:buildContext:end -->` 之间的内容。
 
+输出路径必须是 workdir 内的普通相对文件。脚本拒绝绝对路径、`..`、symlink 和超过 256 KiB 的现有受管文件；`--dry-run` 与 `--json` 不写文件。
+
 扫描内容包括：
 
 - 包管理器、配置文件和 scripts。
@@ -102,3 +116,15 @@ node scripts/build-context.js <workdir> --json
 - 后端框架、服务目录和语言配置。
 - 测试框架、测试文件和验证命令。
 - 角色索引和后续 `/team build` 使用约束。
+
+## 行为测试与突变
+
+```bash
+npm run test:behavior
+npm run test:mutation
+```
+
+- 行为测试使用 `node:test`、临时目录和 fake `npx`。
+- fake `npx` 只记录 argv 和模拟退出码，不访问网络或真实全局环境。
+- 突变门禁要求总体检出率不低于 85%，关键 mutant 零存活。
+- `npm test` 串联结构、核心契约和行为测试；CI 在 Node 18/20/22 上分别执行。
