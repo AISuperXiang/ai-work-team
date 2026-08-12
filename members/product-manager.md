@@ -10,6 +10,7 @@ when_to_load:
 primary_outputs:
   - requirement-brief
   - prd
+  - goal-contract
   - acceptance-criteria
 quality_gates:
   - requirement-gate
@@ -23,6 +24,7 @@ quality_gates:
 - 把模糊诉求转成可执行需求。
 - 明确目标用户、业务目标、范围、非目标、优先级和验收标准。
 - 明确价值假设、用户收益、业务收益、指标基线和收益目标。
+- 在目标驱动设计中维护 `goal-contract.json`，防止下游方案静默改变目标、非目标和约束。
 - 在资源受限时做 MVP 裁剪和取舍说明。
 - 对最终交付是否满足需求目标给出产品判断。
 
@@ -46,6 +48,7 @@ quality_gates:
 
 - 需求简报。
 - PRD 或轻量需求说明。
+- Goal Contract 及重新评审触发条件。
 - 用户故事、范围边界和验收标准。
 - 价值假设、指标基线、收益目标和成本收益判断。
 - 产品走查结论。

@@ -10,6 +10,7 @@ when_to_load:
 primary_outputs:
   - workflow-status
   - handoff-summary
+  - design-decision-summary
   - delivery-summary
 quality_gates:
   - delivery-gate
@@ -22,6 +23,7 @@ quality_gates:
 - 维护工作流状态板，推动阶段从输入到产出再到门禁通过。
 - 汇总多角色意见，识别冲突、阻塞和风险。
 - 维护决策日志、风险台账、角色交接、证据索引和机器可读状态。
+- 在目标驱动设计中控制评审轮次、迭代预算、审批边界和用户执行授权。
 - 在最终回复中交付清晰的变更摘要、验证结果和后续建议。
 
 ## 场景判断

@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-work-team.local/schemas/goal-contract.schema.json",
+  "title": "AI Work Team Goal Contract",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "goalId",
+    "title",
+    "statement",
+    "targetUsers",
+    "problem",
+    "desiredOutcomes",
+    "nonGoals",
+    "constraints",
+    "successCriteria",
+    "metrics",
+    "assumptions",
+    "owner",
+    "reviewTriggers"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "goalId": {
+      "type": "string",
+      "pattern": "^goal-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "targetUsers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "problem": {
+      "type": "string",
+      "minLength": 1
+    },
+    "desiredOutcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "outcome", "metricIds"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^outcome-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "outcome": {
+            "type": "string",
+            "minLength": 1
+          },
+          "metricIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^metric-[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        }
+      }
+    },
+    "nonGoals": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "required": [
+        "strategic",
+        "time",
+        "budget",
+        "technical",
+        "securityAndCompliance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "strategic": {
+          "$ref": "#/$defs/stringList"
+        },
+        "time": {
+          "$ref": "#/$defs/stringList"
+        },
+        "budget": {
+          "$ref": "#/$defs/stringList"
+        },
+        "technical": {
+          "$ref": "#/$defs/stringList"
+        },
+        "securityAndCompliance": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "successCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "metricId", "target", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^criterion-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "metricId": {
+            "type": "string",
+            "pattern": "^metric-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "baseline",
+          "target",
+          "dataSource",
+          "observationWindow"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^metric-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dataSource": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observationWindow": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "statement", "validationMethod", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^assumption-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validationMethod": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["unvalidated", "validated", "invalidated"]
+          }
+        }
+      }
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewTriggers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

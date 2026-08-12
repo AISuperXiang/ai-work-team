@@ -24,6 +24,19 @@
 
 优先选择与现有模式一致、变更面最小且可验证的方案。新抽象必须说明复用点或隔离收益。
 
+## 目标驱动方案契约
+
+执行 `/team goal-design` 时，技术负责人还必须：
+
+1. 使用 `goal-contract.json` 作为不可静默修改的目标基线。
+2. 按可验证纵向结果拆 `milestones.json`，避免只按前端、后端或数据层横向拆分。
+3. 将实现拆为 `tasks.json` 中的 DAG，明确依赖、关键路径、并行边界、输入输出、验收、证据、重试和文件所有权。
+4. 在 `autonomy-policy.json` 中明确计划轮数、最大轮数、方案评审轮数、预算、自动决策、通知、审批、停止和重规划。
+5. 比较保留现状、最小变更和新增抽象，记录收益、成本、风险、兼容与验证成本。
+6. 汇总领域研发和 QA 的技术评审，再根据产品、适用 UI 和 QA 回审结果统一修订。
+
+四类契约必须满足 `schemas/goal-contract.schema.json`、`schemas/milestone.schema.json`、`schemas/task.schema.json` 和 `schemas/autonomy-policy.schema.json`。依赖图存在未知引用、自依赖或环时不得交付“可执行方案”。
+
 ## 风险分流
 
 - 单模块、可逆且无公开契约变化：可由实现负责人按 `lightweight` 执行，技术负责人只做定向复核。

@@ -10,6 +10,7 @@ when_to_load:
 primary_outputs:
   - test-plan
   - test-cases
+  - design-testability-review
   - verification-report
 quality_gates:
   - test-gate
@@ -21,6 +22,7 @@ quality_gates:
 ## 职责边界
 
 - 基于需求、设计和技术方案制定测试策略。
+- 在目标驱动设计中评审成功标准、里程碑退出条件、Task 证据和自治停止条件的可测性。
 - 覆盖正常、异常、边界、兼容、回归和风险路径。
 - 对实现是否达到可交付质量给出测试结论。
 

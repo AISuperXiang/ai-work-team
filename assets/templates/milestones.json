@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0.0",
+  "goalId": "goal-replace-with-safe-id",
+  "plannedIterations": 3,
+  "maxIterations": 5,
+  "milestones": [
+    {
+      "milestoneId": "milestone-first-vertical-slice",
+      "title": "First measurable vertical slice",
+      "outcome": "Deliver the smallest end-to-end result that can validate the primary value assumption.",
+      "iteration": 1,
+      "dependsOn": [],
+      "scope": {
+        "inScope": [
+          "Include only the minimum user path and evidence collection needed for the goal."
+        ],
+        "outOfScope": [
+          "Defer optimizations and secondary paths that do not affect the first decision."
+        ]
+      },
+      "deliverables": [
+        {
+          "id": "deliverable-first-slice",
+          "type": "code",
+          "pathOrReference": "Replace with the expected project path or implementation reference."
+        },
+        {
+          "id": "deliverable-first-evidence",
+          "type": "runtime-evidence",
+          "pathOrReference": "evidence/first-vertical-slice.md"
+        }
+      ],
+      "exitCriteria": [
+        {
+          "id": "exit-first-slice",
+          "criterion": "The primary user path is executable and produces the expected observable result.",
+          "evidence": "Provide repeatable runtime, browser, integration, or user-acceptance evidence."
+        }
+      ],
+      "taskIds": [
+        "task-first-vertical-slice"
+      ],
+      "ownerRole": "tech-lead",
+      "riskLevel": "medium",
+      "targetVerificationLevel": "V3",
+      "status": "pending"
+    }
+  ]
+}

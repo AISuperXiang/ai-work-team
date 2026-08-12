@@ -6,6 +6,7 @@ triggers:
   - 承接需求
   - 需求评审
   - 技术方案
+  - 目标驱动技术方案
   - 代码审查
   - 缺陷修复
   - 外部 Skill
@@ -21,6 +22,7 @@ execution_mode: sequential
 
 | 优先级 | 触发输入 | 工作流 | 文件 | 默认命令 |
 | --- | --- | --- | --- | --- |
+| P0 | `/team goal-design`、根据目标先完善需求并出技术方案、目标驱动自治迭代方案 | 目标驱动技术方案 | `workflows/goal-driven-technical-design.md` | `/team goal-design` |
 | P0 | `/team build`、承接需求、实现需求、从需求到交付 | 端到端需求交付 | `workflows/requirement-end-to-end.md` | `/team build` |
 | P0 | `/team buildContext`、生成 AGENTS.md、构建项目上下文、项目 Agent 索引 | 项目上下文构建 | `workflows/project-context-build.md` | `/team buildContext` |
 | P0 | `/team bugfix`、修复问题、线上 bug、回归失败 | 缺陷修复交付 | `workflows/bugfix-delivery.md` | `/team bugfix` |
@@ -38,13 +40,15 @@ execution_mode: sequential
 1. 明确有 `/team` 命令时，优先按 [`commands/team.md`](../commands/team.md) 的命令映射。
 2. 没有命令时，按用户意图和关键词匹配本表。
 3. 用户要求“生成 AGENTS.md”“构建项目上下文”“建立项目 Agent 索引”时，默认进入 `workflows/project-context-build.md`。
-4. 用户要求“实现”“交付”“完整承接”时，默认进入 `workflows/requirement-end-to-end.md`。
-5. 用户只要求“评审”“看看需求是否合理”时，默认进入 `workflows/requirement-review.md`。
-6. 用户要求审查已有 diff、PR、提交或代码逻辑时，默认进入 `workflows/code-review-delivery.md`；已描述失败现象时优先进入缺陷修复。
-7. 用户描述的是已存在问题或失败现象时，默认进入 `workflows/bugfix-delivery.md`。
-8. 用户要求安装、推荐、列出外部 Skill 时，默认进入 `workflows/external-skill-install.md`。
-9. 用户要求注册、登记、声明本地 CLI 能力时，默认读取 `external-cli/README.md`。
-10. 工作流执行前必须读取 `workflows/execution-protocol.md`。
+4. 用户只给目标，并要求先生成 PRD、需求/UI 评审、自治契约和评审后技术方案时，进入 `workflows/goal-driven-technical-design.md`。
+5. 用户已有需求或初步技术方案，只要求技术设计或架构评审时，进入 `workflows/technical-design-review.md`。
+6. 用户要求“实现”“交付”“完整承接”时，默认进入 `workflows/requirement-end-to-end.md`。
+7. 用户只要求“评审”“看看需求是否合理”时，默认进入 `workflows/requirement-review.md`。
+8. 用户要求审查已有 diff、PR、提交或代码逻辑时，默认进入 `workflows/code-review-delivery.md`；已描述失败现象时优先进入缺陷修复。
+9. 用户描述的是已存在问题或失败现象时，默认进入 `workflows/bugfix-delivery.md`。
+10. 用户要求安装、推荐、列出外部 Skill 时，默认进入 `workflows/external-skill-install.md`。
+11. 用户要求注册、登记、声明本地 CLI 能力时，默认读取 `external-cli/README.md`。
+12. 工作流执行前必须读取 `workflows/execution-protocol.md`。
 
 ## 未命中处理
 

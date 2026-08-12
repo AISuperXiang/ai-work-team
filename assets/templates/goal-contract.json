@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "goalId": "goal-replace-with-safe-id",
+  "title": "Replace with a concise goal title",
+  "statement": "Describe the measurable outcome to achieve, not only the feature to build.",
+  "targetUsers": [
+    "Describe the primary user segment"
+  ],
+  "problem": "Describe the current user or business problem and why it matters now.",
+  "desiredOutcomes": [
+    {
+      "id": "outcome-primary",
+      "outcome": "Describe the observable user or business outcome.",
+      "metricIds": [
+        "metric-primary"
+      ]
+    }
+  ],
+  "nonGoals": [
+    "State one explicit boundary that prevents uncontrolled scope growth."
+  ],
+  "constraints": {
+    "strategic": [
+      "State the product or business direction that must not be violated."
+    ],
+    "time": [
+      "State the deadline or iteration timebox."
+    ],
+    "budget": [
+      "State the engineering, model, tool, or operating budget."
+    ],
+    "technical": [
+      "State platform, compatibility, deployment, or architecture constraints."
+    ],
+    "securityAndCompliance": [
+      "State data, permission, privacy, security, or compliance constraints."
+    ]
+  },
+  "successCriteria": [
+    {
+      "id": "criterion-primary",
+      "description": "Describe the observable condition that proves the goal is met.",
+      "metricId": "metric-primary",
+      "target": "State the target value or threshold.",
+      "evidence": "State the test, runtime evidence, user acceptance, or metric source."
+    }
+  ],
+  "metrics": [
+    {
+      "id": "metric-primary",
+      "name": "Name the primary metric",
+      "baseline": "State the current value or the first-baseline collection method.",
+      "target": "State the expected change and decision threshold.",
+      "dataSource": "State the log, analytics, experiment, feedback, or acceptance source.",
+      "observationWindow": "State when and for how long the metric is observed."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "assumption-primary",
+      "statement": "State an important unverified assumption.",
+      "validationMethod": "State the smallest experiment, spike, or evidence needed.",
+      "status": "unvalidated"
+    }
+  ],
+  "owner": "product-manager",
+  "reviewTriggers": [
+    "The target user or core value changes.",
+    "The plan exceeds an approved budget, deadline, or risk boundary.",
+    "Evidence invalidates a critical assumption."
+  ]
+}

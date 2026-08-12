@@ -123,6 +123,34 @@ const MUTANTS = [
     critical: true,
   },
   {
+    id: "contracts-goal-design-stage-contract",
+    file: "scripts/validate-contracts.js",
+    search:
+      '    "Design Revision",\n' +
+      '    "Decision Handoff"\n',
+    replacement:
+      '    "Design Rework",\n' +
+      '    "Decision Handoff"\n',
+    tests: ["test/validate-contracts.test.js"],
+    critical: true,
+  },
+  {
+    id: "contracts-goal-design-template-names",
+    file: "workflows/goal-driven-technical-design.md",
+    search: "`assets/templates/goal-contract.json`、`assets/templates/milestones.json`、`assets/templates/tasks.json`、`assets/templates/autonomy-policy.json`",
+    replacement: "`assets/templates/goal-contract.json`、`assets/templates/milestone-plan.json`、`assets/templates/task-plan.json`、`assets/templates/autonomy-policy.json`",
+    tests: ["test/validate-contracts.test.js"],
+    critical: true,
+  },
+  {
+    id: "contracts-high-risk-task-approval",
+    file: "scripts/validate-contracts.js",
+    search: '    if (task.riskLevel === "high" || task.riskLevel === "critical") {',
+    replacement: "    if (false) {",
+    tests: ["test/validate-contracts.test.js"],
+    critical: true,
+  },
+  {
     id: "contracts-default-workspace-scan",
     file: "scripts/validate-contracts.js",
     search: "  } else if (command.allWorkspaces) {",

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0.0",
+  "goalId": "goal-replace-with-safe-id",
+  "tasks": [
+    {
+      "taskId": "task-first-vertical-slice",
+      "milestoneId": "milestone-first-vertical-slice",
+      "title": "Implement and verify the first vertical slice",
+      "objective": "Produce the smallest end-to-end behavior that validates the primary goal assumption.",
+      "capability": "Select the workflow, local Skill, registered CLI, or implementation capability needed for this task.",
+      "ownerRole": "tech-lead",
+      "dependsOn": [],
+      "inputs": [
+        {
+          "name": "Approved goal contract",
+          "sourceOrDestination": "goal-contract.json",
+          "schemaOrFormat": "schemas/goal-contract.schema.json"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Implemented vertical slice",
+          "sourceOrDestination": "Replace with the owned project paths.",
+          "schemaOrFormat": "Repository-native code and configuration"
+        },
+        {
+          "name": "Verification evidence",
+          "sourceOrDestination": "evidence/first-vertical-slice.md",
+          "schemaOrFormat": "Repeatable commands, results, and uncovered scope"
+        }
+      ],
+      "acceptanceCriteria": [
+        {
+          "id": "acceptance-first-slice",
+          "criterion": "The goal's primary observable behavior works within the approved scope.",
+          "verification": "Run the selected unit, integration, browser, or acceptance path and retain evidence."
+        }
+      ],
+      "evidenceRequirements": [
+        "Record the exact verification command or steps and result.",
+        "Record failures, repair attempts, and the final uncovered risk."
+      ],
+      "fileOwnership": [
+        "Replace with explicit files or exclusive module boundaries before parallel execution."
+      ],
+      "riskLevel": "medium",
+      "executionMode": "sequential",
+      "decisionMode": "notify",
+      "retryPolicy": {
+        "maxAttempts": 3,
+        "backoff": "linear",
+        "onExhausted": "replan"
+      },
+      "status": "pending"
+    }
+  ]
+}

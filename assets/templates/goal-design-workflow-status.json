@@ -1,0 +1,234 @@
+{
+  "workflow": "goal-driven-technical-design",
+  "requirementFolder": "",
+  "complexityLevel": "M",
+  "executionProfile": "standard",
+  "verificationLevel": "V0",
+  "rolePlan": [
+    {
+      "role": "delivery-manager",
+      "mode": "active",
+      "reason": "维护目标设计状态、评审轮次、决策、交接和用户批准边界。",
+      "stages": [
+        "Goal Intake",
+        "Requirement Review",
+        "Cross-Role Review",
+        "Decision Handoff"
+      ]
+    },
+    {
+      "role": "product-manager",
+      "mode": "active",
+      "reason": "需要把目标转成 Goal Contract、PRD、范围、价值和验收标准。",
+      "stages": [
+        "Goal Intake",
+        "PRD",
+        "Requirement Review",
+        "Cross-Role Review"
+      ]
+    },
+    {
+      "role": "operations-manager",
+      "mode": "consulted",
+      "reason": "需要校准指标、收益观测、迭代预算或发布节奏；无此信号时改为 not_applicable。",
+      "stages": [
+        "PRD"
+      ]
+    },
+    {
+      "role": "ui-designer",
+      "mode": "consulted",
+      "reason": "涉及界面或交互时评审 UI；无 UI 影响时改为 not_applicable 并清空阶段。",
+      "stages": [
+        "UI Review",
+        "Cross-Role Review"
+      ]
+    },
+    {
+      "role": "tech-lead",
+      "mode": "active",
+      "reason": "负责架构设计、方案对比、契约一致性、评审裁决和方案修订。",
+      "stages": [
+        "Architecture Design",
+        "Technical Review",
+        "Design Revision"
+      ]
+    },
+    {
+      "role": "frontend-engineer",
+      "mode": "consulted",
+      "reason": "存在客户端、页面、状态或浏览器边界时评审任务与实现可行性。",
+      "stages": [
+        "Architecture Design",
+        "Technical Review"
+      ]
+    },
+    {
+      "role": "backend-engineer",
+      "mode": "consulted",
+      "reason": "存在 API、数据、权限、任务或服务端边界时评审契约与实现可行性。",
+      "stages": [
+        "Architecture Design",
+        "Technical Review"
+      ]
+    },
+    {
+      "role": "qa-engineer",
+      "mode": "consulted",
+      "reason": "评审验收标准、里程碑退出条件、任务证据和目标验证等级。",
+      "stages": [
+        "Requirement Review",
+        "Technical Review",
+        "Cross-Role Review"
+      ]
+    }
+  ],
+  "updatedAt": "",
+  "stages": [
+    {
+      "name": "Goal Intake",
+      "owner": "delivery-manager,product-manager",
+      "status": "pending",
+      "gates": [
+        "role-activation-gate",
+        "goal-contract-gate",
+        "requirement-gate",
+        "no-legacy-contract"
+      ],
+      "artifacts": [
+        "requirement-brief.md",
+        "goal-contract.json",
+        "risk-register.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "PRD",
+      "owner": "product-manager,operations-manager",
+      "status": "pending",
+      "gates": [
+        "requirement-gate",
+        "value-gate"
+      ],
+      "artifacts": [
+        "prd.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "Requirement Review",
+      "owner": "product-manager,qa-engineer,delivery-manager",
+      "status": "pending",
+      "gates": [
+        "requirement-gate",
+        "value-gate",
+        "handoff-gate"
+      ],
+      "artifacts": [
+        "requirement-review.md",
+        "decision-log.md",
+        "role-handoff.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "UI Review",
+      "owner": "ui-designer",
+      "status": "pending",
+      "gates": [
+        "design-gate",
+        "handoff-gate"
+      ],
+      "artifacts": [
+        "ui-review.md",
+        "role-handoff.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "Architecture Design",
+      "owner": "tech-lead,frontend-engineer,backend-engineer",
+      "status": "pending",
+      "gates": [
+        "goal-contract-gate",
+        "autonomy-gate",
+        "technical-gate",
+        "decision-gate"
+      ],
+      "artifacts": [
+        "technical-design.md",
+        "milestones.json",
+        "tasks.json",
+        "autonomy-policy.json",
+        "test-plan.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "Technical Review",
+      "owner": "tech-lead,frontend-engineer,backend-engineer,qa-engineer",
+      "status": "pending",
+      "gates": [
+        "technical-gate",
+        "autonomy-gate",
+        "design-review-gate"
+      ],
+      "artifacts": [
+        "technical-design-review.md",
+        "risk-register.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "Cross-Role Review",
+      "owner": "product-manager,ui-designer,qa-engineer",
+      "status": "pending",
+      "gates": [
+        "design-review-gate",
+        "handoff-gate"
+      ],
+      "artifacts": [
+        "technical-design-review.md",
+        "role-handoff.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "Design Revision",
+      "owner": "tech-lead",
+      "status": "pending",
+      "gates": [
+        "design-review-gate",
+        "technical-gate",
+        "autonomy-gate",
+        "decision-gate"
+      ],
+      "artifacts": [
+        "technical-design.md",
+        "technical-design-review.md",
+        "milestones.json",
+        "tasks.json",
+        "autonomy-policy.json",
+        "decision-log.md"
+      ],
+      "evidence": []
+    },
+    {
+      "name": "Decision Handoff",
+      "owner": "delivery-manager",
+      "status": "pending",
+      "gates": [
+        "evidence-gate",
+        "verification-gate",
+        "handoff-gate",
+        "no-legacy-contract"
+      ],
+      "artifacts": [
+        "design-decision-summary.md",
+        "workflow-status.json",
+        "evidence/README.md"
+      ],
+      "evidence": []
+    }
+  ]
+}

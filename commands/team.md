@@ -17,6 +17,7 @@ execution_mode: sequential
 | `/team intake <需求>` | 需求评审 | `workflows/requirement-review.md` | 需求描述 | 需求简报、缺口、推荐工作流 |
 | `/team review <需求/PRD>` | 需求评审 | `workflows/requirement-review.md` | 需求或 PRD | 评审结论、风险、下一步 |
 | `/team design <需求>` | 技术方案评审 | `workflows/technical-design-review.md` | 需求和约束 | 技术方案、实现计划、测试策略 |
+| `/team goal-design <目标>` | 目标驱动技术方案 | `workflows/goal-driven-technical-design.md` | 目标；可选项目路径和约束 | PRD、需求/UI 评审、四类自治 Schema、评审后技术方案、用户决策摘要 |
 | `/team build <需求>` | 端到端需求交付 | `workflows/requirement-end-to-end.md` | 需求描述 | workspace 目录、PRD、价值门禁、决策日志、风险台账、交接记录、代码实现、验证、质量评分、交付 |
 | `/team buildContext <工作目录> [需求/范围]` | 项目上下文构建 | `workflows/project-context-build.md` | 工作目录 | `AGENTS.md`、角色索引、技术上下文、约束和验证结果 |
 | `/team bugfix <问题>` | 缺陷修复交付 | `workflows/bugfix-delivery.md` | 问题现象 | 根因、修复、回归、交付摘要 |
@@ -35,6 +36,8 @@ execution_mode: sequential
 | “给这个项目生成 AGENTS.md 上下文” | `/team buildContext` |
 | “帮我评审这个需求” | `/team review` |
 | “先出技术方案” | `/team design` |
+| “根据这个目标先完善需求并出可控迭代的技术方案” | `/team goal-design` |
+| “给我目标驱动的 PRD、自治契约和评审后技术方案” | `/team goal-design` |
 | “修这个 bug” | `/team bugfix` |
 | “review 这段代码并优化” | `/team code-review` |
 | “产品 UI 测试一起走查” | `/team walk` |
@@ -51,21 +54,27 @@ execution_mode: sequential
 1. 解析指令后读取目标工作流。
 2. 读取 `workflows/execution-protocol.md` 和 `docs/methodologies/role-activation-methodology.md`，先形成 `rolePlan`。
 3. 对 `/team build`、`/team bugfix` 和 `/team code-review` 读取 `docs/methodologies/execution-methodology.md`，记录执行档位与验证等级。
-4. 对 `/team build` 读取 `workspace/README.md`、`workflows/implementation-protocol.md`、`docs/handoff-contract.md` 和 `docs/quality-rubrics.md`。
-5. 对 `/team code-review` 读取 `docs/engineering-standards/review-standard.md`，先确认审查范围、领域角色和基线，再输出分级发现。
-6. 对 `/team buildContext` 读取 `workflows/project-context-build.md`，并使用 `scripts/build-context.js` 扫描目标工作目录。
-7. 对 `/team install` 读取 `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md` 和 `external-skills/role-map.md`。
-8. 对 `/team register-cli` 读取 `external-cli/README.md`，检查 CLI 是否可用，并创建或更新 `external-cli/<cli-id>.md` 能力卡。
-9. 建立状态板和 `rolePlan`。
-10. 仅加载 `rolePlan` 中 `active` 或 `consulted` 的成员文件与方法论。
-11. 按阶段执行并检查质量门禁，包含 role activation、value、decision、handoff、complexity、evidence、verification 和 no-legacy 约束。
-12. 代码落地场景必须写入 workspace 需求目录，并在项目代码中完成文件改动和验证。
+4. 对 `/team goal-design` 读取 `workflows/goal-driven-technical-design.md`、`docs/methodologies/goal-driven-technical-design-methodology.md`、`docs/quality-gates.md`、`docs/handoff-contract.md`、四类 Schema 和对应模板。
+5. `/team goal-design` 必须创建 workspace，从目标依次完成 Goal Contract、PRD、需求评审、条件式 UI 评审、技术设计、技术评审、跨角色回审、方案修订和用户决策交接。
+6. `/team goal-design` 不进入代码实现；最终结论必须写明“方案已评审，等待用户批准执行”，批准后才进入 `/team build`。
+7. 对 `/team build` 读取 `workspace/README.md`、`workflows/implementation-protocol.md`、`docs/handoff-contract.md` 和 `docs/quality-rubrics.md`。
+8. 对 `/team code-review` 读取 `docs/engineering-standards/review-standard.md`，先确认审查范围、领域角色和基线，再输出分级发现。
+9. 对 `/team buildContext` 读取 `workflows/project-context-build.md`，并使用 `scripts/build-context.js` 扫描目标工作目录。
+10. 对 `/team install` 读取 `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md` 和 `external-skills/role-map.md`。
+11. 对 `/team register-cli` 读取 `external-cli/README.md`，检查 CLI 是否可用，并创建或更新 `external-cli/<cli-id>.md` 能力卡。
+12. 建立状态板和 `rolePlan`。
+13. 仅加载 `rolePlan` 中 `active` 或 `consulted` 的成员文件与方法论。
+14. 按阶段执行并检查质量门禁，包含 role activation、value、decision、handoff、complexity、evidence、verification 和 no-legacy 约束。
+15. 代码落地场景必须写入 workspace 需求目录，并在项目代码中完成文件改动和验证。
 
 ## 失败处理
 
 - 指令缺少输入：要求用户补充需求、PRD、问题或上下文。
 - 指令未知：展示命令表并推荐最近似命令。
 - 输入同时匹配多个工作流：优先选择命令指定工作流，不再二次猜测。
+- `/team goal-design` 缺少目标：要求用户提供目标或期望改变的结果；不得把空目标扩写成 PRD。
+- `/team goal-design` 未提供项目路径：允许输出绿色项目方案或技术 spike，但必须标记代码、接口和运行环境假设，不得伪造现状。
+- `/team goal-design` 达到最大方案评审轮数仍不收敛：停止自动修订，输出冲突、证据和最多 3 个用户决策项。
 - `/team build` 未能确定项目根目录：先询问或探索，不能伪造实现结果。
 - `/team code-review` 未提供范围：先读取当前未提交 diff；无 diff 时要求用户指定路径、提交或 PR。
 - `/team buildContext` 未提供工作目录：询问用户提供代码仓库或工作区路径；不得默认扫描无关目录。

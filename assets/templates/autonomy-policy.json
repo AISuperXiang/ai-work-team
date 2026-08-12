@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "policy-replace-with-safe-id",
+  "goalId": "goal-replace-with-safe-id",
+  "defaultDecisionMode": "notify",
+  "iterationPolicy": {
+    "plannedIterations": 3,
+    "maxIterations": 5,
+    "maxDesignReviewRounds": 2,
+    "maxNoImprovementRounds": 2,
+    "evaluationCadence": "Evaluate after every iteration and milestone.",
+    "perIterationExitCriteria": [
+      "All tasks in the iteration have a terminal status.",
+      "Acceptance criteria and evidence are recorded.",
+      "Residual risks and the next continue, replan, or stop decision are explicit."
+    ]
+  },
+  "budgetPolicy": {
+    "maxTasks": 30,
+    "maxParallelTasks": 3,
+    "maxRetriesPerTask": 2,
+    "maxDurationHours": 40,
+    "maxModelCalls": 200,
+    "maxCost": {
+      "amount": 0,
+      "currency": "UNSPECIFIED"
+    }
+  },
+  "decisionRights": {
+    "automatic": [
+      {
+        "action": "Make reversible implementation choices within the approved architecture and owned files.",
+        "constraints": [
+          "The choice does not change public contracts, scope, budget, security, or compatibility.",
+          "The choice is covered by an executable acceptance or regression check."
+        ]
+      }
+    ],
+    "notify": [
+      {
+        "action": "Reorder independent tasks or replace an equivalent low-risk implementation detail.",
+        "constraints": [
+          "Milestone outcomes, exit criteria, budget, and critical path remain unchanged.",
+          "The decision and evidence are added to the decision log."
+        ]
+      }
+    ],
+    "approvalRequired": [
+      {
+        "action": "Change the target user, core value, milestone outcome, public contract, or approved iteration budget.",
+        "constraints": [
+          "Pause affected tasks and present options, impact, evidence, and recommendation."
+        ]
+      },
+      {
+        "action": "Perform production, destructive, paid, permission, credential, security, privacy, or compliance-sensitive operations.",
+        "constraints": [
+          "Require explicit human approval for the exact action, target, blast radius, and rollback."
+        ]
+      }
+    ]
+  },
+  "approvalGates": [
+    {
+      "trigger": "Before implementation begins from this design package.",
+      "approverRoles": [
+        "delivery-manager",
+        "tech-lead"
+      ],
+      "requiredEvidence": [
+        "Reviewed technical design and resolved P0/P1 findings.",
+        "Approved goal contract, iteration budget, and autonomy policy."
+      ]
+    },
+    {
+      "trigger": "Before any production, destructive, paid, permission, security, privacy, or compliance-sensitive action.",
+      "approverRoles": [
+        "delivery-manager",
+        "tech-lead"
+      ],
+      "requiredEvidence": [
+        "Exact target and blast radius.",
+        "Verification, monitoring, and rollback plan."
+      ]
+    }
+  ],
+  "forbiddenActions": [
+    "Exceed the maximum iteration, task, model-call, duration, or cost budget.",
+    "Silently change the goal, non-goals, success metrics, or approval rules.",
+    "Claim completion without the evidence required by the target verification level.",
+    "Expose or persist secrets, credentials, cookies, tokens, or unrelated private data."
+  ],
+  "stopConditions": [
+    {
+      "type": "goal_achieved",
+      "condition": "All goal success criteria meet their target with required evidence.",
+      "action": "stop"
+    },
+    {
+      "type": "budget_exhausted",
+      "condition": "Any approved iteration, task, time, model-call, or cost limit is reached.",
+      "action": "pause"
+    },
+    {
+      "type": "no_improvement",
+      "condition": "The primary metric or quality result does not improve for the configured number of rounds.",
+      "action": "escalate"
+    },
+    {
+      "type": "risk_threshold",
+      "condition": "A P0/P1, critical security, data, permission, or irreversible risk remains open.",
+      "action": "stop"
+    }
+  ],
+  "replanTriggers": [
+    "A critical assumption is invalidated.",
+    "A milestone exit criterion cannot be verified with available tools or environment.",
+    "A public contract, data model, permission boundary, or blast radius changes.",
+    "Two consecutive repair attempts fail for the same root cause."
+  ],
+  "escalationRules": [
+    {
+      "trigger": "A decision exceeds the automatic or notify boundary.",
+      "targetRoles": [
+        "delivery-manager",
+        "tech-lead"
+      ],
+      "response": "Pause affected tasks and provide no more than three evidence-backed decision options."
+    },
+    {
+      "trigger": "Product value, target users, or acceptance criteria become inconsistent.",
+      "targetRoles": [
+        "product-manager",
+        "delivery-manager"
+      ],
+      "response": "Return to requirement review and freeze execution until the goal contract is updated."
+    }
+  ],
+  "reviewCadence": {
+    "afterEachMilestone": true,
+    "afterEachIteration": true,
+    "beforeProduction": true
+  }
+}

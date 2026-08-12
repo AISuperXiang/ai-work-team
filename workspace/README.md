@@ -39,6 +39,19 @@ workspace/
             └── delivery-summary.md
 ```
 
+目标驱动技术方案还会增加：
+
+```text
+workspace/
+└── YYYYMMDD-short-goal-slug/
+    ├── goal-contract.json
+    ├── milestones.json
+    ├── tasks.json
+    ├── autonomy-policy.json
+    ├── technical-design-review.md
+    └── design-decision-summary.md
+```
+
 ## 命名约定
 
 - `YYYYMMDD` 使用当天日期。
@@ -49,6 +62,7 @@ workspace/
 ## 交付约束
 
 - `/team build` 必须先创建或选择一个 workspace 需求目录，再推进 PRD、方案、实现、测试和交付。
+- `/team goal-design` 必须创建独立 workspace，完成 PRD、条件式 UI 评审、四类自治契约、技术方案、跨角色评审和用户决策交接；不得在该工作流内修改目标项目代码。
 - 每个阶段产物必须落到该需求目录，不能只留在对话里。
 - 代码改动仍发生在用户项目仓库；workspace 只保存过程产物、价值判断、决策、风险、交接、验证证据和交付摘要。
 - PRD 必须记录价值假设、指标基线、收益目标、成本收益比和上线后观测计划。
@@ -58,6 +72,7 @@ workspace/
 - `workflow-status.json` 必须记录阶段状态、负责人、门禁、产物路径、证据路径和 `rolePlan`。
 - `workflow-status.json` 还必须记录 `executionProfile`（`lightweight` / `standard` / `assurance`）和 `verificationLevel`（`V0-V4`）；交付结论不得超过验证等级，未参与角色必须有不适用依据。
 - `evidence/` 用于保存验证命令、截图说明、日志摘要或人工验证记录，不保存密钥、Cookie、Token 或敏感数据。
+- `goal-contract.json`、`milestones.json`、`tasks.json`、`autonomy-policy.json` 必须使用对应 Schema，且计划轮数、最大轮数、预算、审批、停止和重规划规则一致。
 - 主文档、模板和新 workspace 文档不得出现旧快捷入口、旧项目短名或旧本地路径。
 
 ## 复用规则

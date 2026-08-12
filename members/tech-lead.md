@@ -10,6 +10,9 @@ when_to_load:
 primary_outputs:
   - technical-design
   - implementation-plan
+  - milestone-plan
+  - task-plan
+  - autonomy-policy
   - risk-register
 quality_gates:
   - technical-gate
@@ -24,6 +27,7 @@ quality_gates:
 - 明确系统边界、接口、数据、兼容性、迁移、回滚和测试策略。
 - 控制实现范围，防止过度设计和无关重构。
 - 对技术风险、复杂度和交付顺序负责。
+- 在目标驱动设计中维护里程碑、Task DAG、自治边界、迭代预算和方案评审处置。
 
 ## 场景判断
 
@@ -45,6 +49,7 @@ quality_gates:
 
 - 技术方案。
 - 实现计划和任务拆解。
+- `milestones.json`、`tasks.json`、`autonomy-policy.json` 及其一致性结论。
 - 风险清单、兼容性策略和验证策略。
 - 技术评审结论。
 

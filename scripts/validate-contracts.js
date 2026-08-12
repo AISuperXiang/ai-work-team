@@ -96,6 +96,17 @@ const MEMBER_IDS = new Set([
 const REQUIRED_STATUS_FIELDS = ["name", "owner", "status", "gates", "artifacts", "evidence"];
 const REQUIRED_STATUS_STAGES_BY_WORKFLOW = {
   "requirement-end-to-end": ["Intake", "PRD", "UI/UX", "Tech Design", "Implementation", "QA", "Delivery"],
+  "goal-driven-technical-design": [
+    "Goal Intake",
+    "PRD",
+    "Requirement Review",
+    "UI Review",
+    "Architecture Design",
+    "Technical Review",
+    "Cross-Role Review",
+    "Design Revision",
+    "Decision Handoff"
+  ],
   "bugfix-delivery": ["Triage", "Reproduce", "Diagnose", "Fix", "Regression", "Delivery"],
   "code-review-delivery": ["Scope", "Behavior Review", "Domain Review", "Test Review", "Optimize", "Verify & Deliver"],
   "technical-design-review": ["Context", "Architecture", "QA Review", "Decision"]
@@ -105,6 +116,63 @@ const REQUIRED_PRD_METRIC_HEADERS = ["指标", "当前基线", "目标变化", "
 const REQUIRED_DELIVERY_BUSINESS_ROWS = ["价值假设", "指标基线", "收益目标", "成本收益比", "上线后观测结果/计划"];
 const REQUIRED_QUALITY_DIMENSIONS = ["业务影响", "技术先进性", "健壮性", "测试可信度", "UI 美观与可用性", "安全与兼容性", "交付完整度"];
 const REQUIRED_HANDOFF_SECTIONS = ["背景", "当前阶段", "已确认决策", "待确认问题", "风险", "产出物", "验证"];
+const GOAL_DESIGN_SCHEMA_CONTRACTS = [
+  {
+    schema: "schemas/goal-contract.schema.json",
+    template: "assets/templates/goal-contract.json",
+    required: [
+      "schemaVersion",
+      "goalId",
+      "title",
+      "statement",
+      "targetUsers",
+      "problem",
+      "desiredOutcomes",
+      "nonGoals",
+      "constraints",
+      "successCriteria",
+      "metrics",
+      "assumptions",
+      "owner",
+      "reviewTriggers"
+    ]
+  },
+  {
+    schema: "schemas/milestone.schema.json",
+    template: "assets/templates/milestones.json",
+    required: [
+      "schemaVersion",
+      "goalId",
+      "plannedIterations",
+      "maxIterations",
+      "milestones"
+    ]
+  },
+  {
+    schema: "schemas/task.schema.json",
+    template: "assets/templates/tasks.json",
+    required: ["schemaVersion", "goalId", "tasks"]
+  },
+  {
+    schema: "schemas/autonomy-policy.schema.json",
+    template: "assets/templates/autonomy-policy.json",
+    required: [
+      "schemaVersion",
+      "policyId",
+      "goalId",
+      "defaultDecisionMode",
+      "iterationPolicy",
+      "budgetPolicy",
+      "decisionRights",
+      "approvalGates",
+      "forbiddenActions",
+      "stopConditions",
+      "replanTriggers",
+      "escalationRules",
+      "reviewCadence"
+    ]
+  }
+];
 
 const checks = [
   {
@@ -124,6 +192,10 @@ const checks = [
       "rolePlan",
       "role-activation-gate",
       "code-review-delivery.md",
+      "/team goal-design",
+      "goal-contract-gate",
+      "autonomy-gate",
+      "design-review-gate",
       "质量评分"
     ]
   },
@@ -218,6 +290,26 @@ const checks = [
     ]
   },
   {
+    file: "workflows/goal-driven-technical-design.md",
+    mustContain: [
+      "/team goal-design",
+      "goal-contract.json",
+      "milestones.json",
+      "tasks.json",
+      "autonomy-policy.json",
+      "goal-contract-gate",
+      "autonomy-gate",
+      "design-review-gate",
+      "maxDesignReviewRounds",
+      "等待用户批准执行",
+      "/team build"
+    ],
+    mustNotContain: [
+      "milestone-plan.json",
+      "task-plan.json"
+    ]
+  },
+  {
     file: "workflows/implementation-protocol.md",
     mustContain: [
       "定位项目",
@@ -279,6 +371,8 @@ const checks = [
       "/team buildContext",
       "/team install",
       "/team code-review",
+      "/team goal-design",
+      "goal-driven-technical-design.md",
       "external-skills/catalog.json"
     ]
   },
@@ -286,6 +380,9 @@ const checks = [
     file: "docs/quality-gates.md",
     mustContain: [
       "value-gate",
+      "goal-contract-gate",
+      "autonomy-gate",
+      "design-review-gate",
       "decision-gate",
       "handoff-gate",
       "complexity-gate",
@@ -323,6 +420,58 @@ const checks = [
       "风险",
       "置信度",
       "需决策项"
+    ]
+  },
+  {
+    file: "assets/templates/requirement-review.md",
+    mustContain: [
+      "评审输入",
+      "范围与价值",
+      "验收与可测性",
+      "状态、异常与边界",
+      "冻结输入",
+      "评审结论"
+    ]
+  },
+  {
+    file: "assets/templates/goal-driven-technical-design.md",
+    mustContain: [
+      "背景与目标",
+      "需求分析",
+      "技术核心模块设计",
+      "复杂逻辑拆解",
+      "实现方案对比",
+      "Contract Schemas",
+      "goal-contract",
+      "milestone",
+      "task",
+      "autonomy-policy",
+      "迭代节奏与迭代路径",
+      "Review Resolution",
+      "User Decision"
+    ]
+  },
+  {
+    file: "assets/templates/technical-design-review.md",
+    mustContain: [
+      "角色评审结论",
+      "契约一致性",
+      "评审意见处置",
+      "maxDesignReviewRounds",
+      "待用户决策",
+      "最终结论"
+    ]
+  },
+  {
+    file: "docs/methodologies/goal-driven-technical-design-methodology.md",
+    mustContain: [
+      "目标收敛",
+      "从目标到 PRD",
+      "四类契约",
+      "Task DAG",
+      "Autonomy Policy",
+      "评审与修订",
+      "等待用户批准执行"
     ]
   },
   {
@@ -731,6 +880,13 @@ for (const check of checks) {
       fail(`${check.file} missing: ${needle}`);
     }
   }
+  for (const needle of check.mustNotContain || []) {
+    if (content.includes(needle)) {
+      fail(`${check.file} must not contain: ${needle}`);
+    } else {
+      pass(`${check.file} omits obsolete value: ${needle}`);
+    }
+  }
 }
 
 function collectFiles(dir, files = [], options = {}) {
@@ -964,6 +1120,235 @@ function validateStatusSchemaContract() {
   }
 }
 
+function validateDirectedAcyclicGraph(items, idField, dependencyField, label, relativePath) {
+  if (!Array.isArray(items) || items.length === 0) {
+    fail(`${relativePath} ${label} must be a non-empty array`);
+    return;
+  }
+
+  const nodes = new Map();
+  for (const item of items) {
+    const id = item && item[idField];
+    if (!isMeaningful(id)) {
+      fail(`${relativePath} ${label} item missing ${idField}`);
+      continue;
+    }
+    if (nodes.has(id)) {
+      fail(`${relativePath} ${label} has duplicate id: ${id}`);
+    } else {
+      nodes.set(id, item);
+      pass(`${relativePath} ${label} id is unique: ${id}`);
+    }
+  }
+
+  for (const [id, item] of nodes) {
+    const dependencies = item[dependencyField];
+    if (!Array.isArray(dependencies)) {
+      fail(`${relativePath} ${label} ${id} ${dependencyField} must be an array`);
+      continue;
+    }
+    for (const dependency of dependencies) {
+      if (dependency === id) {
+        fail(`${relativePath} ${label} ${id} must not depend on itself`);
+      } else if (!nodes.has(dependency)) {
+        fail(`${relativePath} ${label} ${id} references unknown dependency: ${dependency}`);
+      } else {
+        pass(`${relativePath} ${label} ${id} dependency exists: ${dependency}`);
+      }
+    }
+  }
+
+  const visiting = new Set();
+  const visited = new Set();
+  let hasCycle = false;
+  function visit(id) {
+    if (visiting.has(id)) {
+      hasCycle = true;
+      return;
+    }
+    if (visited.has(id)) return;
+    visiting.add(id);
+    const item = nodes.get(id);
+    for (const dependency of Array.isArray(item && item[dependencyField]) ? item[dependencyField] : []) {
+      if (nodes.has(dependency)) visit(dependency);
+    }
+    visiting.delete(id);
+    visited.add(id);
+  }
+  for (const id of nodes.keys()) visit(id);
+  if (hasCycle) {
+    fail(`${relativePath} ${label} dependency graph must be acyclic`);
+  } else {
+    pass(`${relativePath} ${label} dependency graph is acyclic`);
+  }
+}
+
+function validateGoalDesignDocumentSet(documents, label) {
+  const { goal, milestones, tasks, autonomy } = documents;
+  if (!goal || !milestones || !tasks || !autonomy) return;
+
+  const goalIds = new Set([
+    goal.goalId,
+    milestones.goalId,
+    tasks.goalId,
+    autonomy.goalId,
+  ]);
+  if (goalIds.size === 1 && isMeaningful(goal.goalId)) {
+    pass(`${label} uses one goalId across all contracts: ${goal.goalId}`);
+  } else {
+    fail(`${label} must use one meaningful goalId across all contracts`);
+  }
+
+  if (
+    Number.isInteger(milestones.plannedIterations) &&
+    Number.isInteger(milestones.maxIterations) &&
+    milestones.plannedIterations <= milestones.maxIterations
+  ) {
+    pass(`${label} milestone plannedIterations does not exceed maxIterations`);
+  } else {
+    fail(`${label} milestone iteration limits are invalid`);
+  }
+
+  const iterationPolicy = autonomy.iterationPolicy || {};
+  if (
+    Number.isInteger(iterationPolicy.plannedIterations) &&
+    Number.isInteger(iterationPolicy.maxIterations) &&
+    iterationPolicy.plannedIterations <= iterationPolicy.maxIterations
+  ) {
+    pass(`${label} autonomy plannedIterations does not exceed maxIterations`);
+  } else {
+    fail(`${label} autonomy iteration limits are invalid`);
+  }
+  if (
+    milestones.plannedIterations === iterationPolicy.plannedIterations &&
+    milestones.maxIterations === iterationPolicy.maxIterations
+  ) {
+    pass(`${label} milestone and autonomy iteration limits match`);
+  } else {
+    fail(`${label} milestone and autonomy iteration limits must match`);
+  }
+  if (Number.isInteger(iterationPolicy.maxDesignReviewRounds) && iterationPolicy.maxDesignReviewRounds > 0) {
+    pass(`${label} defines a bounded design review loop`);
+  } else {
+    fail(`${label} must define maxDesignReviewRounds`);
+  }
+
+  validateDirectedAcyclicGraph(
+    milestones.milestones,
+    "milestoneId",
+    "dependsOn",
+    "milestones",
+    label,
+  );
+  validateDirectedAcyclicGraph(
+    tasks.tasks,
+    "taskId",
+    "dependsOn",
+    "tasks",
+    label,
+  );
+
+  const milestoneMap = new Map(
+    (Array.isArray(milestones.milestones) ? milestones.milestones : [])
+      .filter((item) => isMeaningful(item && item.milestoneId))
+      .map((item) => [item.milestoneId, item]),
+  );
+  const taskMap = new Map(
+    (Array.isArray(tasks.tasks) ? tasks.tasks : [])
+      .filter((item) => isMeaningful(item && item.taskId))
+      .map((item) => [item.taskId, item]),
+  );
+  for (const [taskId, task] of taskMap) {
+    const milestone = milestoneMap.get(task.milestoneId);
+    if (!milestone) {
+      fail(`${label} task ${taskId} references unknown milestone: ${task.milestoneId}`);
+      continue;
+    }
+    if (Array.isArray(milestone.taskIds) && milestone.taskIds.includes(taskId)) {
+      pass(`${label} task ${taskId} is linked from milestone ${task.milestoneId}`);
+    } else {
+      fail(`${label} milestone ${task.milestoneId} must reference task ${taskId}`);
+    }
+    if (task.riskLevel === "high" || task.riskLevel === "critical") {
+      if (task.decisionMode === "approval") {
+        pass(`${label} high-risk task ${taskId} requires approval`);
+      } else {
+        fail(`${label} high-risk task ${taskId} must use decisionMode approval`);
+      }
+    }
+  }
+  for (const [milestoneId, milestone] of milestoneMap) {
+    for (const taskId of Array.isArray(milestone.taskIds) ? milestone.taskIds : []) {
+      if (taskMap.has(taskId)) {
+        pass(`${label} milestone ${milestoneId} task exists: ${taskId}`);
+      } else {
+        fail(`${label} milestone ${milestoneId} references unknown task: ${taskId}`);
+      }
+    }
+  }
+
+  const decisionRights = autonomy.decisionRights || {};
+  if (
+    Array.isArray(decisionRights.approvalRequired) &&
+    decisionRights.approvalRequired.length > 0 &&
+    Array.isArray(autonomy.approvalGates) &&
+    autonomy.approvalGates.length > 0
+  ) {
+    pass(`${label} defines human approval boundaries`);
+  } else {
+    fail(`${label} must define approvalRequired decisions and approvalGates`);
+  }
+  if (Array.isArray(autonomy.stopConditions) && autonomy.stopConditions.length > 0) {
+    pass(`${label} defines hard stop conditions`);
+  } else {
+    fail(`${label} must define stop conditions`);
+  }
+}
+
+function validateGoalDesignSchemaContracts() {
+  const documents = {};
+  for (const contract of GOAL_DESIGN_SCHEMA_CONTRACTS) {
+    const schema = parseJsonFile(contract.schema);
+    const template = parseJsonFile(contract.template);
+    if (!schema || !template) continue;
+
+    if (schema.$schema === "https://json-schema.org/draft/2020-12/schema") {
+      pass(`${contract.schema} uses JSON Schema draft 2020-12`);
+    } else {
+      fail(`${contract.schema} must use JSON Schema draft 2020-12`);
+    }
+    if (schema.type === "object" && schema.additionalProperties === false) {
+      pass(`${contract.schema} is a closed object contract`);
+    } else {
+      fail(`${contract.schema} must be a closed object contract`);
+    }
+    const schemaRequired = Array.isArray(schema.required) ? schema.required : [];
+    for (const field of contract.required) {
+      if (schemaRequired.includes(field) && schema.properties && hasOwn(schema.properties, field)) {
+        pass(`${contract.schema} requires and defines: ${field}`);
+      } else {
+        fail(`${contract.schema} must require and define: ${field}`);
+      }
+      if (hasOwn(template, field)) {
+        pass(`${contract.template} provides: ${field}`);
+      } else {
+        fail(`${contract.template} missing: ${field}`);
+      }
+    }
+    if (template.schemaVersion === "1.0.0") {
+      pass(`${contract.template} uses schemaVersion 1.0.0`);
+    } else {
+      fail(`${contract.template} must use schemaVersion 1.0.0`);
+    }
+
+    if (contract.schema.includes("goal-contract")) documents.goal = template;
+    if (contract.schema.includes("milestone")) documents.milestones = template;
+    if (contract.schema.includes("task.schema")) documents.tasks = template;
+    if (contract.schema.includes("autonomy-policy")) documents.autonomy = template;
+  }
+  validateGoalDesignDocumentSet(documents, "goal design templates");
+}
+
 function validateWorkflowStatusTemplate(relativePath) {
   const parsed = parseJsonFile(relativePath);
   if (!parsed) return;
@@ -1000,6 +1385,54 @@ function validateTemplateContracts() {
   requireTableHeaders("assets/templates/delivery-summary.md", "角色激活计划", ["角色", "模式", "场景依据", "实际贡献/未参与原因"]);
   requireTableHeaders("assets/templates/technical-design.md", "事实与假设", ["类型", "内容", "证据/来源", "对方案的影响"]);
   requireTableHeaders("assets/templates/technical-design.md", "决策与职责边界", ["决策", "候选方案", "最终选择与依据", "责任角色", "验证/回滚"]);
+  requireTableHeaders("assets/templates/requirement-review.md", "验收与可测性", [
+    "验收编号",
+    "前置条件",
+    "输入/动作",
+    "可观察结果",
+    "证据",
+    "QA 结论"
+  ]);
+  for (const heading of [
+    "背景与目标",
+    "需求分析",
+    "技术核心模块设计",
+    "复杂逻辑拆解",
+    "实现方案对比",
+    "Contract Schemas",
+    "里程碑与 Task DAG",
+    "迭代节奏与迭代路径",
+    "Review Resolution",
+    "User Decision"
+  ]) {
+    requireSectionExists("assets/templates/goal-driven-technical-design.md", heading);
+  }
+  requireTableHeaders("assets/templates/goal-driven-technical-design.md", "Contract Schemas", [
+    "契约",
+    "Schema",
+    "当前目标实例",
+    "用途",
+    "关键约束"
+  ]);
+  requireTableHeaders("assets/templates/technical-design-review.md", "角色评审结论", [
+    "意见编号",
+    "角色",
+    "结论",
+    "严重度",
+    "关联章节/契约",
+    "证据或反例",
+    "必须修改项",
+    "置信度"
+  ]);
+  requireTableHeaders("assets/templates/technical-design-review.md", "评审意见处置", [
+    "意见编号",
+    "处置",
+    "修改内容",
+    "修改位置",
+    "责任角色",
+    "复核角色",
+    "状态"
+  ]);
   requireTableHeaders("assets/templates/test-plan.md", "风险与测试策略", ["风险/失效条件", "测试层级", "负责人", "最低验证等级", "不覆盖的影响"]);
   requireTableHeaders("assets/templates/bug-analysis.md", "复现与基线证据", ["项", "内容"]);
   requireTableHeaders("assets/templates/bug-analysis.md", "假设与排除", ["假设", "证据", "结论", "下一步"]);
@@ -1220,6 +1653,25 @@ function validateCompletedWorkspaceArtifacts(workspaceDir, status) {
   }
 }
 
+function validateWorkspaceGoalDesignContracts(workspaceDir) {
+  const files = {
+    goal: "goal-contract.json",
+    milestones: "milestones.json",
+    tasks: "tasks.json",
+    autonomy: "autonomy-policy.json",
+  };
+  const documents = {};
+  for (const [key, fileName] of Object.entries(files)) {
+    const relativePath = path.join(workspaceDir, fileName);
+    if (!fs.existsSync(path.join(ROOT, relativePath))) {
+      fail(`${relativePath} missing for completed goal-driven design`);
+      continue;
+    }
+    documents[key] = parseJsonFile(relativePath);
+  }
+  validateGoalDesignDocumentSet(documents, workspaceDir);
+}
+
 function validateWorkspaceStatus(workspaceDir) {
   const statusPath = path.join(workspaceDir, "workflow-status.json");
   if (!fs.existsSync(path.join(ROOT, statusPath))) {
@@ -1238,6 +1690,12 @@ function validateWorkspaceStatus(workspaceDir) {
       .map((stage) => stage.name),
   );
   if (completedStages.has("PRD")) validateWorkspacePrd(workspaceDir);
+  if (
+    status.workflow === "goal-driven-technical-design" &&
+    (completedStages.has("Architecture Design") || completedStages.has("Decision Handoff"))
+  ) {
+    validateWorkspaceGoalDesignContracts(workspaceDir);
+  }
   if (completedStages.has("Delivery")) {
     validateWorkspaceDeliverySummary(workspaceDir, status);
   }
@@ -1355,8 +1813,10 @@ function validateNoLegacyContract() {
 
 validateStatusSchemaContract();
 validateWorkflowStatusTemplate("assets/templates/workflow-status.json");
+validateWorkflowStatusTemplate("assets/templates/goal-design-workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
+validateGoalDesignSchemaContracts();
 validateBusinessImpactRubric();
 validateTemplateContracts();
 try {

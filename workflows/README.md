@@ -20,6 +20,7 @@
 | 端到端需求交付 | `requirement-end-to-end.md` | 从需求到实现、测试、走查、交付 |
 | 项目上下文构建 | `project-context-build.md` | 扫描工作目录并创建/更新 AGENTS.md |
 | 需求评审 | `requirement-review.md` | 评审 PRD 或模糊需求 |
+| 目标驱动技术方案 | `goal-driven-technical-design.md` | 从目标生成 PRD、自治契约、跨角色评审后的技术方案和用户决策包 |
 | 技术方案评审 | `technical-design-review.md` | 评审架构、接口、数据、测试策略 |
 | 缺陷修复交付 | `bugfix-delivery.md` | 复现、定位、修复、回归、交付 |
 | 代码审查与优化交付 | `code-review-delivery.md` | 审查 diff/代码逻辑，必要时完成最小优化与验证 |

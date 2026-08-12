@@ -1,8 +1,8 @@
 ---
 name: "ai-work-team"
-description: "产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接需求、评审需求、代码审查与优化、设计方案、实现交付、缺陷修复、走查验收，或使用 /team 指令。"
+description: "产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接需求、评审需求、从目标生成 PRD 和可控迭代技术方案、代码审查与优化、实现交付、缺陷修复、走查验收，或使用 /team 指令。"
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # AI Work Team
@@ -35,6 +35,7 @@ metadata:
 
 - 用户输入 `/team` 指令。
 - 用户要求承接需求、实现需求、从需求到交付完整推进。
+- 用户给出目标，希望先生成 PRD、需求/UI 评审、自治契约和评审后的技术方案。
 - 用户要求产品、运营、UI、研发、测试等角色协作。
 - 用户要求需求评审、代码逻辑审查与优化、技术方案评审、缺陷修复交付、产品/UI/QA 走查。
 - 用户要求构建项目上下文、生成或更新 `AGENTS.md`。
@@ -63,6 +64,7 @@ metadata:
 | `/team` 或自然语言路由 | `commands/team.md`、`workflows/route-table.md`、`workflows/execution-protocol.md`、`docs/methodologies/role-activation-methodology.md` | `commands/README.md` |
 | `/team intake`、`/team review` | `workflows/requirement-review.md`、`docs/quality-gates.md` | `members/product-manager.md`、`members/operations-manager.md`、`assets/templates/requirement-brief.md`、`assets/templates/prd.md` |
 | `/team design` | `workflows/technical-design-review.md`、`docs/quality-gates.md`、`docs/handoff-contract.md` | `members/ui-designer.md`、`members/tech-lead.md`、`assets/templates/technical-design.md` |
+| `/team goal-design` | `workflows/goal-driven-technical-design.md`、`docs/methodologies/goal-driven-technical-design-methodology.md`、`docs/quality-gates.md`、`docs/handoff-contract.md`、`workspace/README.md`、四类 `schemas/*.schema.json` | `rolePlan` 中的产品、运营、UI、技术负责人、领域研发、QA、交付经理与目标驱动模板 |
 | `/team build` | `workflows/requirement-end-to-end.md`、`workflows/implementation-protocol.md`、`workspace/README.md`、`docs/methodologies/role-activation-methodology.md`、`docs/quality-gates.md`、`docs/quality-rubrics.md`、`docs/business-impact-rubric.md`、`docs/handoff-contract.md` | `rolePlan` 中处于 `active` / `consulted` 的 `members/*.md`、对应方法论与模板 |
 | `/team bugfix` | `workflows/bugfix-delivery.md`、`workflows/implementation-protocol.md`、`docs/methodologies/execution-methodology.md`、`docs/methodologies/role-activation-methodology.md`、`docs/quality-gates.md`、`docs/quality-rubrics.md` | `rolePlan` 中的技术负责人、问题归属研发、QA、产品角色和对应模板 |
 | `/team code-review` | `workflows/code-review-delivery.md`、`docs/methodologies/execution-methodology.md`、`docs/methodologies/role-activation-methodology.md`、`docs/engineering-standards/review-standard.md`、`docs/quality-gates.md` | `rolePlan` 中命中领域的研发、QA、产品或 UI 角色与 `assets/templates/code-review.md` |
@@ -115,6 +117,9 @@ metadata:
 门禁失败时停止进入下一阶段，说明失败项、责任角色和修复动作。
 
 - **value-gate**：PRD 完成前必须明确目标用户、价值假设、指标基线、收益目标、成本收益比、观测方式和复盘计划；业务影响评分必须满足最低线。
+- **goal-contract-gate**：目标驱动技术方案必须冻结目标、非目标、约束、指标、成功标准、假设和重新评审触发器。
+- **autonomy-gate**：里程碑、Task DAG、计划/最大迭代轮数、预算、审批、停止和重规划规则必须完整且一致。
+- **design-review-gate**：技术、产品、适用 UI、研发和 QA 的评审意见必须有证据、处置和复核，且自动修订不超过上限。
 - **decision-gate**：关键范围、优先级、技术取舍、上线风险和延期项必须写入 `decision-log.md`。
 - **handoff-gate**：阶段切换必须按 `docs/handoff-contract.md` 写入 `role-handoff.md` 或等价交接摘要。
 - **complexity-gate**：需求必须按 `S / M / L / XL` 分级；`L / XL` 必须拆里程碑、技术 spike、QA 策略、灰度、回滚和收益复盘。

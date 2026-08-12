@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-work-team.local/schemas/autonomy-policy.schema.json",
+  "title": "AI Work Team Autonomy Policy",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "goalId",
+    "defaultDecisionMode",
+    "iterationPolicy",
+    "budgetPolicy",
+    "decisionRights",
+    "approvalGates",
+    "forbiddenActions",
+    "stopConditions",
+    "replanTriggers",
+    "escalationRules",
+    "reviewCadence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "policyId": {
+      "type": "string",
+      "pattern": "^policy-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "goalId": {
+      "type": "string",
+      "pattern": "^goal-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "defaultDecisionMode": {
+      "type": "string",
+      "enum": ["auto", "notify", "approval"]
+    },
+    "iterationPolicy": {
+      "type": "object",
+      "required": [
+        "plannedIterations",
+        "maxIterations",
+        "maxDesignReviewRounds",
+        "maxNoImprovementRounds",
+        "evaluationCadence",
+        "perIterationExitCriteria"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "plannedIterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "maxIterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "maxDesignReviewRounds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "maxNoImprovementRounds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "evaluationCadence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "perIterationExitCriteria": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "budgetPolicy": {
+      "type": "object",
+      "required": [
+        "maxTasks",
+        "maxParallelTasks",
+        "maxRetriesPerTask",
+        "maxDurationHours",
+        "maxModelCalls",
+        "maxCost"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "maxTasks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxParallelTasks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxRetriesPerTask": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "maxDurationHours": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maxModelCalls": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxCost": {
+          "type": "object",
+          "required": ["amount", "currency"],
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "type": "number",
+              "minimum": 0
+            },
+            "currency": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "decisionRights": {
+      "type": "object",
+      "required": ["automatic", "notify", "approvalRequired"],
+      "additionalProperties": false,
+      "properties": {
+        "automatic": {
+          "$ref": "#/$defs/actionRules"
+        },
+        "notify": {
+          "$ref": "#/$defs/actionRules"
+        },
+        "approvalRequired": {
+          "$ref": "#/$defs/actionRules"
+        }
+      }
+    },
+    "approvalGates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["trigger", "approverRoles", "requiredEvidence"],
+        "additionalProperties": false,
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approverRoles": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/roleId"
+            }
+          },
+          "requiredEvidence": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "forbiddenActions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "stopConditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "condition", "action"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "goal_achieved",
+              "budget_exhausted",
+              "no_improvement",
+              "risk_threshold",
+              "deadline",
+              "manual_stop"
+            ]
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action": {
+            "type": "string",
+            "enum": ["pause", "stop", "escalate"]
+          }
+        }
+      }
+    },
+    "replanTriggers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "escalationRules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["trigger", "targetRoles", "response"],
+        "additionalProperties": false,
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "minLength": 1
+          },
+          "targetRoles": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/roleId"
+            }
+          },
+          "response": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "reviewCadence": {
+      "type": "object",
+      "required": ["afterEachMilestone", "afterEachIteration", "beforeProduction"],
+      "additionalProperties": false,
+      "properties": {
+        "afterEachMilestone": {
+          "type": "boolean"
+        },
+        "afterEachIteration": {
+          "type": "boolean"
+        },
+        "beforeProduction": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "actionRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "constraints"],
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "roleId": {
+      "type": "string",
+      "enum": [
+        "product-manager",
+        "operations-manager",
+        "ui-designer",
+        "tech-lead",
+        "frontend-engineer",
+        "backend-engineer",
+        "qa-engineer",
+        "delivery-manager"
+      ]
+    }
+  }
+}

@@ -72,6 +72,7 @@ const workflowFiles = [
   "workflows/implementation-protocol.md",
   "workflows/requirement-end-to-end.md",
   "workflows/requirement-review.md",
+  "workflows/goal-driven-technical-design.md",
   "workflows/technical-design-review.md",
   "workflows/bugfix-delivery.md",
   "workflows/code-review-delivery.md",
@@ -85,22 +86,35 @@ const schemaFiles = [
   "schemas/workflow.schema.json",
   "schemas/command.schema.json",
   "schemas/status.schema.json",
-  "schemas/skill-runtime.schema.json"
+  "schemas/skill-runtime.schema.json",
+  "schemas/goal-contract.schema.json",
+  "schemas/milestone.schema.json",
+  "schemas/task.schema.json",
+  "schemas/autonomy-policy.schema.json"
 ];
 
 const templateFiles = [
   "assets/templates/requirement-brief.md",
+  "assets/templates/requirement-review.md",
   "assets/templates/prd.md",
   "assets/templates/decision-log.md",
   "assets/templates/risk-register.md",
   "assets/templates/role-handoff.md",
   "assets/templates/workflow-status.json",
+  "assets/templates/goal-design-workflow-status.json",
   "assets/templates/bugfix-workflow-status.json",
   "assets/templates/code-review-workflow-status.json",
   "assets/templates/bug-analysis.md",
   "assets/templates/code-review.md",
   "assets/templates/ui-review.md",
   "assets/templates/technical-design.md",
+  "assets/templates/goal-driven-technical-design.md",
+  "assets/templates/technical-design-review.md",
+  "assets/templates/design-decision-summary.md",
+  "assets/templates/goal-contract.json",
+  "assets/templates/milestones.json",
+  "assets/templates/tasks.json",
+  "assets/templates/autonomy-policy.json",
   "assets/templates/implementation-plan.md",
   "assets/templates/test-plan.md",
   "assets/templates/walkthrough-report.md",
@@ -122,7 +136,8 @@ const methodologyFiles = [
   "docs/methodologies/qa-methodology.md",
   "docs/methodologies/delivery-methodology.md",
   "docs/methodologies/execution-methodology.md",
-  "docs/methodologies/role-activation-methodology.md"
+  "docs/methodologies/role-activation-methodology.md",
+  "docs/methodologies/goal-driven-technical-design-methodology.md"
 ];
 
 const standardFiles = [

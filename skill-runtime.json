@@ -4,9 +4,9 @@
   "skill": {
     "id": "ai-work-team",
     "name": "AI Work Team Skill",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "entry": "SKILL.md",
-    "description": "Product, operations, UI, engineering, QA, and delivery expert-team workflow skill."
+    "description": "Product, operations, UI, engineering, QA, goal-driven technical design, and delivery expert-team workflow skill."
   },
   "runtime": {
     "node": ">=18",

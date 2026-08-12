@@ -15,6 +15,7 @@
 - `delivery-methodology.md`
 - `execution-methodology.md`
 - `role-activation-methodology.md`
+- `goal-driven-technical-design-methodology.md`
 
 ## 使用方式
 
@@ -23,3 +24,5 @@
 涉及实现、缺陷修复或代码审查时，先读取 `execution-methodology.md`，按风险、未知度和影响范围选择 `lightweight`、`standard` 或 `assurance` 执行档位，并记录验证等级。
 
 所有工作流开始前读取 `role-activation-methodology.md`，先形成 `rolePlan`，再加载实际参与角色。产品、运营、UI、技术负责人、前端、后端、QA 和交付经理各自的方法论只在该角色处于 `active` 或 `consulted` 时按需加载。
+
+从目标生成 PRD、四类自治契约和评审后技术方案时，读取 `goal-driven-technical-design-methodology.md`，并把计划/最大迭代轮数、预算、审批、停止和重规划规则写入方案。

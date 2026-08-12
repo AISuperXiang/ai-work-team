@@ -34,6 +34,7 @@
 `ai-work-team` is a good fit when:
 
 - A one-line request needs clearer users, business value, scope, and acceptance criteria.
+- A directional goal needs a PRD, conditional UI review, autonomy contracts, and a reviewed technical design before the user decides whether to execute.
 - A feature must move from PRD and UI/UX through technical design, implementation, testing, and delivery.
 - A bug fix requires reproduction, root-cause analysis, impact assessment, regression evidence, and residual-risk reporting.
 - A code review must distinguish behavioral defects and engineering risks from style preferences, then map findings to verifiable fixes.
@@ -52,6 +53,7 @@ It is usually unnecessary when:
 | Capability | Problem addressed | Primary outputs |
 | --- | --- | --- |
 | Requirement intake and review | Unclear goals, value, scope, or acceptance criteria | Requirement brief, PRD, decision log |
+| Goal-driven technical design | Turning a goal into a constrained, controllably iterative design reviewed across roles | Goal Contract, milestones, Task DAG, autonomy policy, reviewed technical design |
 | Technical and UI design | Cross-platform design, interaction, or risk review | UI review, technical design, implementation plan |
 | End-to-end feature delivery | Moving a request from design to code and verification | Code changes, test plan, delivery summary |
 | Bug-fix delivery | Reproducing, diagnosing, fixing, and regressing a defect | Bug analysis, regression evidence, risk record |
@@ -111,6 +113,7 @@ After installation, use either a natural-language request or an explicit `/team`
 | `/team intake <request>` | Clarify goals, value, scope, constraints, and information gaps |
 | `/team review <request/PRD>` | Review requirement completeness, business value, and acceptance criteria |
 | `/team design <request>` | Design or review UI, technical approach, and implementation boundaries |
+| `/team goal-design <goal>` | Generate a PRD, requirement/UI reviews, four autonomy Schemas, and a reviewed technical design for user approval |
 | `/team build <request>` | Drive a request through implementation, verification, and delivery |
 | `/team buildContext <working-directory> [request/scope]` | Scan a project and create or update `AGENTS.md` |
 | `/team bugfix <problem>` | Handle a defect through reproduction, diagnosis, fix, and regression |
@@ -126,6 +129,7 @@ Examples:
 ```text
 /team build Create a membership renewal page with coupon support and success feedback
 /team review Review this PRD, focusing on business value and acceptance criteria
+/team goal-design Design an app for managing complex personal goals with bounded autonomous iterations
 /team bugfix Fix order submission failures and add regression verification
 /team code-review Review the current diff for race conditions and regression risks
 /team buildContext <project-root> Build Agent context for future work
@@ -209,6 +213,8 @@ workspace/
 
 Code changes remain in the user's project repository. `workspace/` stores process documents, key decisions, role handoffs, risks, verification evidence, and delivery summaries.
 
+`/team goal-design` also produces `goal-contract.json`, `milestones.json`, `tasks.json`, `autonomy-policy.json`, `technical-design-review.md`, and `design-decision-summary.md`. It does not modify project code; an approved design proceeds through `/team build`.
+
 An existing requirement directory is reused with a `features/` subdirectory only when the user explicitly asks to add or append a feature to that requirement.
 
 ## Quality and Verification
@@ -236,6 +242,9 @@ The profile is determined by risk, uncertainty, and blast radius, not urgency.
 ### Quality Gates
 
 - `value-gate`: The PRD defines target users, value hypothesis, metric baseline, benefit target, and observation plan.
+- `goal-contract-gate`: The goal, non-goals, constraints, metrics, success criteria, assumptions, and review triggers are frozen.
+- `autonomy-gate`: Milestones, the Task DAG, planned/maximum iterations, budgets, approvals, stop conditions, and replanning rules are consistent.
+- `design-review-gate`: Technical, product, applicable UI, engineering, and QA findings have evidence, disposition, and re-review within the configured round limit.
 - `decision-gate`: Scope, priority, technical tradeoffs, release risks, and deferred items are recorded.
 - `handoff-gate`: Role transitions have explicit inputs, outputs, risks, and acceptance.
 - `complexity-gate`: The task is classified as `S/M/L/XL`; `L/XL` work includes milestones, rollout, and rollback.

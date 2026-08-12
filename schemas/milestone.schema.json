@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-work-team.local/schemas/milestone.schema.json",
+  "title": "AI Work Team Milestone Plan",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "goalId",
+    "plannedIterations",
+    "maxIterations",
+    "milestones"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "goalId": {
+      "type": "string",
+      "pattern": "^goal-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "plannedIterations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "maxIterations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "milestones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/milestone"
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "milestone": {
+      "type": "object",
+      "required": [
+        "milestoneId",
+        "title",
+        "outcome",
+        "iteration",
+        "dependsOn",
+        "scope",
+        "deliverables",
+        "exitCriteria",
+        "taskIds",
+        "ownerRole",
+        "riskLevel",
+        "targetVerificationLevel",
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "milestoneId": {
+          "type": "string",
+          "pattern": "^milestone-[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "iteration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "dependsOn": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^milestone-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "scope": {
+          "type": "object",
+          "required": ["inScope", "outOfScope"],
+          "additionalProperties": false,
+          "properties": {
+            "inScope": {
+              "$ref": "#/$defs/stringList"
+            },
+            "outOfScope": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "deliverables": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "pathOrReference"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^deliverable-[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "document",
+                  "code",
+                  "schema",
+                  "test",
+                  "runtime-evidence",
+                  "release"
+                ]
+              },
+              "pathOrReference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "exitCriteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "criterion", "evidence"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^exit-[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "criterion": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "taskIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^task-[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "ownerRole": {
+          "$ref": "#/$defs/roleId"
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "targetVerificationLevel": {
+          "type": "string",
+          "enum": ["V0", "V1", "V2", "V3", "V4"]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "in_progress",
+            "blocked",
+            "review",
+            "completed",
+            "cancelled"
+          ]
+        }
+      }
+    },
+    "roleId": {
+      "type": "string",
+      "enum": [
+        "product-manager",
+        "operations-manager",
+        "ui-designer",
+        "tech-lead",
+        "frontend-engineer",
+        "backend-engineer",
+        "qa-engineer",
+        "delivery-manager"
+      ]
+    }
+  }
+}

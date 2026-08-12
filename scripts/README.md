@@ -26,7 +26,7 @@ npm test
 - 成员、工作流、命令文件是否包含 frontmatter。
 - 工作流和命令中引用的 `workflows/*.md` 是否存在。
 - 工作流中声明的成员是否存在。
-- 必需 schema 和模板是否存在，包括 `schemas/skill-runtime.schema.json`。
+- 必需 schema 和模板是否存在，包括 `schemas/skill-runtime.schema.json` 以及 goal contract、milestone、task、autonomy policy 四类目标设计 Schema。
 - `external-skills/catalog.json` 是否可解析，Skill 包名、质量等级和角色引用是否有效。
 
 ## validate-contracts.js
@@ -54,9 +54,12 @@ npm run validate:workspaces
 - PRD 与交付摘要中的价值假设、指标基线、收益目标、成本收益比、证据索引和质量评分表格结构。
 - 完成态 workspace 阶段的 `artifacts` 和 `evidence` 不得为空；可解析为相对路径的产物和证据必须存在。
 - `role-handoff.md` 的交接记录、背景、决策、风险、产物、验证和 Hybrid 子 Agent 汇总。
+- `/team goal-design` 的工作流阶段、四类 JSON Schema、实例模板、迭代上限、里程碑/Task DAG、双向引用、人工审批和硬停止条件。
 - `no-legacy-contract` 精确扫描旧入口、旧短名、旧本地路径和 URL 编码旧路径，并避免误伤当前合法名称 `ai-work-team`。
 - `/team build` 必须输出 workspace、代码实现、验证和质量评分。
 - `/team install` 必须引用外部 Skills catalog、安装策略和角色映射。
+
+目标驱动 workspace 完成 Architecture Design 后，契约校验还会检查 `goal-contract.json`、`milestones.json`、`tasks.json` 和 `autonomy-policy.json` 的跨文件一致性。
 
 ## list-external-skills.js
 
