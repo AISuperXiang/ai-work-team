@@ -11,15 +11,27 @@
 - 风险：影响、概率、责任角色、缓解方案。
 - 产出物：链接或摘要。
 - 验证：已运行检查、结果、未验证项。
+- 交付控制：active contract revision、required acceptance/check、关联 run/snapshot、
+  evidence review 和当前 readiness；不得只交接全局验证等级。
 - 角色激活：`rolePlan`、各角色模式、场景依据和本阶段责任。
+- 当前调用：task ID、invocation ID、操作、授权依据、允许动作和必要阶段。
+- 行为影响面：current impact scope、入口、消费者、合并保护检查和 gaps。
+- 环境与资源：环境 probe、构建/实例/账号/数据匹配结论、资源 owner 和失效条件；
+  不记录控制 token、Cookie、口令、storage state 或敏感业务数据。
 
 ## 强制交接规则
 
-- 每次阶段切换必须更新 `role-handoff.md`，不能只在对话中口头交接。
+- 每次阶段切换必须更新权威状态中的交接引用。standard/assurance 默认同步
+  `role-handoff.md`；lightweight、verify-only、recheck 和 deliver 可使用状态内等价记录，
+  但必须由 `recordPolicy.omittedArtifacts` 保存省略理由和 decisionRef。
 - 下游角色开始前必须检查背景、决策、待确认问题、风险、产物和验证是否齐全。
 - 缺少会影响范围、实现或测试的字段时，阶段状态为 `blocked`，由交付经理要求上游补齐。
 - 交接记录必须能追溯到 workspace 产物、验证证据或用户决策。
+- 下游发现预期、required、验证方法、兼容范围或保留行为变化时，回到契约修订，
+  不得直接改测试或完成态。旧记录无 v2 证据时明确 legacy_unverified。
 - 交接前后 `rolePlan` 变化必须显式记录；下游角色不得默认接收未被激活的领域责任。
+- 同一事实只在权威状态或指定原文维护一次；`role-handoff.md` 是派生/引用视图，
+  不得独立改变 contract、finding、run、readiness 或资源 owner。
 
 ## Hybrid 子 Agent 输出契约
 

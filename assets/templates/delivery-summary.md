@@ -33,8 +33,20 @@
 
 ## 验证结果
 
-| 命令/步骤 | 结果 | 说明 |
-| --- | --- | --- |
+| 验收 ID / Check ID | Run ID | 方法/环境 | 结果 | 证据 | 说明 |
+| --- | --- | --- | --- | --- | --- |
+
+## 调用、范围与环境
+
+| Task / Invocation | 操作 / 授权 | Current Impact Scope | Review Coverage / Gaps | Environment Probe / 资源 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+
+## 测试选择、Catalog 与执行
+
+| Selection | 显式任务路径 / 完整性 | Catalog Health | Execution Run | Known Failure / 结论边界 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
 
 ## 执行档位与验证等级
 
@@ -50,9 +62,9 @@
 | 结论 | 证据类型 | 路径/来源 | 说明 |
 | --- | --- | --- | --- |
 
-## 质量评分
+## 质量评估（可选）
 
-| 维度 | 分数 | 说明 |
+| 维度 | 证据化判断 | 可选分数 |
 | --- | --- | --- |
 | 业务影响 |  |  |
 | 技术先进性 |  |  |
@@ -62,8 +74,12 @@
 | 安全与兼容性 |  |  |
 | 交付完整度 |  |  |
 
+> 数字评分仅用于用户要求、复盘或同类方案比较，不参与 accepted 判定。
+
 ## 交付产物索引
 
+- Record Policy / 权威记录：
+- Source Record Digest：
 - `decision-log.md`：
 - `risk-register.md`：
 - `role-handoff.md`：
@@ -87,4 +103,11 @@
 
 ## 验收结论
 
-- 可验收 / 带风险验收 / 不建议验收：
+- 交付对象：implementation / analysis
+- Claim：pending / candidate / accepted / analysis_complete
+- Readiness：ready / review / blocked / legacy_unverified
+- Review Verdict：no_blocking_findings / changes_required / partial / not_assessed
+- 结论：
+
+> `accepted` 仅用于证据完整的实现；`analysis_complete` 只表示报告完成。
+> required 缺失、失败、冲突或过期时不得使用“带风险验收”覆盖门禁。

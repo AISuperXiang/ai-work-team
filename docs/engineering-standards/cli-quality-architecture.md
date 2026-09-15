@@ -23,6 +23,20 @@
 - dry-run 和 JSON 模式不得产生文件写入。
 - 更新带受管 marker 的文件时必须保留 marker 外的人工内容，并保证重复执行幂等。
 
+只读证据检查还必须：
+
+- 复用 `scripts/safe-files.js` 统一执行路径、symlink、文件类型、大小和稳定读取检查。
+- 以调用者显式提供且 realpath 后的 project root 为边界，只读取状态 manifest 中的相对普通文件。
+- 拒绝凭据路径、路径穿越、反斜杠、控制字符、父目录/目标 symlink 和非普通文件。
+- 对状态设置 256 KiB 上限；大证据只流式哈希，不读取到状态或模型。
+- capture/assess、普通/JSON 输出均零写入，不执行状态中的命令或访问证据 URL。
+
+只读 Skill 评估器还必须：
+
+- 只读取当前工作目录内显式相对 JSON，拒绝 symlink、越界、重复参数和超过 256 KiB 的输入。
+- 不运行 Agent、不访问隐藏 oracle、不回写评估结果。
+- answer leakage、候选关键错误和未成熟逃逸观察不得被平均分或耗时改善覆盖。
+
 ## 3. 行为测试
 
 - 使用 Node 内置 `node:test` 与 `node:assert`，不为当前 CommonJS CLI 引入测试框架依赖。
@@ -43,6 +57,11 @@
   - 核心 contracts 重新扫描历史 workspace。
   - 三个核心 CLI 被替换为直接成功退出。
 - 新增关键分支时必须同步增加 mutant 或说明已有 mutant 如何覆盖。
+- 交付控制的关键 mutant 还包括：忽略契约 digest/保留项、STALE 或 skip 当 PASS、
+  open P1 仍接受、旧版本降级、路径校验绕过、verify/deliver 动作越权、
+  impact scope 缺口、环境 probe 失配和 check-delivery 直接成功。
+- 测试选择回退到 working tree、catalog 非健康被放行、finding 撤回缺反证、
+  answer leakage 被接纳、候选关键错误被平均掉和 evaluate-skill 直接成功。
 
 ## 5. 契约校验边界
 

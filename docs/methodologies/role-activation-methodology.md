@@ -17,7 +17,7 @@
 
 - `active`：对阶段产出、决策、代码、测试或门禁有直接责任。
 - `consulted`：只在有界问题上提供结论或证据，不拥有完整阶段产出。
-- `not_applicable`：已判断无关，不创建虚假的文档、评分或交接。
+- `not_applicable`：已判断无关，不创建虚假的文档、评估或交接。
 - `standard` 和 `assurance` 默认激活 `delivery-manager`；`lightweight` 可以由交付负责人兼任，但仍要记录责任归属。
 - 角色从 `not_applicable` 或 `consulted` 升级为 `active` 时，必须更新 `rolePlan`、状态板和交接记录。
 
@@ -57,5 +57,5 @@
 
 - `workflow-status.json.rolePlan` 与阶段 owner 一致。
 - 已激活角色的输出、证据和门禁可追溯。
-- 未激活角色有明确不适用依据，最终评分对应维度标为 `N/A` 或不纳入。
+- 未激活角色有明确不适用依据，最终评估对应维度标为 `N/A` 或不纳入。
 - 角色结论冲突时已由交付经理记录裁决，而不是通过增加更多角色投票解决。

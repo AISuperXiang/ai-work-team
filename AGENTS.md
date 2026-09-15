@@ -15,6 +15,7 @@ These rules apply to the entire `ai-work-team` repository. Read `SKILL.md` first
 ## File Write Rules
 
 - User-controlled output paths must be relative and remain inside the declared workdir.
+- Read-only CLI inputs must reuse `scripts/safe-files.js` instead of duplicating path, symlink, size, or stable-read checks.
 - Reject absolute paths, `..` traversal, parent-directory symlink escapes, and symlink output files.
 - Only write regular files whose parent directory already exists.
 - If an existing managed file exceeds 256 KiB or cannot be read safely, fail without modifying it.
@@ -40,6 +41,13 @@ These rules apply to the entire `ai-work-team` repository. Read `SKILL.md` first
 ## Contract Validation Rules
 
 - `npm run validate:contracts` validates publishable core contracts only.
+- `scripts/check-delivery.js` is read-only. It may hash only explicit relative regular files under the declared project/workspace roots; it must never execute recorded argv, fetch evidence URLs, write status, or infer that hashes prove business correctness.
+- V2.1 delivery claims require a confirmed active contract, explicit task-scoped test selection, catalog health, and per-check evidence. Global verification levels, successful process exit, known-failure labels, or quality scores must not replace method, case, environment, snapshot, output, and evidence-review matching.
+- Resume, verify, review, and deliver invocations must preserve their action boundary. Verify/review/deliver cannot modify source, test expectations, or fixtures; deliver cannot start new verification.
+- Current evidence must bind the active behavior impact scope and sanitized environment probes. Never treat a port, heartbeat, status JSON owner, or old browser result as proof of the target app, build, account, data, or lock.
+- Review findings must record counterevidence, attribution, confidence, and current fixed state. Retracted findings require explicit counterevidence; pre-existing findings do not create repair authorization.
+- `workflow-status.json` is the authoritative current record. Derived summaries cannot override contracts, findings, runs, readiness, or resource ownership; numeric quality scores are advisory only.
+- `scripts/evaluate-skill.js` is read-only. It may aggregate only explicit evaluation input, must reject answer leakage and unsafe paths, and must not run agents, access hidden oracles, or write results.
 - Historical workspace validation is explicit:
   - All workspaces: `npm run validate:workspaces`
   - One workspace: `node scripts/validate-contracts.js --workspace workspace/<requirement-folder>`

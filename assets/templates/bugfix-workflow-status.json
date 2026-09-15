@@ -1,4 +1,48 @@
 {
+  "schemaVersion": "2.1",
+  "deliveryControl": {
+    "taskId": "replace-with-stable-task-id",
+    "taskMode": "implementation",
+    "authorizedActions": [
+      "read",
+      "modify_source",
+      "modify_tests",
+      "modify_fixture",
+      "run_verification",
+      "run_assessment",
+      "append_evidence",
+      "write_summary",
+      "start_service",
+      "stop_owned_service"
+    ],
+    "activeContractRevision": null,
+    "currentInvocationId": null,
+    "currentImpactScopeIds": [],
+    "contracts": [],
+    "acceptance": [],
+    "fixes": [],
+    "snapshots": [],
+    "invocations": [],
+    "impactScopes": [],
+    "reviewRuns": [],
+    "environmentProbes": [],
+    "testSelections": [],
+    "catalogHealth": [],
+    "knownFailures": [],
+    "verificationPacks": [],
+    "verificationRuns": [],
+    "findingDisposition": [],
+    "recordPolicy": {
+      "profile": "minimal",
+      "authoritativeRecord": "workflow-status.json",
+      "summaryMode": "derived",
+      "requiredArtifacts": ["workflow-status.json"],
+      "derivedArtifacts": ["delivery-summary.md"],
+      "omittedArtifacts": [],
+      "summarySourceDigest": null
+    },
+    "completion": { "implementation": "pending", "claim": "pending" }
+  },
   "workflow": "bugfix-delivery",
   "requirementFolder": "",
   "complexityLevel": "S",
@@ -89,7 +133,7 @@
       "owner": "delivery-manager",
       "status": "pending",
       "gates": ["handoff-gate", "delivery-gate", "verification-gate"],
-      "artifacts": ["role-handoff.md", "delivery-summary.md"],
+      "artifacts": ["workflow-status.json", "delivery-summary.md"],
       "evidence": []
     }
   ]

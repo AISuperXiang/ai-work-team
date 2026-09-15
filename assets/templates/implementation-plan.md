@@ -12,6 +12,15 @@
 | 验证等级目标 | `V0` / `V1` / `V2` / `V3` / `V4` |
 | 目标行为 |  |
 | 非目标 |  |
+| Task / Invocation |  |
+| Current Impact Scope |  |
+| Record Policy / 权威记录 |  |
+
+## 行为影响面
+
+| Scope ID | 入口 / 共享决策 | 同类入口 | 消费者 / 结果 | Check / Merge Guard | 排除依据 |
+| --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |
 
 ## 改动清单
 

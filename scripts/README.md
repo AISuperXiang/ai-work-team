@@ -2,6 +2,7 @@
 
 本目录维护 deterministic 校验与 CLI 脚本。所有 CLI 遵循
 [`cli-quality-architecture.md`](../docs/engineering-standards/cli-quality-architecture.md)。
+`safe-files.js` 为只读 CLI 统一提供相对路径、symlink、文件类型、大小和读取稳定性检查。
 
 ## validate-structure.js
 
@@ -48,18 +49,53 @@ npm run validate:workspaces
 
 - `workspace/` 一需求一目录规则。
 - `implementation-protocol.md` 强制代码落地闭环。
-- `quality-rubrics.md` 质量评分。
-- `business-impact-rubric.md` 业务影响最低线。
+- `quality-rubrics.md` 适用质量维度与可选辅助评分。
+- `business-impact-rubric.md` 业务价值实质门禁。
 - `workflow-status.json` 的 `stages[]` 状态模型、阶段负责人、门禁、产物和证据字段。
-- PRD 与交付摘要中的价值假设、指标基线、收益目标、成本收益比、证据索引和质量评分表格结构。
+- PRD 与交付摘要中的价值假设、指标基线、收益目标、成本收益比和证据索引。
 - 完成态 workspace 阶段的 `artifacts` 和 `evidence` 不得为空；可解析为相对路径的产物和证据必须存在。
 - `role-handoff.md` 的交接记录、背景、决策、风险、产物、验证和 Hybrid 子 Agent 汇总。
 - `/team goal-design` 的工作流阶段、四类 JSON Schema、实例模板、迭代上限、里程碑/Task DAG、双向引用、人工审批和硬停止条件。
 - `no-legacy-contract` 精确扫描旧入口、旧短名、旧本地路径和 URL 编码旧路径，并避免误伤当前合法名称 `ai-work-team`。
-- `/team build` 必须输出 workspace、代码实现、验证和质量评分。
+- `/team build` 必须输出 workspace、权威状态、代码实现、验证和风险结论；评分不参与准入。
 - `/team install` 必须引用外部 Skills catalog、安装策略和角色映射。
 
 目标驱动 workspace 完成 Architecture Design 后，契约校验还会检查 `goal-contract.json`、`milestones.json`、`tasks.json` 和 `autonomy-policy.json` 的跨文件一致性。
+
+## check-delivery.js
+
+新 build、bugfix、code-review 的 v2.1 状态在交付前使用只读检查：
+
+```bash
+node scripts/check-delivery.js --project-root /absolute/project --workspace workspace/task --mode capture --json
+node scripts/check-delivery.js --project-root /absolute/project --workspace workspace/task --mode assess --json
+```
+
+- `capture` 从状态中最后一个显式 snapshot manifest 读取文件并输出当前 SHA-256 快照、
+  contract digest 与 impact scope digest；不写状态、不返回 ready。
+- `assess` 校验契约、invocation 动作边界、行为影响面、增量审查覆盖、环境 probe、
+  修复对照、逐 check 运行、输出摘要和当前文件快照。
+- 退出码 `0`：capture 成功或当前 subject ready；`1`：不满足、不可评估或 legacy_unverified；`2`：非法参数或路径。
+- 两种模式都不执行 `verificationRuns.execution.argv`、不访问 URL、不启动服务、不修改文件。
+- 路径必须位于 project root/workspace 内且不是 symlink、非普通文件或敏感凭据路径。状态上限 256 KiB；被哈希文件上限 1 GiB。
+- 环境 probe 只引用 workspace 内脱敏证据；工具不读取账号文件、Cookie、Token 或 Gateway 控制凭据。
+
+`validate-contracts.js` 只审计归档结构和已声明结果的一致性；它不读取任意用户项目的当前源码。
+完整规则见 [`delivery-controls.md`](../docs/delivery-controls.md)。
+
+## evaluate-skill.js
+
+汇总已经记录的隐藏答案历史案例和真实任务试点：
+
+```bash
+node scripts/evaluate-skill.js --input <relative-evaluation-json> --json
+```
+
+- 输入符合 `schemas/skill-evaluation.schema.json`，基线与候选固定模型、工具和预算。
+- 只读显式相对 JSON，不运行 Agent、不访问 oracle、不写结果。
+- answer leakage、非法路径、symlink、重复参数和超限输入失败关闭。
+- 输出 offline、pilot 和 adopt/hold/reject；关键错误、交付率回退不能被平均分抵消，
+  delivered 样本不足或观察未成熟时保持 hold。
 
 ## list-external-skills.js
 

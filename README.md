@@ -4,6 +4,8 @@
 
 > 面向 Agent / IDE 的产品研发专家团队编排 Skill：把一句自然语言需求或 `/team` 指令，推进为有方案、有实现、有验证证据、可走查、可交付的结果。
 
+当前版本：`0.6.0`。本版本重点加强可续跑任务、逐项证据门禁、增量代码审查、环境身份校验和 Skill 效果评估。
+
 ## 项目简介
 
 `ai-work-team` 将产品、运营、UI、技术负责人、前端、后端、QA 和交付经理的协作流程固化为可执行工作流。它不替代某个研发角色，而是负责：
@@ -58,6 +60,8 @@
 | 端到端实现交付 | 需求需要从设计推进到代码和验证 | 代码改动、测试计划、交付摘要 |
 | 缺陷修复 | 问题需要先复现，再定位、修复和回归 | 缺陷分析、回归证据、风险记录 |
 | 代码审查与优化 | 需要定位缺陷、风险和缺失测试 | 分级发现、修复建议、验证结论 |
+| 续跑、仅验证与交付汇总 | 需要复用已有任务并保持动作边界 | invocation、有效证据、只读交付结论 |
+| Skill 效果评估 | 需要比较规则升级是否降低错误和人工成本 | holdout、真实任务试点、adopt/hold/reject |
 | 产品 / UI / QA 走查 | 多角色需要形成统一验收结论 | 走查报告、阻塞项、交付结论 |
 | 项目上下文构建 | Agent 缺少项目结构和约束 | `AGENTS.md` |
 | 能力扩展 | 团队需要外部 Skill 或本地 CLI | 能力目录、角色映射、安全边界 |
@@ -117,9 +121,11 @@ npm test
 | `/team build <需求>` | 从需求到实现、验证和交付完整推进 |
 | `/team buildContext <工作目录> [需求/范围]` | 扫描项目并生成或更新 `AGENTS.md` |
 | `/team bugfix <问题>` | 按复现、根因、修复、回归流程处理缺陷 |
-| `/team code-review <路径\|diff\|提交\|PR>` | 审查代码并输出分级发现和验证建议 |
+| `/team resume <任务>` | 核对变化，从原工作流最早必要阶段续跑 |
+| `/team verify <任务> [check IDs]` | 只运行缺失、失败或失效验证，不修改源码、测试期望或 fixture |
+| `/team code-review <范围> [--mode initial\|delta\|recheck]` | 初审、增量审查或指定 finding 复核 |
 | `/team walk <实现/页面/改动>` | 组织产品、UI、QA 联合走查 |
-| `/team deliver <上下文>` | 汇总交付范围、证据、风险和后续事项 |
+| `/team deliver <任务>` | 基于 task ID 或 workspace 汇总有效证据、风险和后续事项 |
 | `/team install [skill-id\|role task]` | 推荐或安装登记在目录中的外部 Skill |
 | `/team register-cli <cli-id> ...` | 登记本地 CLI 的能力和安全边界 |
 | `/team status` | 查看当前工作流状态 |
@@ -131,7 +137,10 @@ npm test
 /team review 评审这份 PRD，重点看业务价值和验收标准
 /team goal-design 做一个帮助个人持续管理复杂目标的 App，先给出可控迭代的技术方案
 /team bugfix 修复订单提交失败，并补充回归验证
-/team code-review 审查当前 diff，重点检查状态竞争和回归风险
+/team resume workspace/20260915-order-fix
+/team verify workspace/20260915-order-fix target-check,preserve-check
+/team code-review 当前 diff --mode delta
+/team code-review workspace/20260915-order-fix --mode recheck --findings F1,F2
 /team buildContext <project-root> 为后续需求建立 Agent 上下文
 ```
 
@@ -149,8 +158,9 @@ Intake
   -> Plan
   -> Workspace
   -> Execute
+  -> Select Tests
   -> Verify
-  -> Score
+  -> Assess Quality
   -> Deliver
 ```
 
@@ -161,9 +171,10 @@ Intake
 5. **Plan**：建立阶段、负责人、产出和门禁状态板。
 6. **Workspace**：为需要留存证据的任务创建独立交付目录。
 7. **Execute**：由已激活角色完成文档、设计、代码或评审产出。
-8. **Verify**：运行可用验证并记录 `V0-V4` 验证等级。
-9. **Score**：按业务影响、健壮性、测试可信度和交付完整度评分。
-10. **Deliver**：汇总范围、决策、证据、风险和后续建议。
+8. **Select Tests**：从显式任务路径选择检查，分别记录 catalog 健康和执行结果。
+9. **Verify**：运行可用验证并记录 `V0-V4` 验证等级。
+10. **Assess Quality**：检查适用质量维度；数字评分只用于比较或复盘。
+11. **Deliver**：从权威状态汇总范围、决策、证据、风险和后续建议。
 
 关键原则：
 
@@ -171,6 +182,16 @@ Intake
 - **角色按需激活**：每个角色标记为 `active`、`consulted` 或 `not_applicable`。
 - **证据驱动结论**：没有命令、日志、截图、数据或人工验收记录，就不声明“已验证”。
 - **决策必须落盘**：关键范围、取舍、风险和延期项不能只保留在对话中。
+- **有效契约优先**：最新明确意图、项目约束和已批准决策形成唯一 active revision；
+  旧文档、当前代码、测试或 CR 建议不能单独改变期望。
+- **修复必须对照**：同时验证原反例、最可能受损的保留行为和适用消费方。
+- **逐项证据门禁**：全局 `V0-V4` 仅作汇总，不能替代每个 required check 的方法、分支、环境和快照匹配。
+- **有界续跑**：复用 task、契约、finding 和仍有效证据，只重开必要阶段。
+- **行为影响面**：实现、测试和 CR 共用入口、同类入口、消费者及合并保护清单。
+- **环境身份**：复用项目已有 Gateway、runner 和资源锁，分别确认 app/worktree、构建、账号和数据。
+- **测试结果分层**：test selection、catalog health 和 execution 独立，已知失败不屏蔽门禁。
+- **可信 CR**：finding 先核真、反证、归因和已修核对，再按风险选择异步、SSR 或缓存验证。
+- **一个权威记录**：`workflow-status.json` 维护当前事实，摘要和交接为单向派生视图。
 
 ## 团队角色
 
@@ -189,7 +210,8 @@ Intake
 
 ## 交付物
 
-每个新需求默认在 `workspace/` 下建立独立目录：
+每个新需求默认在 `workspace/` 下建立独立目录。下列是 standard 参考结构；
+lightweight、verify-only、recheck 和 deliver 按 `recordPolicy` 只保留必要产物：
 
 ```text
 workspace/
@@ -223,8 +245,8 @@ workspace/
 
 | 档位 | 适用范围 | 要求 |
 | --- | --- | --- |
-| `lightweight` | 低风险、范围明确的局部任务 | 保留最小但完整的决策、改动和验证证据 |
-| `standard` | 多模块或存在一定不确定性的任务 | 使用核心工作流产物并完成角色交接 |
+| `lightweight` | 低风险、范围明确的局部任务 | 权威状态、必要证据和可读结论；决定/风险/交接可内联 |
+| `standard` | 多模块或存在一定不确定性的任务 | 权威状态、必要方案/契约原文和证据；摘要单向派生 |
 | `assurance` | 高风险、`L/XL`、权限、数据或高回滚成本任务 | 增加独立风险评审、灰度、回滚和运行时验证 |
 
 档位由风险、未知度和影响范围决定，不由任务紧急程度决定。
@@ -250,12 +272,37 @@ workspace/
 - `complexity-gate`：需求完成 `S/M/L/XL` 分级，`L/XL` 有里程碑、灰度和回滚计划。
 - `evidence-gate`：所有完成或验证结论都有可追溯证据。
 - `reproduction-gate`：缺陷修复先复现，或记录可执行的采证计划。
-- `review-gate`：代码审查包含范围、位置、反例、严重度和验证建议。
+- `review-gate`：代码审查包含范围、位置、反例、反证、归因、已修核对、严重度和验证建议。
 - `verification-gate`：交付结论不超过当前验证等级。
 - `role-activation-gate`：所有角色都有参与、咨询或不适用依据。
 - `no-legacy-contract`：主文档、模板和脚本不包含废弃入口、短名或路径。
 
 详细规则见 [`docs/quality-gates.md`](./docs/quality-gates.md) 和 [`docs/quality-rubrics.md`](./docs/quality-rubrics.md)。
+
+新 build、bugfix、code-review 使用 v2.1 `workflow-status.json.deliveryControl`。
+交付前可运行只读检查：
+
+```bash
+node scripts/check-delivery.js \
+  --project-root /absolute/project \
+  --workspace workspace/task \
+  --mode assess \
+  --json
+```
+
+工具不执行状态中记录的命令，也不替代业务语义、影响范围或环境身份的人工复核。
+旧状态仍可审计，但结果为 `legacy_unverified`，不会自动升级为当前可验收。
+
+增量审查必须分别展示本轮 reviewed、仍有效 inherited 和 gaps。运行时证据必须绑定
+impact scope 与脱敏 environment probe；端口占用或服务心跳不能单独证明目标实例和当前构建。
+
+Skill 规则变更使用 `schemas/skill-evaluation.schema.json` 和只读评估器：
+
+```bash
+node scripts/evaluate-skill.js --input <relative-evaluation-json> --json
+```
+
+先运行隐藏答案历史 holdout，再比较同风险真实任务的人工时间与逃逸回归。关键错误不能被平均分抵消，观察窗口未成熟时结论保持 hold。
 
 ## IDE / Agent 接入
 
@@ -290,10 +337,10 @@ ai-work-team/
 | `members/` | 产品、运营、UI、研发、QA、交付经理等角色定义 |
 | `workflows/` | 需求评审、交付、缺陷修复、代码审查和走查流程 |
 | `commands/` | `/team` 指令和自然语言路由规则 |
-| `docs/` | 方法论、工程标准、质量门禁、评分规则和集成契约 |
+| `docs/` | 方法论、风险验证包、工程标准、质量门禁、辅助评估和集成契约 |
 | `assets/templates/` | PRD、技术方案、测试计划、风险和交付模板 |
 | `workspace/` | 每个需求的过程产物和证据索引 |
-| `scripts/` | 结构校验、契约校验、上下文构建和 Skill 安装脚本 |
+| `scripts/` | 结构校验、契约/交付证据校验、Skill 效果评估、上下文构建和安装脚本 |
 
 ## 扩展能力
 

@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Work Team Skill Evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evaluationId",
+    "baseline",
+    "candidate",
+    "policy",
+    "offlineCases",
+    "pilotTasks"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "evaluationId": {
+      "$ref": "#/$defs/text"
+    },
+    "baseline": {
+      "$ref": "#/$defs/variant"
+    },
+    "candidate": {
+      "$ref": "#/$defs/variant"
+    },
+    "policy": {
+      "$ref": "#/$defs/policy"
+    },
+    "offlineCases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/offlineCase"
+      }
+    },
+    "pilotTasks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pilotTask"
+      }
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/text"
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "skillVersion",
+        "modelRef",
+        "toolsetRef",
+        "budgetRef"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/text"
+        },
+        "skillVersion": {
+          "$ref": "#/$defs/text"
+        },
+        "modelRef": {
+          "$ref": "#/$defs/text"
+        },
+        "toolsetRef": {
+          "$ref": "#/$defs/text"
+        },
+        "budgetRef": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimumHoldoutCases",
+        "minimumPilotTasksPerArm",
+        "minimumTimeReductionRatio",
+        "maxEscapeRegressionDelta",
+        "criticalErrorCodes"
+      ],
+      "properties": {
+        "minimumHoldoutCases": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimumPilotTasksPerArm": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimumTimeReductionRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maxEscapeRegressionDelta": {
+          "type": "number",
+          "minimum": 0
+        },
+        "criticalErrorCodes": {
+          "$ref": "#/$defs/ids"
+        }
+      }
+    },
+    "caseResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correct",
+        "criticalErrors",
+        "humanActiveMinutes"
+      ],
+      "properties": {
+        "correct": {
+          "type": "boolean"
+        },
+        "criticalErrors": {
+          "$ref": "#/$defs/ids"
+        },
+        "humanActiveMinutes": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "offlineCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "split",
+        "fidelity",
+        "riskClass",
+        "inputRef",
+        "oracleRef",
+        "answerLeakage",
+        "baselineResult",
+        "candidateResult"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/text"
+        },
+        "split": {
+          "enum": [
+            "development",
+            "holdout"
+          ]
+        },
+        "fidelity": {
+          "enum": [
+            "exact",
+            "reconstructed"
+          ]
+        },
+        "riskClass": {
+          "$ref": "#/$defs/text"
+        },
+        "inputRef": {
+          "$ref": "#/$defs/text"
+        },
+        "oracleRef": {
+          "$ref": "#/$defs/text"
+        },
+        "answerLeakage": {
+          "const": false
+        },
+        "baselineResult": {
+          "$ref": "#/$defs/caseResult"
+        },
+        "candidateResult": {
+          "$ref": "#/$defs/caseResult"
+        }
+      }
+    },
+    "escapedRegression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "count"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "mature",
+            "pending",
+            "not_exposed"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observationEnd": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "pilotTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "arm",
+        "riskClass",
+        "status",
+        "changeClass",
+        "humanActiveMinutes",
+        "toolMinutes",
+        "environmentWaitMinutes",
+        "criticalErrors",
+        "escapedRegression"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/text"
+        },
+        "arm": {
+          "enum": [
+            "baseline",
+            "candidate"
+          ]
+        },
+        "riskClass": {
+          "$ref": "#/$defs/text"
+        },
+        "status": {
+          "enum": [
+            "delivered",
+            "blocked",
+            "abandoned"
+          ]
+        },
+        "changeClass": {
+          "enum": [
+            "same_goal",
+            "requirement_change",
+            "dependency_change",
+            "merge_work",
+            "historical_backlog"
+          ]
+        },
+        "humanActiveMinutes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "toolMinutes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "environmentWaitMinutes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "criticalErrors": {
+          "$ref": "#/$defs/ids"
+        },
+        "escapedRegression": {
+          "$ref": "#/$defs/escapedRegression"
+        }
+      }
+    }
+  }
+}

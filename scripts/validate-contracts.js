@@ -7,6 +7,8 @@ const {
   assertNoConflict,
   parseCliArgs,
 } = require("./cli-args");
+const { validateDeliveryControl, evaluateDeliveryControl } = require("./delivery-controls");
+const { validateSkillEvaluation } = require("./skill-evaluation");
 
 const ROOT = path.resolve(__dirname, "..");
 const SKIP_DIRS = new Set([".git", "node_modules", "dist", "build", "coverage", ".next", ".turbo"]);
@@ -114,7 +116,6 @@ const REQUIRED_STATUS_STAGES_BY_WORKFLOW = {
 const REQUIRED_PRD_BUSINESS_ROWS = ["目标用户", "用户价值", "业务价值", "价值假设", "预期收益", "成本收益比"];
 const REQUIRED_PRD_METRIC_HEADERS = ["指标", "当前基线", "目标变化", "数据来源", "观察周期", "异常阈值"];
 const REQUIRED_DELIVERY_BUSINESS_ROWS = ["价值假设", "指标基线", "收益目标", "成本收益比", "上线后观测结果/计划"];
-const REQUIRED_QUALITY_DIMENSIONS = ["业务影响", "技术先进性", "健壮性", "测试可信度", "UI 美观与可用性", "安全与兼容性", "交付完整度"];
 const REQUIRED_HANDOFF_SECTIONS = ["背景", "当前阶段", "已确认决策", "待确认问题", "风险", "产出物", "验证"];
 const GOAL_DESIGN_SCHEMA_CONTRACTS = [
   {
@@ -183,6 +184,8 @@ const checks = [
       "docs/quality-rubrics.md",
       "docs/business-impact-rubric.md",
       "docs/handoff-contract.md",
+      "docs/delivery-controls.md",
+      "scripts/check-delivery.js",
       "value-gate",
       "decision-log.md",
       "role-handoff.md",
@@ -196,7 +199,8 @@ const checks = [
       "goal-contract-gate",
       "autonomy-gate",
       "design-review-gate",
-      "质量评分"
+      "Select Tests",
+      "数字评分"
     ]
   },
   {
@@ -210,6 +214,8 @@ const checks = [
       "at least 85%",
       "zero survivors",
       "npm run validate:workspaces",
+      "check-delivery.js",
+      "evaluate-skill.js",
       "Node 18.20.8, 20.20.2, and 22.22.2"
     ]
   },
@@ -235,7 +241,12 @@ const checks = [
       "fake `npx`",
       "85%",
       "Node 18.20.8、20.20.2、22.22.2",
-      "npm run validate:workspaces"
+      "check-delivery.js",
+      "evaluate-skill.js",
+      "npm run validate:workspaces",
+      "/team resume",
+      "/team verify",
+      "--mode initial\\|delta\\|recheck"
     ]
   },
   {
@@ -246,7 +257,12 @@ const checks = [
       "fake `npx`",
       "85%",
       "Node 18.20.8, 20.20.2, and 22.22.2",
-      "npm run validate:workspaces"
+      "check-delivery.js",
+      "evaluate-skill.js",
+      "npm run validate:workspaces",
+      "/team resume",
+      "/team verify",
+      "--mode initial\\|delta\\|recheck"
     ]
   },
   {
@@ -255,6 +271,7 @@ const checks = [
       "\"test:behavior\"",
       "\"test:mutation\"",
       "\"validate:workspaces\"",
+      "\"eval:skill\"",
       "\"test:ci\""
     ]
   },
@@ -286,7 +303,8 @@ const checks = [
       "evidence-gate",
       "no-legacy-contract",
       "未修改项目代码，不得声称完成实现",
-      "质量评分达到最低线"
+      "recordPolicy.requiredArtifacts",
+      "Delivery Controls"
     ]
   },
   {
@@ -318,12 +336,36 @@ const checks = [
       "不可跳过门禁",
       "没有代码改动却声称完成实现",
       "decision-log.md",
-      "risk-register.md",
       "role-handoff.md",
       "workflow-status.json",
       "execution-methodology.md",
       "业务影响",
-      "质量评分"
+      "选择测试",
+      "质量评估",
+      "check-delivery.js",
+      "Behavior Impact Standard",
+      "Verification Environment Standard",
+      "mergeGuardCheckIds"
+    ]
+  },
+  {
+    file: "docs/delivery-controls.md",
+    mustContain: [
+      "有效契约",
+      "修复对照",
+      "逐项证据",
+      "legacy_unverified",
+      "analysis_complete",
+      "check-delivery.js",
+      "不执行",
+      "start/resume/verify/review/deliver",
+      "Behavior Impact Standard",
+      "Verification Environment Standard",
+      "testSelections",
+      "catalogHealth",
+      "Finding 裁决",
+      "风险验证包",
+      "recordPolicy"
     ]
   },
   {
@@ -354,24 +396,26 @@ const checks = [
       "UI 美观与可用性",
       "测试可信度",
       "安全与兼容性",
-      "交付最低线"
+      "辅助评估规则",
+      "实质门禁"
     ]
   },
   {
     file: "commands/team.md",
     mustContain: [
-      "workspace 目录",
+      "workspace、权威状态",
       "代码实现",
-      "质量评分",
+      "权威状态",
       "未能确定项目根目录",
-      "价值门禁",
-      "决策日志",
-      "风险台账",
-      "交接记录",
+      "必要方案/决策",
+      "风险和交付视图",
       "/team buildContext",
       "/team install",
       "/team code-review",
       "/team goal-design",
+      "/team resume",
+      "/team verify",
+      "--mode initial\\|delta\\|recheck",
       "goal-driven-technical-design.md",
       "external-skills/catalog.json"
     ]
@@ -403,7 +447,7 @@ const checks = [
     file: "docs/business-impact-rubric.md",
     mustContain: [
       "必填输入",
-      "评分标准",
+      "辅助评估",
       "阻断规则",
       "产物映射",
       "workflow-status.json",
@@ -488,7 +532,7 @@ const checks = [
     mustContain: [
       "业务影响与收益观测",
       "证据索引",
-      "质量评分",
+      "质量评估（可选）",
       "业务影响",
       "上线后复盘计划",
       "decision-log.md",
@@ -561,7 +605,11 @@ const checks = [
       "verificationLevel",
       "stages",
       "artifacts",
-      "evidence"
+      "evidence",
+      "testSelections",
+      "catalogHealth",
+      "verificationPacks",
+      "recordPolicy"
     ]
   },
   {
@@ -679,7 +727,28 @@ const checks = [
       "review-gate",
       "分级发现",
       "用户未授权修改时",
-      "验证等级"
+      "验证等级",
+      "initial",
+      "delta",
+      "recheck",
+      "reviewed",
+      "inherited",
+      "gaps",
+      "mergeGuardCheckIds",
+      "反证",
+      "pre_existing",
+      "cache-consistency"
+    ]
+  },
+  {
+    file: "workflows/delivery-summary.md",
+    mustContain: [
+      "/team deliver",
+      "只读",
+      "check-delivery",
+      "不运行新的业务测试",
+      "不启动服务",
+      "review/blocked"
     ]
   },
   {
@@ -701,6 +770,36 @@ const checks = [
       "consulted",
       "not_applicable",
       "工作流最小组合"
+    ]
+  },
+  {
+    file: "docs/methodologies/skill-evaluation-methodology.md",
+    mustContain: [
+      "历史场景",
+      "真实任务试点",
+      "answer leakage",
+      "holdout",
+      "人工活跃",
+      "逃逸回归",
+      "evaluate-skill.js"
+    ]
+  },
+  {
+    file: "scripts/evaluate-skill.js",
+    mustContain: [
+      "--input",
+      "summarizeSkillEvaluation",
+      "resolveSafePath",
+      "decision"
+    ]
+  },
+  {
+    file: "scripts/safe-files.js",
+    mustContain: [
+      "Symlink paths are not allowed",
+      "Input exceeds the size limit",
+      "Input changed while reading",
+      "O_NOFOLLOW"
     ]
   }
 ];
@@ -978,6 +1077,26 @@ function validateStatusObject(parsed, relativePath, options = {}) {
   }
 
   const templateMode = options.templateMode === true;
+  const controlErrors = validateDeliveryControl(parsed);
+  for (const diagnostic of controlErrors) fail(`${relativePath} ${diagnostic.code}: ${diagnostic.at || ""}`);
+  if (controlErrors.length && parsed.schemaVersion) return false;
+  if (["2.0", "2.1"].includes(parsed.schemaVersion) && !templateMode) {
+    const control = parsed.deliveryControl;
+    const terminal = ["accepted", "analysis_complete"].includes(control.completion.claim);
+    if (terminal) {
+      // Archive consistency only. Live file/environment validity is checked by
+      // check-delivery in the explicitly selected consumer project.
+      const recorded = control.snapshots.find((item) => item.id === control.completion.evidenceReview?.snapshotId);
+      const outputHashes = Object.fromEntries([
+        ...control.verificationRuns.flatMap((run) => run.outputRefs),
+        ...control.environmentProbes.map((probe) => probe.evidence),
+      ].map((item) => [item.path, item.hash]));
+      const assessment = evaluateDeliveryControl(parsed, { snapshot: recorded, outputHashes });
+      if (assessment.readiness !== "ready") {
+        for (const diagnostic of assessment.diagnostics) fail(`${relativePath} archive ${diagnostic.code}`);
+      } else pass(`${relativePath} versioned archive claim is consistent; live assessment still required`);
+    }
+  }
   for (const field of ["workflow", "requirementFolder", "complexityLevel", "executionProfile", "verificationLevel", "rolePlan", "updatedAt", "stages"]) {
     if (hasOwn(parsed, field)) {
       pass(`${relativePath} has top-level field: ${field}`);
@@ -1087,6 +1206,82 @@ function validateStatusSchemaContract() {
   const relativePath = "schemas/status.schema.json";
   const schema = parseJsonFile(relativePath);
   if (!schema) return;
+  const supportedVersions = schema.properties?.schemaVersion?.enum || [];
+  if (supportedVersions.includes("2.0") &&
+      supportedVersions.includes("2.1") &&
+      schema.dependentRequired?.schemaVersion?.includes("deliveryControl") &&
+      schema.dependentRequired?.deliveryControl?.includes("schemaVersion") &&
+      schema.$defs?.deliveryControl) {
+    pass("status schema requires versioned delivery controls without changing legacy required fields");
+  } else {
+    fail("status schema missing versioned delivery control contract");
+  }
+  const deliveryRequired = schema.$defs?.deliveryControl?.required || [];
+  for (const field of [
+    "taskId",
+    "authorizedActions",
+    "currentInvocationId",
+    "currentImpactScopeIds",
+    "invocations",
+    "impactScopes",
+    "reviewRuns",
+    "environmentProbes",
+  ]) {
+    if (deliveryRequired.includes(field)) {
+      pass(`${relativePath} deliveryControl requires P1 field: ${field}`);
+    } else {
+      fail(`${relativePath} deliveryControl missing P1 field: ${field}`);
+    }
+  }
+  for (const definition of ["invocation", "impactScope", "reviewRun", "environmentProbe"]) {
+    if (schema.$defs?.[definition]) {
+      pass(`${relativePath} defines P1 contract: ${definition}`);
+    } else {
+      fail(`${relativePath} missing P1 contract: ${definition}`);
+    }
+  }
+  for (const definition of [
+    "testSelection",
+    "catalogHealth",
+    "knownFailure",
+    "verificationPack",
+    "recordPolicy",
+  ]) {
+    if (schema.$defs?.[definition]) {
+      pass(`${relativePath} defines v2.1 contract: ${definition}`);
+    } else {
+      fail(`${relativePath} missing v2.1 contract: ${definition}`);
+    }
+  }
+  for (const field of [
+    "testSelections",
+    "catalogHealth",
+    "knownFailures",
+    "verificationPacks",
+    "recordPolicy",
+  ]) {
+    if (schema.$defs?.deliveryControl?.properties?.[field]) {
+      pass(`${relativePath} deliveryControl defines v2.1 field: ${field}`);
+    } else {
+      fail(`${relativePath} deliveryControl missing v2.1 field: ${field}`);
+    }
+  }
+  const enhancedRequired = schema.allOf?.find((item) =>
+    item.if?.properties?.schemaVersion?.const === "2.1")
+    ?.then?.properties?.deliveryControl?.required || [];
+  for (const field of [
+    "testSelections",
+    "catalogHealth",
+    "knownFailures",
+    "verificationPacks",
+    "recordPolicy",
+  ]) {
+    if (enhancedRequired.includes(field)) {
+      pass(`${relativePath} conditionally requires v2.1 field: ${field}`);
+    } else {
+      fail(`${relativePath} does not conditionally require v2.1 field: ${field}`);
+    }
+  }
 
   const required = Array.isArray(schema.required) ? schema.required : [];
   for (const field of ["workflow", "requirementFolder", "complexityLevel", "executionProfile", "verificationLevel", "rolePlan", "updatedAt", "stages"]) {
@@ -1349,6 +1544,47 @@ function validateGoalDesignSchemaContracts() {
   validateGoalDesignDocumentSet(documents, "goal design templates");
 }
 
+function validateSkillEvaluationContract() {
+  const schemaPath = "schemas/skill-evaluation.schema.json";
+  const templatePath = "assets/templates/skill-evaluation.json";
+  const schema = parseJsonFile(schemaPath);
+  const template = parseJsonFile(templatePath);
+  if (!schema || !template) return;
+  if (schema.$schema === "https://json-schema.org/draft/2020-12/schema") {
+    pass(`${schemaPath} uses JSON Schema draft 2020-12`);
+  } else {
+    fail(`${schemaPath} must use JSON Schema draft 2020-12`);
+  }
+  for (const field of [
+    "schemaVersion",
+    "evaluationId",
+    "baseline",
+    "candidate",
+    "policy",
+    "offlineCases",
+    "pilotTasks",
+  ]) {
+    if (schema.required?.includes(field) && hasOwn(schema.properties || {}, field)) {
+      pass(`${schemaPath} requires and defines: ${field}`);
+    } else {
+      fail(`${schemaPath} missing required field: ${field}`);
+    }
+    if (hasOwn(template, field)) {
+      pass(`${templatePath} provides: ${field}`);
+    } else {
+      fail(`${templatePath} missing: ${field}`);
+    }
+  }
+  const diagnostics = validateSkillEvaluation(template);
+  if (diagnostics.length === 0) {
+    pass(`${templatePath} passes deterministic evaluation validation`);
+  } else {
+    for (const diagnostic of diagnostics) {
+      fail(`${templatePath} ${diagnostic.code}: ${diagnostic.at || ""}`);
+    }
+  }
+}
+
 function validateWorkflowStatusTemplate(relativePath) {
   const parsed = parseJsonFile(relativePath);
   if (!parsed) return;
@@ -1357,7 +1593,7 @@ function validateWorkflowStatusTemplate(relativePath) {
 
 function validateBusinessImpactRubric() {
   const relativePath = "docs/business-impact-rubric.md";
-  for (const heading of ["必填输入", "评分标准", "阻断规则", "产物映射", "证据要求"]) {
+  for (const heading of ["必填输入", "辅助评估", "阻断规则", "产物映射", "证据要求"]) {
     requireSectionHasContent(relativePath, heading);
   }
   const mappingTable = requireTableRows(relativePath, "产物映射", [
@@ -1379,10 +1615,11 @@ function validateTemplateContracts() {
   requireSectionExists("assets/templates/prd.md", "上线后复盘计划");
 
   requireTableRows("assets/templates/delivery-summary.md", "业务影响与收益观测", REQUIRED_DELIVERY_BUSINESS_ROWS);
-  requireTableRows("assets/templates/delivery-summary.md", "质量评分", REQUIRED_QUALITY_DIMENSIONS);
+  requireTableHeaders("assets/templates/delivery-summary.md", "质量评估（可选）", ["维度", "证据化判断", "可选分数"]);
   requireTableHeaders("assets/templates/delivery-summary.md", "证据索引", ["结论", "证据类型", "路径/来源", "说明"]);
   requireTableHeaders("assets/templates/delivery-summary.md", "执行档位与验证等级", ["项", "内容"]);
   requireTableHeaders("assets/templates/delivery-summary.md", "角色激活计划", ["角色", "模式", "场景依据", "实际贡献/未参与原因"]);
+  requireTableHeaders("assets/templates/delivery-summary.md", "验证结果", ["验收 ID / Check ID", "Run ID", "方法/环境", "结果", "证据", "说明"]);
   requireTableHeaders("assets/templates/technical-design.md", "事实与假设", ["类型", "内容", "证据/来源", "对方案的影响"]);
   requireTableHeaders("assets/templates/technical-design.md", "决策与职责边界", ["决策", "候选方案", "最终选择与依据", "责任角色", "验证/回滚"]);
   requireTableHeaders("assets/templates/requirement-review.md", "验收与可测性", [
@@ -1434,23 +1671,41 @@ function validateTemplateContracts() {
     "状态"
   ]);
   requireTableHeaders("assets/templates/test-plan.md", "风险与测试策略", ["风险/失效条件", "测试层级", "负责人", "最低验证等级", "不覆盖的影响"]);
+  requireTableHeaders("assets/templates/test-plan.md", "测试场景", ["验收 ID", "Check ID / caseKey", "类型", "方法/环境", "场景与步骤", "期望结果", "Run ID / 结果"]);
+  requireTableHeaders("assets/templates/test-plan.md", "测试选择与 Catalog 健康", ["Selection ID", "显式任务路径 / Scope 来源", "Selector", "命中 Check / Test", "未映射 / 排除依据", "Catalog Health", "完整性"]);
+  requireTableHeaders("assets/templates/test-plan.md", "风险验证包", ["Pack", "触发依据", "选择", "Required Check", "不适用理由"]);
   requireTableHeaders("assets/templates/bug-analysis.md", "复现与基线证据", ["项", "内容"]);
+  requireTableHeaders("assets/templates/bug-analysis.md", "期望行为", ["验收 ID", "契约修订", "正确期望", "依据", "适用范围"]);
+  requireTableHeaders("assets/templates/bug-analysis.md", "保留行为与消费方", ["验收 ID", "类型", "必须保持的行为/消费入口", "不适用理由与决策"]);
   requireTableHeaders("assets/templates/bug-analysis.md", "假设与排除", ["假设", "证据", "结论", "下一步"]);
   requireTableHeaders("assets/templates/code-review.md", "分级发现", [
+    "Finding ID",
     "严重度",
     "代码位置",
     "失效场景",
     "证据",
     "建议动作",
     "验证方式",
+    "Acceptance / Check ID",
     "状态"
   ]);
   requireTableHeaders("assets/templates/code-review.md", "角色激活计划", ["角色", "模式", "审查维度/场景依据", "参与阶段"]);
+  requireTableHeaders("assets/templates/code-review.md", "Finding 裁决", [
+    "Finding ID",
+    "契约依据",
+    "支持证据",
+    "反证检查 / Counterevidence",
+    "证据状态",
+    "变更归因",
+    "置信度",
+    "已修核对 / Fixed State"
+  ]);
 
   for (const heading of REQUIRED_HANDOFF_SECTIONS) {
     requireSectionExists("assets/templates/role-handoff.md", heading);
   }
   requireTableHeaders("assets/templates/role-handoff.md", "角色激活计划", ["角色", "模式", "场景依据", "参与阶段"]);
+  requireTableHeaders("assets/templates/role-handoff.md", "交付控制", ["Active Contract", "Required Checks", "Selection / Catalog / Run", "Readiness", "Record Policy / Evidence Review"]);
   requireTableHeaders("assets/templates/role-handoff.md", "Hybrid 子 Agent 输出汇总", [
     "角色",
     "结论",
@@ -1508,22 +1763,6 @@ function validateWorkspaceRolePlanTable(relativePath, status, heading, requiredC
   }
 }
 
-function roleParticipates(status, role) {
-  return Array.isArray(status.rolePlan) && status.rolePlan.some(
-    (item) => item.role === role && (item.mode === "active" || item.mode === "consulted")
-  );
-}
-
-function scoreMayBeNotApplicable(dimension, status, row) {
-  const reason = String(row[2] || "").trim();
-  if (!isMeaningful(reason)) return false;
-  if (dimension === "UI 美观与可用性") return !roleParticipates(status, "ui-designer");
-  if (dimension === "业务影响") {
-    return /纯内部|缺陷修复|代码审查|不涉及.*业务|非业务变化/.test(reason);
-  }
-  return false;
-}
-
 function validateWorkspaceDeliverySummary(workspaceDir, status) {
   const relativePath = path.join(workspaceDir, "delivery-summary.md");
   if (!fs.existsSync(path.join(ROOT, relativePath))) {
@@ -1558,31 +1797,15 @@ function validateWorkspaceDeliverySummary(workspaceDir, status) {
   }
   validateWorkspaceRolePlanTable(relativePath, status, "角色激活计划", ["角色", "模式", "场景依据", "实际贡献/未参与原因"]);
 
-  const qualityTable = requireTableRows(relativePath, "质量评分", REQUIRED_QUALITY_DIMENSIONS);
-  if (!qualityTable) return;
-  const rows = tableRowsByFirstColumn(qualityTable);
-  const minimums = new Map([
-    ["业务影响", 4],
-    ["技术先进性", 3],
-    ["健壮性", 4],
-    ["测试可信度", 4],
-    ["安全与兼容性", 4],
-    ["交付完整度", 4]
-  ]);
-  for (const dimension of REQUIRED_QUALITY_DIMENSIONS) {
-    const row = rows.get(dimension);
-    if (!row) continue;
-    const score = parseScore(row[1]);
-    if (score === null && scoreMayBeNotApplicable(dimension, status, row)) {
-      pass(`${relativePath} ${dimension} is N/A with rolePlan basis`);
-      continue;
+  const qualityTable = findFirstTable(readText(relativePath), "质量评估（可选）");
+  if (qualityTable) {
+    for (const row of qualityTable.rows) {
+      const score = parseScore(row[2]);
+      if (score === undefined && isMeaningful(row[2])) {
+        fail(`${relativePath} optional quality score must be 0-5 or N/A`);
+      }
     }
-    const minimum = minimums.get(dimension) || 4;
-    if (typeof score === "number" && score >= minimum) {
-      pass(`${relativePath} ${dimension} score meets minimum ${minimum}`);
-    } else {
-      fail(`${relativePath} ${dimension} score must be >= ${minimum} or valid rolePlan-backed N/A`);
-    }
+    pass(`${relativePath} optional quality assessment does not gate delivery`);
   }
 }
 
@@ -1591,9 +1814,20 @@ function tableHasRows(relativePath, heading) {
   return Boolean(table && table.rows.length > 0);
 }
 
-function validateWorkspaceHandoff(workspaceDir) {
+function artifactOmitted(status, artifact) {
+  return status?.schemaVersion === "2.1" &&
+    status.deliveryControl?.recordPolicy?.omittedArtifacts?.some((item) =>
+      item.artifact === artifact && isMeaningful(item.reason) &&
+      isMeaningful(item.decisionRef));
+}
+
+function validateWorkspaceHandoff(workspaceDir, status) {
   const relativePath = path.join(workspaceDir, "role-handoff.md");
   if (!fs.existsSync(path.join(ROOT, relativePath))) {
+    if (artifactOmitted(status, "role-handoff.md")) {
+      pass(`${relativePath} omitted by recordPolicy with decisionRef`);
+      return;
+    }
     fail(`${relativePath} missing for completed handoff-gate stage`);
     return;
   }
@@ -1612,8 +1846,6 @@ function validateWorkspaceHandoff(workspaceDir) {
       fail(`${relativePath} ${heading} table missing rows`);
     }
   }
-  const statusPath = path.join(workspaceDir, "workflow-status.json");
-  const status = parseJsonFile(statusPath);
   if (status) {
     validateWorkspaceRolePlanTable(relativePath, status, "角色激活计划", ["角色", "模式", "场景依据", "参与阶段"]);
   }
@@ -1697,7 +1929,11 @@ function validateWorkspaceStatus(workspaceDir) {
     validateWorkspaceGoalDesignContracts(workspaceDir);
   }
   if (completedStages.has("Delivery")) {
-    validateWorkspaceDeliverySummary(workspaceDir, status);
+    if (artifactOmitted(status, "delivery-summary.md")) {
+      pass(`${workspaceDir}/delivery-summary.md omitted by recordPolicy with decisionRef`);
+    } else {
+      validateWorkspaceDeliverySummary(workspaceDir, status);
+    }
   }
   if (
     (status.stages || []).some(
@@ -1707,7 +1943,7 @@ function validateWorkspaceStatus(workspaceDir) {
         stage.gates.includes("handoff-gate"),
     )
   ) {
-    validateWorkspaceHandoff(workspaceDir);
+    validateWorkspaceHandoff(workspaceDir, status);
   }
   return true;
 }
@@ -1817,6 +2053,7 @@ validateWorkflowStatusTemplate("assets/templates/goal-design-workflow-status.jso
 validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
 validateGoalDesignSchemaContracts();
+validateSkillEvaluationContract();
 validateBusinessImpactRubric();
 validateTemplateContracts();
 try {

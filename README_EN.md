@@ -4,6 +4,8 @@
 
 > A product-engineering expert team orchestration Skill for Agent / IDE environments. It turns a natural-language request or `/team` command into a reviewable delivery with plans, implementation, verification evidence, risks, and handoff records.
 
+Current version: `0.6.0`. This release focuses on resumable tasks, per-check evidence gates, incremental code review, environment identity, and Skill-effect evaluation.
+
 ## Overview
 
 `ai-work-team` turns collaboration among product, operations, UI, technical leadership, frontend, backend, QA, and delivery roles into executable workflows. It does not replace individual specialists. Instead, it:
@@ -58,6 +60,8 @@ It is usually unnecessary when:
 | End-to-end feature delivery | Moving a request from design to code and verification | Code changes, test plan, delivery summary |
 | Bug-fix delivery | Reproducing, diagnosing, fixing, and regressing a defect | Bug analysis, regression evidence, risk record |
 | Code review and optimization | Finding defects, risks, and missing tests | Prioritized findings, fixes, verification result |
+| Resume, verify, and delivery summary | Reusing an existing task while preserving operation boundaries | Invocation history, valid evidence, read-only delivery conclusion |
+| Skill-effect evaluation | Comparing whether rule changes reduce errors and human effort | Holdout cases, real-task pilots, adopt/hold/reject |
 | Product / UI / QA walkthrough | Reaching one multi-role acceptance decision | Walkthrough report, blockers, delivery decision |
 | Project context generation | Giving Agents project structure and constraints | `AGENTS.md` |
 | Capability extension | Adding external Skills or local CLI tools safely | Capability catalog, role mapping, safety boundaries |
@@ -117,9 +121,11 @@ After installation, use either a natural-language request or an explicit `/team`
 | `/team build <request>` | Drive a request through implementation, verification, and delivery |
 | `/team buildContext <working-directory> [request/scope]` | Scan a project and create or update `AGENTS.md` |
 | `/team bugfix <problem>` | Handle a defect through reproduction, diagnosis, fix, and regression |
-| `/team code-review <path\|diff\|commit\|PR>` | Review code and produce prioritized findings with verification guidance |
+| `/team resume <task>` | Reconcile changes and resume the original workflow from the first necessary stage |
+| `/team verify <task> [check IDs]` | Run only missing, failed, or stale checks without changing source, test expectations, or fixtures |
+| `/team code-review <scope> [--mode initial\|delta\|recheck]` | Run an initial review, delta review, or finding-specific recheck |
 | `/team walk <implementation/page/change>` | Run a joint product, UI, and QA walkthrough |
-| `/team deliver <context>` | Summarize scope, evidence, risks, and follow-up work |
+| `/team deliver <task>` | Summarize valid evidence, risks, and follow-up work from a task ID or workspace |
 | `/team install [skill-id\|role task]` | Recommend or install an external Skill registered in the catalog |
 | `/team register-cli <cli-id> ...` | Register a local CLI capability and its safety boundaries |
 | `/team status` | Show the current workflow status |
@@ -131,7 +137,10 @@ Examples:
 /team review Review this PRD, focusing on business value and acceptance criteria
 /team goal-design Design an app for managing complex personal goals with bounded autonomous iterations
 /team bugfix Fix order submission failures and add regression verification
-/team code-review Review the current diff for race conditions and regression risks
+/team resume workspace/20260915-order-fix
+/team verify workspace/20260915-order-fix target-check,preserve-check
+/team code-review current diff --mode delta
+/team code-review workspace/20260915-order-fix --mode recheck --findings F1,F2
 /team buildContext <project-root> Build Agent context for future work
 ```
 
@@ -149,8 +158,9 @@ Intake
   -> Plan
   -> Workspace
   -> Execute
+  -> Select Tests
   -> Verify
-  -> Score
+  -> Assess Quality
   -> Deliver
 ```
 
@@ -161,9 +171,10 @@ Intake
 5. **Plan**: Establish stages, owners, outputs, and gate status.
 6. **Workspace**: Create a dedicated delivery directory when evidence must be retained.
 7. **Execute**: Let activated roles produce documents, designs, code, or review findings.
-8. **Verify**: Run available checks and record a `V0-V4` verification level.
-9. **Score**: Evaluate business impact, robustness, test confidence, and delivery completeness.
-10. **Deliver**: Summarize scope, decisions, evidence, risks, and next steps.
+8. **Select Tests**: Use explicit task paths and record catalog health separately from execution.
+9. **Verify**: Run available checks and record a `V0-V4` verification level.
+10. **Assess Quality**: Check applicable quality dimensions; numeric scores are optional comparison aids.
+11. **Deliver**: Derive scope, decisions, evidence, risks, and next steps from the authoritative status.
 
 Key principles:
 
@@ -171,6 +182,15 @@ Key principles:
 - **On-demand role activation**: Mark each role as `active`, `consulted`, or `not_applicable`.
 - **Evidence-backed conclusions**: Do not claim verification without commands, logs, screenshots, data, or human acceptance records.
 - **Durable decisions**: Scope, tradeoffs, risks, and deferred work must not exist only in chat.
+- **One effective contract**: The latest explicit intent, repository constraints, and approved decisions form one active revision. Old documents, current code, tests, and review suggestions cannot change expectations by themselves.
+- **Repair comparison**: A fix verifies the original counterexample, the most exposed preserved behavior, and applicable consumers.
+- **Per-check evidence**: The global `V0-V4` level is a summary and cannot replace method, branch, environment, and snapshot matching for every required check.
+- **Bounded resume**: Reuse the task, contract, findings, and still-valid evidence, reopening only necessary stages.
+- **Behavior impact scope**: Implementation, tests, and review share entrypoint, sibling, consumer, and merge-guard coverage.
+- **Environment identity**: Reuse project-provided gateways, runners, and resource locks while separately confirming app/worktree, build, account, and data.
+- **Separated test signals**: Test selection, catalog health, and execution are independent; known failures never suppress gates.
+- **Evidence-led review**: Verify, challenge, attribute, and check current fix state before a finding drives changes; load async, SSR, or cache checks only when risk triggers them.
+- **One authoritative record**: `workflow-status.json` owns current facts; summaries and handoffs are derived views.
 
 ## Team Roles
 
@@ -189,7 +209,8 @@ Roles form a candidate pool, not a mandatory attendance list. UI can be excluded
 
 ## Deliverables
 
-Each new requirement receives a dedicated directory under `workspace/`:
+Each new requirement receives a dedicated directory under `workspace/`. The tree below is a
+standard reference; lightweight, verify-only, recheck, and deliver operations keep only the artifacts selected by `recordPolicy`:
 
 ```text
 workspace/
@@ -223,8 +244,8 @@ An existing requirement directory is reused with a `features/` subdirectory only
 
 | Profile | Appropriate for | Requirements |
 | --- | --- | --- |
-| `lightweight` | Clear, localized, low-risk work | Minimal but complete decision, change, and verification evidence |
-| `standard` | Multi-module work or moderate uncertainty | Core workflow artifacts and explicit role handoffs |
+| `lightweight` | Clear, localized, low-risk work | Authoritative status, required evidence, and a readable conclusion; decisions, risks, and handoffs may be inline |
+| `standard` | Multi-module work or moderate uncertainty | Authoritative status, required design/contract sources, and evidence; summaries are derived |
 | `assurance` | High-risk, `L/XL`, permissions, data, or costly rollback | Independent risk review, rollout, rollback, and runtime verification |
 
 The profile is determined by risk, uncertainty, and blast radius, not urgency.
@@ -250,12 +271,37 @@ The profile is determined by risk, uncertainty, and blast radius, not urgency.
 - `complexity-gate`: The task is classified as `S/M/L/XL`; `L/XL` work includes milestones, rollout, and rollback.
 - `evidence-gate`: Every completion or verification claim has traceable evidence.
 - `reproduction-gate`: A bug is reproduced first, or an executable evidence-collection plan is recorded.
-- `review-gate`: Code review findings include scope, location, counterexample, severity, and verification guidance.
+- `review-gate`: Code review findings include scope, location, counterexample, counterevidence, attribution, current fix state, severity, and verification guidance.
 - `verification-gate`: The delivery conclusion does not exceed its verification level.
 - `role-activation-gate`: Every role has an active, consulted, or not-applicable rationale.
 - `no-legacy-contract`: Primary documents, templates, and scripts contain no deprecated entrypoints, aliases, or paths.
 
 See [`docs/quality-gates.md`](./docs/quality-gates.md) and [`docs/quality-rubrics.md`](./docs/quality-rubrics.md) for the full rules.
+
+New build, bug-fix, and code-review tasks use v2.1 `workflow-status.json.deliveryControl`.
+Before delivery, run the read-only assessment:
+
+```bash
+node scripts/check-delivery.js \
+  --project-root /absolute/project \
+  --workspace workspace/task \
+  --mode assess \
+  --json
+```
+
+The tool never executes commands recorded in status and does not replace human review of business meaning, impact scope, or environment identity. Legacy statuses remain auditable but evaluate as `legacy_unverified`, not currently acceptable.
+
+Incremental reviews report current reviewed scope, valid inherited scope, and gaps separately.
+Runtime evidence is bound to an impact scope and sanitized environment probes; a listening
+port or healthy heartbeat alone does not establish the target instance or current build.
+
+Evaluate important Skill-rule changes with `schemas/skill-evaluation.schema.json` and the read-only evaluator:
+
+```bash
+node scripts/evaluate-skill.js --input <relative-evaluation-json> --json
+```
+
+Run hidden-answer historical holdout cases first, then compare human time and escaped regressions on real tasks of similar risk. Critical errors cannot be averaged away; immature observation remains `hold`.
 
 ## IDE / Agent Integration
 
@@ -290,10 +336,10 @@ ai-work-team/
 | `members/` | Product, operations, UI, engineering, QA, and delivery role definitions |
 | `workflows/` | Requirement review, delivery, bug fix, code review, and walkthrough workflows |
 | `commands/` | `/team` commands and natural-language routing rules |
-| `docs/` | Methodologies, engineering standards, quality gates, rubrics, and integration contracts |
+| `docs/` | Methodologies, risk verification packs, engineering standards, quality gates, optional assessments, and integration contracts |
 | `assets/templates/` | Templates for PRDs, technical designs, tests, risks, and delivery |
 | `workspace/` | Per-requirement process artifacts and evidence indexes |
-| `scripts/` | Structure validation, contract validation, context generation, and Skill installation |
+| `scripts/` | Structure validation, contract/evidence validation, Skill-effect evaluation, context generation, and installation |
 
 ## Extensibility
 

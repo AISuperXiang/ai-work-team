@@ -43,6 +43,12 @@
 | 检查/命令/证据 | 结果 | 未验证项 |
 | --- | --- | --- |
 
+### 交付控制
+
+| Task / Invocation | Active Contract | Required Checks | Impact Scope / Review Gaps | Selection / Catalog / Run | Environment / Resource | Readiness | Record Policy / Evidence Review |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  |  |
+
 ## Hybrid 子 Agent 输出汇总
 
 | 角色 | 结论 | 证据 | 风险 | 置信度 | 需决策项 |

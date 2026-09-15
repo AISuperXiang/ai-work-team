@@ -11,6 +11,9 @@
 - `release-standard.md`：发布规范。
 - `security-standard.md`：安全规范。
 - `cli-quality-architecture.md`：CLI 严格参数、文件写入、行为测试、突变和 CI 架构。
+- `behavior-impact-standard.md`：调用链、同类入口、消费者、增量审查和合并后验证范围。
+- `verification-environment-standard.md`：项目环境适配、Gateway 复用、构建身份和资源所有权。
+- `../verification-packs/`：按风险加载的 async ownership、SSR recovery 和 cache consistency 验证方法。
 
 ## 原则
 

@@ -12,6 +12,10 @@
 /team review 评审这份 PRD
 /team goal-design 根据这个目标生成 PRD、自治契约和评审后的技术方案
 /team bugfix 修复订单提交失败
+/team resume workspace/20260915-order-fix
+/team verify workspace/20260915-order-fix target-check,preserve-check
+/team code-review 当前 diff --mode delta
+/team code-review workspace/20260915-order-fix --mode recheck --findings F1,F2
 /team walk 走查这个页面改动
 /team install
 /team install frontend-design
@@ -26,8 +30,9 @@ Agent 也可以在自然语言命中时自动路由，例如“帮我承接这�
 ## 路由优先级
 
 1. 明确 `/team` 指令优先。
-2. 没有指令时读取 `workflows/route-table.md`。
-3. 命中多个工作流时选择更具体的工作流。
-4. 无法判断时由交付经理给出候选并询问。
+2. `resume`、`verify`、`recheck` 等受限操作语义优先于 bug、review 等领域关键词。
+3. 没有指令时读取 `workflows/route-table.md`。
+4. 命中多个工作流时选择更具体的工作流。
+5. 无法判断时由交付经理给出候选并询问。
 
 详细命令见 [`team.md`](team.md)。

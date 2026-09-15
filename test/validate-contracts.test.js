@@ -210,3 +210,82 @@ test("validate-contracts rejects unknown arguments", () => {
   assert.equal(result.status, 2);
   assert.match(result.stderr, /unknown option/i);
 });
+
+test("validate-contracts checks v2 archive claims without reading current source", (t) => {
+  const { fixture, reseal } = require("./delivery-controls-fixture");
+  const { status } = fixture();
+  const relativeDir = `workspace/.delivery-v2-${process.pid}`;
+  const dir = path.join(PROJECT_ROOT, relativeDir);
+  fs.mkdirSync(dir, { recursive: true });
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  status.workflow = "requirement-end-to-end";
+  status.requirementFolder = relativeDir;
+  status.deliveryControl.completion.claim = "accepted";
+  reseal(status);
+  const save = () => fs.writeFileSync(path.join(dir, "workflow-status.json"), JSON.stringify(status));
+  save();
+  let result = runCli("scripts/validate-contracts.js", ["--workspace", relativeDir]);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /archive claim is consistent/);
+  status.deliveryControl.verificationRuns[1].observations = [];
+  save();
+  result = runCli("scripts/validate-contracts.js", ["--workspace", relativeDir]);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /CLAIM_EXCEEDS_EVIDENCE|DERIVED_SUMMARY_STALE/);
+});
+
+test("v2.1 lightweight workspace can omit derived handoff and delivery files", (t) => {
+  const { fixture } = require("./delivery-controls-fixture");
+  const { status } = fixture();
+  const relativeDir = `workspace/.delivery-v21-minimal-${process.pid}`;
+  const dir = path.join(PROJECT_ROOT, relativeDir);
+  fs.mkdirSync(dir, { recursive: true });
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  status.workflow = "requirement-end-to-end";
+  status.requirementFolder = relativeDir;
+  status.executionProfile = "lightweight";
+  status.deliveryControl.recordPolicy = {
+    profile: "minimal",
+    authoritativeRecord: "workflow-status.json",
+    summaryMode: "derived",
+    requiredArtifacts: ["workflow-status.json"],
+    derivedArtifacts: [],
+    summarySourceDigest: null,
+    omittedArtifacts: [
+      {
+        artifact: "role-handoff.md",
+        reason: "The bounded task keeps equivalent handoff data in the authoritative status",
+        decisionRef: "workflow-status.json#deliveryControl.recordPolicy",
+      },
+      {
+        artifact: "delivery-summary.md",
+        reason: "The final response is the derived delivery view",
+        decisionRef: "workflow-status.json#deliveryControl.recordPolicy",
+      },
+    ],
+  };
+  for (const stage of status.stages) {
+    if (stage.name === "UI/UX") {
+      stage.status = "completed";
+      stage.artifacts = ["workflow-status.json"];
+      stage.evidence = ["workflow-status.json"];
+    }
+    if (stage.name === "Delivery") {
+      stage.status = "completed";
+      stage.artifacts = ["workflow-status.json"];
+      stage.evidence = ["workflow-status.json"];
+    }
+  }
+  status.deliveryControl.completion.claim = "accepted";
+  fs.writeFileSync(
+    path.join(dir, "workflow-status.json"),
+    `${JSON.stringify(status, null, 2)}\n`,
+  );
+
+  const result = runCli("scripts/validate-contracts.js", [
+    "--workspace",
+    relativeDir,
+  ]);
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.match(result.stdout, /omitted by recordPolicy with decisionRef/);
+});

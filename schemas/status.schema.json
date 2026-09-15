@@ -4,7 +4,13 @@
   "type": "object",
   "required": ["workflow", "requirementFolder", "complexityLevel", "executionProfile", "verificationLevel", "rolePlan", "updatedAt", "stages"],
   "additionalProperties": false,
+  "dependentRequired": {
+    "schemaVersion": ["deliveryControl"],
+    "deliveryControl": ["schemaVersion"]
+  },
   "properties": {
+    "schemaVersion": { "enum": ["2.0", "2.1"] },
+    "deliveryControl": { "$ref": "#/$defs/deliveryControl" },
     "workflow": {
       "type": "string"
     },
@@ -96,6 +102,530 @@
               "type": "string",
               "minLength": 1
             }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": "2.1"
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deliveryControl": {
+            "required": [
+              "taskId",
+              "taskMode",
+              "authorizedActions",
+              "activeContractRevision",
+              "currentInvocationId",
+              "currentImpactScopeIds",
+              "contracts",
+              "acceptance",
+              "fixes",
+              "snapshots",
+              "invocations",
+              "impactScopes",
+              "reviewRuns",
+              "environmentProbes",
+              "verificationRuns",
+              "findingDisposition",
+              "testSelections",
+              "catalogHealth",
+              "knownFailures",
+              "verificationPacks",
+              "recordPolicy",
+              "completion"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "maybeDigest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+    "path": { "type": "string", "minLength": 1, "format": "safe-relative-file", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?!.*//)(?!.*[\\\\\\u0000-\\u001f]).+$" },
+    "workdirPath": { "type": "string", "minLength": 1, "format": "safe-relative-dir", "pattern": "^(?:\\.|(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//)(?!.*[\\\\\\u0000-\\u001f]).+)$" },
+    "paths": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/path" } },
+    "ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "enum": ["user", "spec", "consumer", "dependency", "decision"] },
+        "ref": { "$ref": "#/$defs/text" },
+        "revision": { "$ref": "#/$defs/text" }
+      }
+    },
+    "refs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/ref" } },
+    "contract": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "status", "sourceRefs", "decisionRef", "appliesTo", "goal", "nonGoals"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "status": { "enum": ["draft", "confirmed", "conflicted"] },
+        "sourceRefs": { "$ref": "#/$defs/refs" },
+        "decisionRef": { "$ref": "#/$defs/text" },
+        "appliesTo": { "$ref": "#/$defs/text" },
+        "goal": { "$ref": "#/$defs/text" },
+        "nonGoals": { "$ref": "#/$defs/ids" },
+        "supersedes": { "$ref": "#/$defs/text" },
+        "changeReason": { "$ref": "#/$defs/text" }
+      },
+      "dependentRequired": { "supersedes": ["changeReason"] }
+    },
+    "check": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "caseKey", "method", "minimumLevel", "environmentKey", "requiredEnvironmentDimensions", "evidenceIds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" }, "caseKey": { "$ref": "#/$defs/text" },
+        "method": { "enum": ["static", "unit", "integration", "runtime", "browser", "manual"] },
+        "minimumLevel": { "enum": ["V1", "V2", "V3", "V4"] },
+        "environmentKey": { "$ref": "#/$defs/text" },
+        "requiredEnvironmentDimensions": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "enum": ["project", "instance", "build", "proxy", "account", "data", "tool", "resource"] }
+        },
+        "evidenceIds": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "acceptance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "contractRevision", "kind", "expected", "basisRefs", "required", "checks"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" }, "contractRevision": { "$ref": "#/$defs/text" },
+        "kind": { "enum": ["target", "preserve", "consumer", "analysis"] },
+        "expected": { "$ref": "#/$defs/text" }, "basisRefs": { "$ref": "#/$defs/refs" },
+        "required": { "type": "boolean" },
+        "checks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/check" } }
+      }
+    },
+    "fix": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "targetAcceptanceIds", "preservedAcceptanceIds", "consumerAcceptanceIds", "baselineRunIds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "targetAcceptanceIds": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "preservedAcceptanceIds": { "$ref": "#/$defs/ids" },
+        "consumerAcceptanceIds": { "$ref": "#/$defs/ids" },
+        "baselineRunIds": { "$ref": "#/$defs/ids" },
+        "preserveNotApplicableReason": { "$ref": "#/$defs/text" },
+        "consumerNotApplicableReason": { "$ref": "#/$defs/text" },
+        "decisionRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "file": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "kind", "hash"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "kind": { "enum": ["source", "test", "fixture", "config", "lock", "artifact"] },
+        "hash": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "const": "missing" }] }
+      }
+    },
+    "snapshot": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "headSha", "baseSha", "files", "codeDigest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "headSha": { "type": ["string", "null"] }, "baseSha": { "type": ["string", "null"] },
+        "files": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/file" } },
+        "codeDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "output": {
+      "type": "object", "additionalProperties": false, "required": ["path", "hash"],
+      "properties": { "path": { "$ref": "#/$defs/path" }, "hash": { "$ref": "#/$defs/digest" } }
+    },
+    "observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["checkId", "caseKey", "outcome", "outputRef"],
+      "properties": {
+        "checkId": { "$ref": "#/$defs/text" }, "caseKey": { "$ref": "#/$defs/text" },
+        "outcome": { "enum": ["pass", "fail", "not_run"] }, "outputRef": { "$ref": "#/$defs/path" }
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false, "required": ["argv", "cwd", "exitCode"],
+      "properties": {
+        "argv": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } },
+        "cwd": { "$ref": "#/$defs/workdirPath" },
+        "exitCode": { "type": ["integer", "null"] }
+      }
+    },
+    "run": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "purpose", "contractRevision", "contractDigest", "impactScopeDigest", "snapshotId", "source", "method", "level", "startedAt", "finishedAt", "execution", "environmentKey", "environmentRef", "environmentProbeIds", "environmentDigest", "artifactDigest", "fixtureDigest", "runStatus", "failureKind", "observations", "outputRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" }, "purpose": { "enum": ["baseline", "postfix", "acceptance"] },
+        "contractRevision": { "$ref": "#/$defs/text" }, "contractDigest": { "$ref": "#/$defs/digest" },
+        "impactScopeDigest": { "$ref": "#/$defs/digest" },
+        "snapshotId": { "$ref": "#/$defs/text" },
+        "source": { "enum": ["agent_run", "ci", "manual"] },
+        "method": { "enum": ["static", "unit", "integration", "runtime", "browser", "manual"] },
+        "level": { "enum": ["V1", "V2", "V3", "V4"] },
+        "startedAt": { "$ref": "#/$defs/text" }, "finishedAt": { "$ref": "#/$defs/text" },
+        "execution": { "anyOf": [{ "$ref": "#/$defs/execution" }, { "type": "null" }] },
+        "manualRef": { "$ref": "#/$defs/text" },
+        "environmentKey": { "$ref": "#/$defs/text" }, "environmentRef": { "$ref": "#/$defs/text" },
+        "environmentProbeIds": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "environmentDigest": { "$ref": "#/$defs/digest" },
+        "artifactDigest": { "$ref": "#/$defs/maybeDigest" }, "fixtureDigest": { "$ref": "#/$defs/maybeDigest" },
+        "runStatus": { "enum": ["completed", "blocked", "not_run"] },
+        "failureKind": { "enum": ["none", "assertion", "setup", "environment", "unknown"] },
+        "observations": { "type": "array", "items": { "$ref": "#/$defs/observation" } },
+        "outputRefs": { "type": "array", "items": { "$ref": "#/$defs/output" } },
+        "supersedesRunIds": { "$ref": "#/$defs/ids" }, "invalidatesRunIds": { "$ref": "#/$defs/ids" },
+        "reason": { "$ref": "#/$defs/text" }
+      }
+    },
+    "finding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "severity", "status", "decisionRef", "acceptanceIds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" }, "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+        "status": { "enum": ["open", "closed", "retracted"] }, "decisionRef": { "$ref": "#/$defs/text" },
+        "acceptanceIds": { "$ref": "#/$defs/ids" },
+        "evidenceStatus": { "enum": ["confirmed", "disputed", "insufficient"] },
+        "attribution": { "enum": ["introduced", "worsened", "pre_existing", "unknown"] },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "fixedState": { "enum": ["unverified", "not_fixed", "fixed", "regressed", "not_applicable"] },
+        "currentAssessmentRef": { "$ref": "#/$defs/text" },
+        "counterEvidenceRefs": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "review": {
+      "type": "object", "additionalProperties": false,
+      "required": ["snapshotId", "contractDigest", "impactScopeDigest", "runIds", "checkedAt", "reviewer", "environmentConfirmed", "ref"],
+      "properties": {
+        "snapshotId": { "$ref": "#/$defs/text" }, "contractDigest": { "$ref": "#/$defs/digest" },
+        "impactScopeDigest": { "$ref": "#/$defs/digest" },
+        "runIds": { "$ref": "#/$defs/ids" }, "checkedAt": { "$ref": "#/$defs/text" },
+        "reviewer": { "$ref": "#/$defs/text" }, "environmentConfirmed": { "type": "boolean" },
+        "ref": { "$ref": "#/$defs/text" }
+      }
+    },
+    "action": {
+      "enum": [
+        "read", "modify_source", "modify_tests", "modify_fixture",
+        "run_verification", "run_assessment", "append_evidence",
+        "write_summary", "start_service", "stop_owned_service", "publish"
+      ]
+    },
+    "invocation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "operation", "authorizationRef", "contractRevision", "snapshotId", "selectedCheckIds", "selectedFindingIds", "allowedActions", "necessaryStages", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "operation": { "enum": ["start", "resume", "verify", "review", "deliver"] },
+        "reviewMode": { "enum": ["initial", "delta", "recheck"] },
+        "authorizationRef": { "$ref": "#/$defs/text" },
+        "contractRevision": { "type": ["string", "null"] },
+        "snapshotId": { "type": ["string", "null"] },
+        "selectedCheckIds": { "$ref": "#/$defs/ids" },
+        "selectedFindingIds": { "$ref": "#/$defs/ids" },
+        "allowedActions": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/action" }
+        },
+        "necessaryStages": { "$ref": "#/$defs/ids" },
+        "reason": { "$ref": "#/$defs/text" },
+        "previousInvocationId": { "$ref": "#/$defs/text" }
+      }
+    },
+    "impactExclusion": {
+      "type": "object", "additionalProperties": false,
+      "required": ["subject", "reason", "evidenceRef"],
+      "properties": {
+        "subject": { "$ref": "#/$defs/text" },
+        "reason": { "$ref": "#/$defs/text" },
+        "evidenceRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "impactScope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "contractRevision", "snapshotId", "behavior", "entryPoints", "sharedDecisions", "siblingEntries", "consumers", "observableOutcomes", "acceptanceIds", "checkIds", "mergeGuardCheckIds", "exclusions"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "contractRevision": { "$ref": "#/$defs/text" },
+        "snapshotId": { "$ref": "#/$defs/text" },
+        "behavior": { "$ref": "#/$defs/text" },
+        "entryPoints": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "sharedDecisions": { "$ref": "#/$defs/ids" },
+        "siblingEntries": { "$ref": "#/$defs/ids" },
+        "consumers": { "$ref": "#/$defs/ids" },
+        "consumerNotApplicableReason": { "$ref": "#/$defs/text" },
+        "observableOutcomes": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "acceptanceIds": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "checkIds": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "mergeGuardCheckIds": { "$ref": "#/$defs/ids" },
+        "exclusions": { "type": "array", "items": { "$ref": "#/$defs/impactExclusion" } }
+      }
+    },
+    "inheritedScope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scopeId", "fromReviewId", "basisRef"],
+      "properties": {
+        "scopeId": { "$ref": "#/$defs/text" },
+        "fromReviewId": { "$ref": "#/$defs/text" },
+        "basisRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "gapScope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scopeId", "reason", "nextAction"],
+      "properties": {
+        "scopeId": { "$ref": "#/$defs/text" },
+        "reason": { "$ref": "#/$defs/text" },
+        "nextAction": { "$ref": "#/$defs/text" }
+      }
+    },
+    "findingResult": {
+      "type": "object", "additionalProperties": false,
+      "required": ["findingId", "status", "evidenceRef"],
+      "properties": {
+        "findingId": { "$ref": "#/$defs/text" },
+        "status": { "enum": ["resolved", "still_open", "regressed", "retracted", "unknown"] },
+        "evidenceRef": { "$ref": "#/$defs/text" },
+        "contractRef": { "$ref": "#/$defs/text" },
+        "evidenceStatus": { "enum": ["confirmed", "disputed", "insufficient"] },
+        "attribution": { "enum": ["introduced", "worsened", "pre_existing", "unknown"] },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "fixedState": { "enum": ["unverified", "not_fixed", "fixed", "regressed", "not_applicable"] },
+        "counterEvidenceRefs": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "reviewRun": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "invocationId", "mode", "reviewBaseRef", "previousTargetSnapshotId", "currentTargetSnapshotId", "impactScopeDigest", "requestedScopeIds", "reviewedScopeIds", "inheritedScopes", "gapScopes", "selectedFindingIds", "findingResults", "mergeState", "mergedSnapshotId", "conclusionScope"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "invocationId": { "$ref": "#/$defs/text" },
+        "mode": { "enum": ["initial", "delta", "recheck"] },
+        "reviewBaseRef": { "$ref": "#/$defs/text" },
+        "previousReviewId": { "$ref": "#/$defs/text" },
+        "previousTargetSnapshotId": { "type": ["string", "null"] },
+        "currentTargetSnapshotId": { "$ref": "#/$defs/text" },
+        "impactScopeDigest": { "$ref": "#/$defs/digest" },
+        "requestedScopeIds": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "reviewedScopeIds": { "$ref": "#/$defs/ids" },
+        "inheritedScopes": { "type": "array", "items": { "$ref": "#/$defs/inheritedScope" } },
+        "gapScopes": { "type": "array", "items": { "$ref": "#/$defs/gapScope" } },
+        "selectedFindingIds": { "$ref": "#/$defs/ids" },
+        "findingResults": { "type": "array", "items": { "$ref": "#/$defs/findingResult" } },
+        "mergeState": { "enum": ["not_applicable", "candidate", "final"] },
+        "mergedSnapshotId": { "type": ["string", "null"] },
+        "conclusionScope": { "enum": ["requested", "reviewed_only"] }
+      }
+    },
+    "environmentRequirement": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dimension", "status", "expectedRef", "observedRef", "owner", "invalidatedBy"],
+      "properties": {
+        "dimension": { "enum": ["project", "instance", "build", "proxy", "account", "data", "tool", "resource"] },
+        "status": { "enum": ["ready", "mismatch", "unavailable", "unknown", "not_applicable"] },
+        "expectedRef": { "$ref": "#/$defs/text" },
+        "observedRef": { "$ref": "#/$defs/text" },
+        "owner": { "$ref": "#/$defs/text" },
+        "invalidatedBy": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "resourceClaim": {
+      "type": "object", "additionalProperties": false,
+      "required": ["resource", "mode", "status", "owner", "evidenceRef"],
+      "properties": {
+        "resource": { "$ref": "#/$defs/text" },
+        "mode": { "enum": ["shared", "exclusive"] },
+        "status": { "enum": ["available", "held_by_run", "conflict", "unknown"] },
+        "owner": { "$ref": "#/$defs/text" },
+        "evidenceRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "environmentProbe": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "phase", "environmentKey", "capturedAt", "sourceRef", "adapterKind", "adapterRef", "requirements", "resources", "evidence", "fingerprint"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "phase": { "enum": ["before", "after"] },
+        "environmentKey": { "$ref": "#/$defs/text" },
+        "capturedAt": { "$ref": "#/$defs/text" },
+        "sourceRef": { "$ref": "#/$defs/text" },
+        "adapterKind": { "enum": ["project-declared", "manual"] },
+        "adapterRef": { "$ref": "#/$defs/text" },
+        "requirements": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/environmentRequirement" } },
+        "resources": { "type": "array", "items": { "$ref": "#/$defs/resourceClaim" } },
+        "evidence": { "$ref": "#/$defs/output" },
+        "fingerprint": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "selectionExclusion": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "reason", "evidenceRef"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "reason": { "$ref": "#/$defs/text" },
+        "evidenceRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "testSelection": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "id", "invocationId", "impactScopeIds", "scopeSource", "paths",
+        "selectorKind", "selectorRef", "catalogHealthId", "selectedCheckIds",
+        "selectedTestIds", "unmappedPaths", "exclusions", "completeness",
+        "runIds", "createdAt"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "invocationId": { "$ref": "#/$defs/text" },
+        "impactScopeIds": { "$ref": "#/$defs/ids" },
+        "scopeSource": { "enum": ["explicit_task", "impact_scope", "working_tree", "not_applicable"] },
+        "paths": { "$ref": "#/$defs/paths" },
+        "selectorKind": { "enum": ["project_declared", "manual", "not_applicable"] },
+        "selectorRef": { "$ref": "#/$defs/text" },
+        "catalogHealthId": { "type": ["string", "null"] },
+        "selectedCheckIds": { "$ref": "#/$defs/ids" },
+        "selectedTestIds": { "$ref": "#/$defs/ids" },
+        "unmappedPaths": { "$ref": "#/$defs/paths" },
+        "exclusions": { "type": "array", "items": { "$ref": "#/$defs/selectionExclusion" } },
+        "completeness": { "enum": ["complete", "partial", "unknown"] },
+        "runIds": { "$ref": "#/$defs/ids" },
+        "createdAt": { "$ref": "#/$defs/text" }
+      }
+    },
+    "catalogDiagnostic": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code", "relevance", "owner", "evidenceRef"],
+      "properties": {
+        "code": { "$ref": "#/$defs/text" },
+        "relevance": { "enum": ["current_scope", "unrelated", "unknown"] },
+        "owner": { "$ref": "#/$defs/text" },
+        "evidenceRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "catalogHealth": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "id", "selectorRef", "status", "checkedAt", "catalogDigest",
+        "validatorDigest", "inventoryDigest", "diagnostics", "evidenceRef"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "selectorRef": { "$ref": "#/$defs/text" },
+        "status": { "enum": ["healthy", "degraded", "invalid", "not_applicable"] },
+        "checkedAt": { "$ref": "#/$defs/text" },
+        "catalogDigest": { "$ref": "#/$defs/maybeDigest" },
+        "validatorDigest": { "$ref": "#/$defs/maybeDigest" },
+        "inventoryDigest": { "$ref": "#/$defs/maybeDigest" },
+        "diagnostics": { "type": "array", "items": { "$ref": "#/$defs/catalogDiagnostic" } },
+        "evidenceRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "knownFailure": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "id", "layer", "signature", "status", "owner", "environmentKey",
+        "affectedCheckIds", "baselineRunId", "firstEvidenceRef",
+        "latestEvidenceRef", "invalidatedBy", "expiresAt"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "layer": { "enum": ["selection", "catalog", "execution", "environment", "tool"] },
+        "signature": { "$ref": "#/$defs/text" },
+        "status": { "enum": ["active", "resolved", "expired", "unknown"] },
+        "owner": { "$ref": "#/$defs/text" },
+        "environmentKey": { "$ref": "#/$defs/text" },
+        "affectedCheckIds": { "$ref": "#/$defs/ids" },
+        "baselineRunId": { "type": ["string", "null"] },
+        "firstEvidenceRef": { "$ref": "#/$defs/text" },
+        "latestEvidenceRef": { "$ref": "#/$defs/text" },
+        "invalidatedBy": { "$ref": "#/$defs/ids", "minItems": 1 },
+        "expiresAt": { "type": ["string", "null"] }
+      }
+    },
+    "verificationPack": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "version", "decision", "triggerRef", "rationale", "checkIds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "kind": { "enum": ["async_ownership", "ssr_recovery", "cache_consistency"] },
+        "version": { "$ref": "#/$defs/text" },
+        "decision": { "enum": ["selected", "not_applicable"] },
+        "triggerRef": { "$ref": "#/$defs/text" },
+        "rationale": { "$ref": "#/$defs/text" },
+        "checkIds": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "artifactOmission": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact", "reason", "decisionRef"],
+      "properties": {
+        "artifact": { "$ref": "#/$defs/path" },
+        "reason": { "$ref": "#/$defs/text" },
+        "decisionRef": { "$ref": "#/$defs/text" }
+      }
+    },
+    "recordPolicy": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "profile", "authoritativeRecord", "summaryMode", "requiredArtifacts",
+        "derivedArtifacts", "omittedArtifacts", "summarySourceDigest"
+      ],
+      "properties": {
+        "profile": { "enum": ["minimal", "standard", "assurance"] },
+        "authoritativeRecord": { "$ref": "#/$defs/path" },
+        "summaryMode": { "const": "derived" },
+        "requiredArtifacts": { "$ref": "#/$defs/paths" },
+        "derivedArtifacts": { "$ref": "#/$defs/paths" },
+        "omittedArtifacts": { "type": "array", "items": { "$ref": "#/$defs/artifactOmission" } },
+        "summarySourceDigest": { "$ref": "#/$defs/maybeDigest" }
+      }
+    },
+    "deliveryControl": {
+      "type": "object", "additionalProperties": false,
+      "required": ["taskId", "taskMode", "authorizedActions", "activeContractRevision", "currentInvocationId", "currentImpactScopeIds", "contracts", "acceptance", "fixes", "snapshots", "invocations", "impactScopes", "reviewRuns", "environmentProbes", "verificationRuns", "findingDisposition", "completion"],
+      "properties": {
+        "taskId": { "$ref": "#/$defs/text" },
+        "taskMode": { "enum": ["implementation", "review", "design"] },
+        "authorizedActions": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/action" }
+        },
+        "activeContractRevision": { "type": ["string", "null"] },
+        "currentInvocationId": { "type": ["string", "null"] },
+        "currentImpactScopeIds": { "$ref": "#/$defs/ids" },
+        "contracts": { "type": "array", "items": { "$ref": "#/$defs/contract" } },
+        "acceptance": { "type": "array", "items": { "$ref": "#/$defs/acceptance" } },
+        "fixes": { "type": "array", "items": { "$ref": "#/$defs/fix" } },
+        "snapshots": { "type": "array", "items": { "$ref": "#/$defs/snapshot" } },
+        "invocations": { "type": "array", "items": { "$ref": "#/$defs/invocation" } },
+        "impactScopes": { "type": "array", "items": { "$ref": "#/$defs/impactScope" } },
+        "reviewRuns": { "type": "array", "items": { "$ref": "#/$defs/reviewRun" } },
+        "environmentProbes": { "type": "array", "items": { "$ref": "#/$defs/environmentProbe" } },
+        "verificationRuns": { "type": "array", "items": { "$ref": "#/$defs/run" } },
+        "findingDisposition": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "testSelections": { "type": "array", "items": { "$ref": "#/$defs/testSelection" } },
+        "catalogHealth": { "type": "array", "items": { "$ref": "#/$defs/catalogHealth" } },
+        "knownFailures": { "type": "array", "items": { "$ref": "#/$defs/knownFailure" } },
+        "verificationPacks": { "type": "array", "items": { "$ref": "#/$defs/verificationPack" } },
+        "recordPolicy": { "$ref": "#/$defs/recordPolicy" },
+        "completion": {
+          "type": "object", "additionalProperties": false, "required": ["implementation", "claim"],
+          "properties": {
+            "implementation": { "enum": ["pending", "in_progress", "complete", "not_applicable"] },
+            "claim": { "enum": ["pending", "candidate", "accepted", "analysis_complete"] },
+            "evidenceReview": { "$ref": "#/$defs/review" }
           }
         }
       }

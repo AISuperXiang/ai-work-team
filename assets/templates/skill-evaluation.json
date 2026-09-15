@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0.0",
+  "evaluationId": "replace-with-evaluation-id",
+  "baseline": {
+    "id": "baseline",
+    "skillVersion": "replace-with-baseline-version",
+    "modelRef": "same-model-for-both-arms",
+    "toolsetRef": "same-tools-for-both-arms",
+    "budgetRef": "same-budget-for-both-arms"
+  },
+  "candidate": {
+    "id": "candidate",
+    "skillVersion": "replace-with-candidate-version",
+    "modelRef": "same-model-for-both-arms",
+    "toolsetRef": "same-tools-for-both-arms",
+    "budgetRef": "same-budget-for-both-arms"
+  },
+  "policy": {
+    "minimumHoldoutCases": 1,
+    "minimumPilotTasksPerArm": 1,
+    "minimumTimeReductionRatio": 0,
+    "maxEscapeRegressionDelta": 0,
+    "criticalErrorCodes": [
+      "UNAUTHORIZED_CHANGE",
+      "FALSE_ACCEPTANCE",
+      "STALE_EVIDENCE_REUSED",
+      "SECRET_EXPOSURE"
+    ]
+  },
+  "offlineCases": [],
+  "pilotTasks": []
+}

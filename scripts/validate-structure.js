@@ -25,15 +25,30 @@ const requiredFiles = [
   "docs/quality-rubrics.md",
   "docs/business-impact-rubric.md",
   "docs/handoff-contract.md",
+  "docs/delivery-controls.md",
   "docs/engineering-standards/cli-quality-architecture.md",
+  "docs/engineering-standards/behavior-impact-standard.md",
+  "docs/engineering-standards/verification-environment-standard.md",
+  "docs/verification-packs/README.md",
+  "docs/verification-packs/async-ownership.md",
+  "docs/verification-packs/ssr-recovery.md",
+  "docs/verification-packs/cache-consistency.md",
   "scripts/README.md",
   "scripts/cli-args.js",
+  "scripts/safe-files.js",
+  "scripts/delivery-controls.js",
+  "scripts/check-delivery.js",
+  "scripts/skill-evaluation.js",
+  "scripts/evaluate-skill.js",
   "scripts/run-mutation-tests.js",
   "test/build-context.test.js",
   "test/external-skill-utils.test.js",
   "test/install-external-skills.test.js",
   "test/list-external-skills.test.js",
   "test/validate-contracts.test.js",
+  "test/delivery-controls.test.js",
+  "test/check-delivery.test.js",
+  "test/skill-evaluation.test.js",
   ".github/workflows/ci.yml",
   "workspace/README.md"
 ];
@@ -46,6 +61,7 @@ const requiredDirs = [
   "external-skills",
   "docs/methodologies",
   "docs/engineering-standards",
+  "docs/verification-packs",
   "docs/integrations",
   "schemas",
   "assets/templates",
@@ -77,6 +93,7 @@ const workflowFiles = [
   "workflows/bugfix-delivery.md",
   "workflows/code-review-delivery.md",
   "workflows/product-ui-qa-walkthrough.md",
+  "workflows/delivery-summary.md",
   "workflows/external-skill-install.md",
   "workflows/project-context-build.md"
 ];
@@ -90,7 +107,8 @@ const schemaFiles = [
   "schemas/goal-contract.schema.json",
   "schemas/milestone.schema.json",
   "schemas/task.schema.json",
-  "schemas/autonomy-policy.schema.json"
+  "schemas/autonomy-policy.schema.json",
+  "schemas/skill-evaluation.schema.json"
 ];
 
 const templateFiles = [
@@ -121,7 +139,8 @@ const templateFiles = [
   "assets/templates/delivery-summary.md",
   "assets/templates/workflow-status.md",
   "assets/templates/workspace-requirement-readme.md",
-  "assets/templates/agents-context.md"
+  "assets/templates/agents-context.md",
+  "assets/templates/skill-evaluation.json"
 ];
 
 const methodologyFiles = [
@@ -137,7 +156,8 @@ const methodologyFiles = [
   "docs/methodologies/delivery-methodology.md",
   "docs/methodologies/execution-methodology.md",
   "docs/methodologies/role-activation-methodology.md",
-  "docs/methodologies/goal-driven-technical-design-methodology.md"
+  "docs/methodologies/goal-driven-technical-design-methodology.md",
+  "docs/methodologies/skill-evaluation-methodology.md"
 ];
 
 const standardFiles = [
@@ -148,7 +168,9 @@ const standardFiles = [
   "docs/engineering-standards/review-standard.md",
   "docs/engineering-standards/release-standard.md",
   "docs/engineering-standards/security-standard.md",
-  "docs/engineering-standards/cli-quality-architecture.md"
+  "docs/engineering-standards/cli-quality-architecture.md",
+  "docs/engineering-standards/behavior-impact-standard.md",
+  "docs/engineering-standards/verification-environment-standard.md"
 ];
 
 const integrationFiles = [
@@ -336,6 +358,16 @@ if (existsFile("skill-runtime.json")) {
   record(
     runtimeConfig && runtimeConfig.entrypoints && runtimeConfig.entrypoints.agents === "AGENTS.md",
     "skill-runtime.json agents entry is AGENTS.md"
+  );
+  record(
+    runtimeConfig && runtimeConfig.entrypoints &&
+      runtimeConfig.entrypoints.deliveryAssessment === "scripts/check-delivery.js",
+    "skill-runtime.json delivery assessment entry is check-delivery.js"
+  );
+  record(
+    runtimeConfig && runtimeConfig.entrypoints &&
+      runtimeConfig.entrypoints.skillEvaluation === "scripts/evaluate-skill.js",
+    "skill-runtime.json skill evaluation entry is evaluate-skill.js"
   );
   record(
     runtimeConfig && packageJson && runtimeConfig.skill && runtimeConfig.skill.version === packageJson.version,

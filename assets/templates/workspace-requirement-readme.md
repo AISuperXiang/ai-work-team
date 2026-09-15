@@ -13,6 +13,9 @@
 
 ## 阶段产物
 
+> 本表是计划视图。`workflow-status.json.deliveryControl.recordPolicy` 决定实际 required、
+> derived 和有依据省略的文件；lightweight 不为形式创建全部条目。
+
 | 阶段 | 文件 | 状态 | 负责人 |
 | --- | --- | --- | --- |
 | Intake | `requirement-brief.md` | pending | 产品经理 |

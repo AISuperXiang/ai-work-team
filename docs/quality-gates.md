@@ -22,7 +22,7 @@
 - 指标基线、收益目标、观测周期和数据来源明确；没有现成数据时必须标记为待采集假设。
 - 成本收益比或投入产出判断明确，包括研发成本、运营成本和预期收益。
 - 上线后观测方式和复盘计划明确。
-- 业务影响评分必须满足 `business-impact-rubric.md` 的最低线。
+- 必须满足 `business-impact-rubric.md` 的目标用户、价值、指标、成本收益和观测等实质要求；数字评分仅作辅助。
 - PRD 完成态必须包含上述内容，否则不得进入 UI/UX 或技术方案阶段。
 
 纯内部工程改动、明确缺陷修复或仅代码审查可标记业务指标为 `N/A`，前提是 `rolePlan` 与交付摘要记录不适用依据、影响范围、风险降低目标和复审触发条件。
@@ -98,6 +98,7 @@
 
 必须满足：
 
+- `deliveryControl.activeContractRevision` 指向 confirmed 契约，且无未决冲突。
 - 改动符合仓库既有结构和风格。
 - 只修改需求相关文件。
 - 关键状态、异常和边界已处理。
@@ -113,6 +114,8 @@
 - 复现结论有命令、日志、截图、请求记录或最小代码路径证据。
 - 无法复现时已列出最小插桩、数据采集或环境补齐方案；不得直接宣称根因已修复。
 - 修复后的场景与原复现步骤可被复跑，或明确标记为待验证风险。
+- 基线失败必须是业务断言失败，并关联有效契约；setup、依赖或环境失败不能充当红测。
+- 修复还要列出最可能受损的保留行为和适用消费方；不适用有 decisionRef。
 
 失败时回到 QA 和技术负责人补采证或缩小假设。
 
@@ -121,7 +124,12 @@
 用于代码审查和逻辑优化，必须满足：
 
 - 审查范围、目标行为、非目标和基线已明确。
-- 结论按严重度排序，并关联具体代码位置、失效场景和建议动作。
+- initial/delta/recheck 模式明确；requested scope 已精确划分为本轮 reviewed、可信 inherited 和 gaps。
+- delta 的上轮 review/target snapshot 可追溯；recheck 覆盖每个选中 finding 且未选 finding 未被改写。
+- changed files 引出的共享契约、同类入口和消费者已检查；合并后的最终组合行为有保护检查或明确待验。
+- 每个 finding 先核真并检查最可能推翻结论的反证；证据状态、置信度、已修核对和
+  introduced/worsened/pre_existing/unknown 归因明确。
+- 结论按严重度排序，并关联具体代码位置、失效场景和建议动作；retracted 有明确 counterevidence。
 - 已检查行为正确性、边界/回归、安全与兼容、测试证据；性能只在相关路径上评估。
 - “无需修改”必须说明检查过的证据和未覆盖范围，不能只给笼统好评。
 
@@ -147,6 +155,11 @@
 - 测试步骤、数据和期望结果清楚。
 - 自动化或人工验证结果可复现。
 - 阻塞缺陷已关闭或明确被接受。
+- test selection 使用显式任务路径，catalog health 和 execution 独立记录；
+  partial/unknown、相关未映射路径、catalog 非健康均不得伪装成完整测试通过。
+- 修复的原反例、保留路径和适用消费方均映射到独立 check；
+  同一次运行可覆盖多项，但退出码或全局等级不能替代逐项 observation。
+- async/SSR/cache 风险命中时，所选验证包的 required check 已通过；未命中时有范围依据。
 
 失败时回到 QA 和研发补测或修复。
 
@@ -158,6 +171,11 @@
 - 交付结论不超过验证等级允许的范围：`V1` 只能声明静态检查通过，`V2` 只能声明受测行为通过。
 - 需要浏览器、运行时、灰度或人工验收的核心路径，在未完成时必须作为剩余风险保留。
 - 验证失败、无法执行或环境阻塞必须说明原因、影响和下一步采证动作。
+- 每个运行关联 current impact scope digest 和环境 probe；required 环境维度、probe 时序、证据哈希和资源状态匹配。
+- 运行时/浏览器/manual 验证同时有 before/after 环境确认；端口占用或 health 心跳不得单独证明 app、worktree、构建、账号或数据正确。
+- 项目声明 Local Gateway、runner 或资源锁时优先复用；不得重复启动、绕过锁或关闭用户原有服务。
+- v2 required check 必须匹配当前契约 digest、方法、caseKey、环境、文件快照和输出摘要。
+- FAILED/CONFLICT 阻断，NOT_RUN/BLOCKED/STALE 保持待验；评分和更高 V 等级均不能覆盖。
 
 失败时降低结论或补充验证，不得用质量评分掩盖证据缺口。
 
@@ -166,13 +184,18 @@
 必须满足：
 
 - 变更范围、关键决策和验证结果明确。
-- 产品、UI、QA 走查结论已汇总。
-- `rolePlan` 已汇总；未参与角色及对应 N/A 评分有场景依据。
+- 已激活的产品、UI、QA 走查结论已汇总；未激活角色不生成形式结论。
+- `rolePlan` 已汇总；未参与角色及对应 N/A 维度有场景依据。
 - 风险和后续建议清楚。
 - 用户可根据交付摘要完成验收。
-- `decision-log.md`、`risk-register.md`、`role-handoff.md`、`workflow-status.json` 已更新。
+- `workflow-status.json` 权威记录已更新；`recordPolicy.requiredArtifacts` 已存在，
+  省略的独立 decision/risk/handoff 文件有内联记录或可追溯 decisionRef。
 - 业务价值、收益观测、证据索引和复盘计划已进入交付摘要。
 - 当前执行档位、验证等级和未覆盖范围已进入交付摘要。
+- 当前 invocation 与用户授权一致；verify/review/deliver 没有执行禁止动作。
+- `/team deliver` 只汇总已有有效结果；若 required check、范围或环境证据失效，结论为 review/blocked，不隐式启动新执行。
+- 实现交付的 claim 为 accepted，并通过只读当前有效性评估；candidate 只能交付为候选和缺口。
+- review/design 的 analysis_complete 只表示报告完成；open P0/P1 必须保留 changes_required，不能表述为代码通过。
 
 失败时由交付经理列出阻塞项和下一步动作。
 
@@ -180,9 +203,12 @@
 
 必须满足：
 
-- 关键范围、优先级、技术取舍、上线风险和延期项写入 `decision-log.md`。
+- 关键范围、优先级、技术取舍、上线风险和延期项写入 `decision-log.md`，
+  或按 `recordPolicy` 内联到 `workflow-status.json` 并提供可追溯 `decisionRef`。
 - 每条决策包含背景、选项、最终选择、影响、负责人和时间。
 - 影响范围、成本、风险或用户体验的决策不得只存在于对话中。
+
+仅当 `recordPolicy.requiredArtifacts` 包含 `decision-log.md` 时，独立文件才是必需产物。
 
 失败时由交付经理补齐决策记录，必要时要求用户裁决。
 
@@ -190,9 +216,13 @@
 
 必须满足：
 
-- 每次角色交接写入 `role-handoff.md` 或等价交接摘要。
+- 每次角色交接写入 `role-handoff.md` 或权威状态引用的等价交接记录。
 - 交接必须包含背景、当前阶段、已确认决策、待确认问题、风险、产物和验证。
 - 下游角色不得在缺少关键交接字段时继续推进阶段。
+
+`lightweight`、verify-only、recheck 和 deliver 汇总可省略独立 `role-handoff.md`，
+前提是 `recordPolicy` 记录省略理由和 decisionRef，且上述信息已在权威状态或现有任务记录中可追溯。
+standard/assurance 只有在确无独立审批、所有权转移或跨角色风险时才能采用同等省略。
 
 失败时由交付经理要求上游角色补齐交接信息。
 

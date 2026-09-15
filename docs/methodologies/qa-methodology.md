@@ -28,6 +28,19 @@ QA 在存在行为变更、缺陷修复、发布风险或回归影响时设为 `
 
 每项未覆盖风险必须说明原因、影响、下一步和对应的 `verificationLevel`，不能用测试数量代替关键路径覆盖。
 
+缺陷修复先核实预期来源，再为原反例、最可能受损的正常/恢复路径和适用消费方建立 check。
+环境或 fixture 失败不算业务复现；退出 0、整体 V2/V3 或“source 与目标相同”都不能替代目标断言。
+证据记录按 [Delivery Controls](../delivery-controls.md) 绑定契约、caseKey、环境和快照。
+QA 还需核对 impact scope 是否包含真实消费者，并按
+[Verification Environment Standard](../engineering-standards/verification-environment-standard.md)
+确认所需 app/worktree、构建、账号、数据和资源状态。运行时/浏览器证据缺 before/after probe 时保持待验。
+
+执行项目前先分开记录 test selection、catalog health 与 verification run。显式任务路径来自
+current impact scope；catalog 错误单独归因，不能把无关登记失败当业务失败，也不能把诊断模式当正式放行。
+
+await/并发/取消、SSR 恢复、缓存一致性风险分别按需读取 `docs/verification-packs/`。
+验证包只绑定 required check；没有真实触发信号时记录不适用，不机械全量扫描。
+
 ## 目标驱动方案评审
 
 在 `/team goal-design` 中，QA 作为 `consulted` 或 `active` 角色检查：
@@ -64,4 +77,4 @@ QA 评审不执行未来实现的测试，但必须给出可执行测试入口�
 - 严重级别。
 - 复测结论。
 
-缺陷未复现时，QA 输出最小采证计划而不是猜测根因；修复后必须复跑同一证据路径，才能把结论提升为“受测行为通过”或更高等级。
+缺陷未复现时，QA 输出最小采证计划而不是猜测根因；修复后必须复跑同一证据路径及保留路径，才能把对应 check 提升为通过。无法获得真实设备或目标分支时保持待验。

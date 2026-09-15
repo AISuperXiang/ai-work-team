@@ -98,6 +98,12 @@
         },
         "validation": {
           "type": "string"
+        },
+        "deliveryAssessment": {
+          "type": "string"
+        },
+        "skillEvaluation": {
+          "type": "string"
         }
       }
     },
