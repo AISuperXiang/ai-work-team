@@ -17,9 +17,57 @@ const ALL_TESTS = [
   "test/delivery-controls.test.js",
   "test/check-delivery.test.js",
   "test/skill-evaluation.test.js",
+  "test/record-evidence.test.js",
 ];
 
 const MUTANTS = [
+  ...[
+    ["evidence-wrapper-outcome", "scripts/delivery-assurance.js",
+      '  if (!successful(result.wrapper, true)) return "unknown";', '  if (false) return "unknown";'],
+    ["evidence-zero-assertions", "scripts/delivery-assurance.js",
+      '  if (result.executed <= 0 || result.assertion === "not_run") return "not_run";',
+      '  if (result.assertion === "not_run") return "not_run";'],
+    ["evidence-prepared-binding", "scripts/record-evidence.js",
+      '  if (input.bindingDigest !== binding) throw new RecordError("Prepared inputs changed");',
+      '  if (false) throw new RecordError("Prepared inputs changed");'],
+    ["evidence-state-cas", "scripts/record-evidence.js",
+      '  if (o.expected && expected !== o.expected) throw new RecordError("State digest conflict");',
+      '  if (false) throw new RecordError("State digest conflict");'],
+    ["evidence-lock", "scripts/record-evidence.js",
+      '  const descriptor = fs.openSync(lock, "wx", 0o600);',
+      '  const descriptor = fs.openSync(lock, "w", 0o600);'],
+    ["evidence-read-only", "scripts/record-evidence.js",
+      '    if (!o.json && !o.dry) commitState(opened, o.expected, status);',
+      '    commitState(opened, o.expected, status);'],
+    ["evidence-next-size", "scripts/record-evidence.js",
+      '  if (Buffer.byteLength(serialized) > MAX_STATUS_BYTES) throw new RecordError("State exceeds size limit");',
+      '  if (false) throw new RecordError("State exceeds size limit");'],
+    ["evidence-kill-switch", "scripts/record-evidence.js",
+      'try { main(process.argv.slice(2)); }', 'process.exit(0);\ntry { main(process.argv.slice(2)); }'],
+    ["coverage-unmapped-requirement", "scripts/delivery-assurance.js",
+      '    if (r.required && !r.checkIds.length) flag("REQUIREMENT_UNCOVERED", r.id);',
+      '    if (false) flag("REQUIREMENT_UNCOVERED", r.id);'],
+    ["coverage-review-binding", "scripts/delivery-assurance.js",
+      '  if (a.coverageReview?.definitionDigest !== coverageDigest(c)) flag("COVERAGE_REVIEW_REQUIRED", "coverageReview");',
+      '  if (false) flag("COVERAGE_REVIEW_REQUIRED", "coverageReview");'],
+    ["coverage-method-compatibility", "scripts/delivery-assurance.js",
+      '      if (!rule.methods.includes(checks.get(id)?.method)) error("OBLIGATION_METHOD_MISMATCH", o.id, id);',
+      '      if (false) error("OBLIGATION_METHOD_MISMATCH", o.id, id);'],
+    ["consumer-required-facet", "scripts/delivery-assurance.js",
+      '      if (!facet || facet.decision === "required" && !facet.checkIds.length) flag("CONSUMER_FACET_UNCOVERED", `${contract.id}.${name}`);',
+      '      if (false) flag("CONSUMER_FACET_UNCOVERED", `${contract.id}.${name}`);'],
+    ["consumer-sample-required", "scripts/delivery-assurance.js",
+      '    if (!fixturePresent(contract.samplePath)) flag("CONSUMER_SAMPLE_REQUIRED", contract.id);',
+      '    if (false) flag("CONSUMER_SAMPLE_REQUIRED", contract.id);'],
+    ["evidence-selection-freshness", "scripts/delivery-controls.js",
+      '      if (!selection || run.result.bindingDigest !== runBinding(c, selection, snapshot,\n        run.environmentProbeIds.map((id) => probes.get(id)))) return false;',
+      '      if (!selection) return false;'],
+    ["evidence-identity-gate", "scripts/delivery-assurance.js",
+      '  if (!a.executionIdentities.some((i) => i.invocationId === c.currentInvocationId)) {',
+      '  if (false) {'],
+  ].map(([id, file, search, replacement]) => ({
+    id, file, search, replacement, tests: ["test/record-evidence.test.js"], critical: true,
+  })),
   {
     id: "delivery-locale-independent-impact-sort",
     file: "scripts/delivery-controls.js",
@@ -255,11 +303,11 @@ const MUTANTS = [
     id: "delivery-version-fallback",
     file: "scripts/delivery-controls.js",
     search:
-      "  if (![\"2.0\", \"2.1\"].includes(status.schemaVersion)) {\n" +
+      "  if (![\"2.0\", \"2.1\", \"2.2\"].includes(status.schemaVersion)) {\n" +
       "    return [{ code: \"UNSUPPORTED_VERSION\", at: \"$.schemaVersion\" }];\n" +
       "  }",
     replacement:
-      "  if (![\"2.0\", \"2.1\"].includes(status.schemaVersion)) {\n" +
+      "  if (![\"2.0\", \"2.1\", \"2.2\"].includes(status.schemaVersion)) {\n" +
       "    return [];\n" +
       "  }",
     tests: ["test/delivery-controls.test.js", "test/check-delivery.test.js"],

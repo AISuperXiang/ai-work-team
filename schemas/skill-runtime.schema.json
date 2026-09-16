@@ -102,6 +102,9 @@
         "deliveryAssessment": {
           "type": "string"
         },
+        "evidenceRecording": {
+          "type": "string"
+        },
         "skillEvaluation": {
           "type": "string"
         }

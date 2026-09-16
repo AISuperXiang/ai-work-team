@@ -26,7 +26,7 @@
 
 评估前读取 `workflow-status.json` 中的 `executionProfile`、`verificationLevel`、`recordPolicy` 和 `rolePlan`。任何分数都不能抬高验证结论；没有运行时或等价证据的核心交互不得写成“已验收”。
 
-v2.1 状态还必须读取 [Delivery Controls](delivery-controls.md) 派生的逐项结果。
+v2.1/2.2 状态还必须读取 [Delivery Controls](delivery-controls.md) 派生的逐项结果。
 `readiness` 非 ready、required check 未通过或当前证据已过期时，任何分数都不能把实现提升为 accepted。
 review/design 可对报告本身评分，但必须单列 `reviewVerdict`；被审代码的 open P0/P1 不因报告完整而消失。
 

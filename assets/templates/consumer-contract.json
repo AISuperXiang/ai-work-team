@@ -1,0 +1,15 @@
+{
+  "id": "config-consumer",
+  "scopeId": "replace-with-current-scope",
+  "kind": "config",
+  "producer": {"repository": "replace-with-producer", "version": "replace-with-commit-or-version", "entryRef": "replace-with-serializer-entry"},
+  "consumer": {"repository": "replace-with-consumer", "version": "replace-with-installed-version", "entryRef": "replace-with-real-consumer-entry"},
+  "samplePath": "test/fixtures/config-payload.json",
+  "facets": [
+    {"name": "serialization", "decision": "required", "basisRef": "technical-design.md#serialization", "checkIds": []},
+    {"name": "lookup", "decision": "required", "basisRef": "technical-design.md#lookup", "checkIds": []},
+    {"name": "render", "decision": "required", "basisRef": "technical-design.md#render", "checkIds": []},
+    {"name": "defaults", "decision": "required", "basisRef": "technical-design.md#defaults", "checkIds": []},
+    {"name": "migration", "decision": "required", "basisRef": "technical-design.md#migration", "checkIds": []}
+  ]
+}

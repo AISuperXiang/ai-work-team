@@ -4,7 +4,7 @@
 
 > A product-engineering expert team orchestration Skill for Agent / IDE environments. It turns a natural-language request or `/team` command into a reviewable delivery with plans, implementation, verification evidence, risks, and handoff records.
 
-Current version: `0.6.0`. This release focuses on resumable tasks, per-check evidence gates, incremental code review, environment identity, and Skill-effect evaluation.
+Current version: `0.7.0`. This release adds automatic evidence recording, requirement coverage review, and real consumer contract checks.
 
 ## Overview
 
@@ -278,7 +278,12 @@ The profile is determined by risk, uncertainty, and blast radius, not urgency.
 
 See [`docs/quality-gates.md`](./docs/quality-gates.md) and [`docs/quality-rubrics.md`](./docs/quality-rubrics.md) for the full rules.
 
-New build, bug-fix, and code-review tasks use v2.1 `workflow-status.json.deliveryControl`.
+New build, bug-fix, and code-review tasks use v2.2 `workflow-status.json.deliveryControl`; 2.0/2.1 retain their existing read semantics.
+[record-evidence](./docs/evidence-recording.md) provides start/prepare/import/summary for skill identity,
+pre-run input binding, separate assertion/runner/wrapper results, and derived summaries.
+JSON/dry-run never write files; recorded commands are never executed.
+Requirements, risk obligations, and [real consumers](./docs/engineering-standards/consumer-contract-standard.md)
+link to explicit checks. Owners still review completeness and business meaning; no real pilot efficiency gains have been measured.
 Before delivery, run the read-only assessment:
 
 ```bash

@@ -1,0 +1,22 @@
+{
+  "id": "replace-with-unique-run-id",
+  "purpose": "acceptance",
+  "selectionId": "replace-with-current-selection",
+  "snapshotId": "replace-with-current-snapshot",
+  "environmentProbeIds": ["replace-with-before-probe"],
+  "bindingDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "startedAt": "replace-with-actual-start-time",
+  "finishedAt": "replace-with-actual-finish-time",
+  "source": "agent_run",
+  "method": "unit",
+  "level": "V2",
+  "execution": {"argv": ["replace-with-sanitized-command"], "cwd": ".", "exitCode": null},
+  "assertion": "unknown",
+  "executed": 0,
+  "runner": {"status": "unknown", "exitCode": null, "sourceRef": "replace-with-runner-result-reference"},
+  "wrapper": {"status": "unknown", "exitCode": null, "sourceRef": "replace-with-wrapper-result-reference"},
+  "observations": [],
+  "outputPaths": [],
+  "fixIds": [],
+  "sanitized": false
+}

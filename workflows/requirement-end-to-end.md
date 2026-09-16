@@ -72,9 +72,11 @@ outputs:
 - 阶段产物必须写入 workspace 需求目录，不能只存在于对话中。
 - 代码改动发生在用户项目仓库，workspace 保存 PRD、决策、风险、交接、方案、实现计划、测试、走查、交付和证据。
 - `workflow-status.json` 必须与状态板保持一致，记录阶段、负责人、门禁、产物路径、证据路径、`executionProfile`、`verificationLevel` 和 `rolePlan`。
-- 新 build 状态使用 `schemaVersion: "2.1"` 和
+- 新 build 状态使用 `schemaVersion: "2.2"` 和
   [Delivery Controls](../docs/delivery-controls.md)；Tech Design 确认有效契约，
   Implementation/QA 记录逐项 check、snapshot 和 run，Delivery 只接受当前有效证据。
+- Tech Design 逐条登记需求来源与检查，QA 对照原文完成 coverageReview；
+  SDK/API/配置变化按 [消费者契约](../docs/engineering-standards/consumer-contract-standard.md) 验证真实消费入口。
 - Implementation 前按
   [Behavior Impact Standard](../docs/engineering-standards/behavior-impact-standard.md)
   记录入口、共享决策、同类入口、消费者、可观察结果、排除依据和合并保护检查。

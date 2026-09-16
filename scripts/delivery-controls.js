@@ -3,6 +3,8 @@
 const { createHash } = require("node:crypto");
 const schema = require("../schemas/status.schema.json");
 const { isSafeRelativePath } = require("./safe-files");
+const { assuranceDefinition, coverageDigest, runBinding, layerOutcome,
+  validateAssurance, assessAssurance } = require("./delivery-assurance");
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const compareText = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 
@@ -35,6 +37,7 @@ function contractDigest(control, revision = control.activeContractRevision) {
       checks: item.checks.map(({ evidenceIds, ...definition }) => definition),
     })),
     fixes: control.fixes.map(({ baselineRunIds, ...definition }) => definition),
+    ...(control.assurance ? { assurance: assuranceDefinition(control) } : {}),
   });
 }
 
@@ -134,13 +137,13 @@ function validateDeliveryControl(status) {
   if (!own(status, "schemaVersion")) {
     return own(status, "deliveryControl") ? [{ code: "VERSION_REQUIRED", at: "$" }] : [];
   }
-  if (!["2.0", "2.1"].includes(status.schemaVersion)) {
+  if (!["2.0", "2.1", "2.2"].includes(status.schemaVersion)) {
     return [{ code: "UNSUPPORTED_VERSION", at: "$.schemaVersion" }];
   }
   validateShape(status, schema, "$", diagnostics);
   if (diagnostics.length) return diagnostics;
   const c = status.deliveryControl;
-  const enhancedControls = status.schemaVersion === "2.1";
+  const enhancedControls = ["2.1", "2.2"].includes(status.schemaVersion);
   const enhancedFields = [
     "testSelections",
     "catalogHealth",
@@ -153,6 +156,8 @@ function validateDeliveryControl(status) {
       if (!own(c, field)) error("V21_FIELD_REQUIRED", `deliveryControl.${field}`);
     }
   }
+  if (diagnostics.length) return diagnostics;
+  validateAssurance(status, error);
   if (diagnostics.length) return diagnostics;
   const index = (items, label) => {
     const map = new Map();
@@ -705,7 +710,7 @@ function evaluateDeliveryControl(status, currentContext) {
     return result;
   }
   const c = status.deliveryControl;
-  const enhancedControls = status.schemaVersion === "2.1";
+  const enhancedControls = ["2.1", "2.2"].includes(status.schemaVersion);
   let blocked = false;
   let pending = false;
   const flag = (code, at, hard = false) => {
@@ -726,6 +731,7 @@ function evaluateDeliveryControl(status, currentContext) {
   const probes = new Map(c.environmentProbes.map((probe) => [probe.id, probe]));
   const review = c.completion.evidenceReview;
   const current = currentContext?.snapshot;
+  if (status.schemaVersion === "2.2") assessAssurance(c, current, flag);
   if (c.taskId === "replace-with-stable-task-id") flag("TASK_ID_REQUIRED", "taskId", true);
   const currentInvocation = c.invocations.find((item) => item.id === c.currentInvocationId);
   if (!currentInvocation) flag("CURRENT_INVOCATION_REQUIRED", "currentInvocationId");
@@ -796,6 +802,11 @@ function evaluateDeliveryControl(status, currentContext) {
   };
   const identityValid = (run, baseline = false) => {
     const snapshot = snapshots.get(run.snapshotId);
+    if (status.schemaVersion === "2.2") {
+      const selection = c.testSelections.find((s) => s.runIds.includes(run.id));
+      if (!selection || run.result.bindingDigest !== runBinding(c, selection, snapshot,
+        run.environmentProbeIds.map((id) => probes.get(id)))) return false;
+    }
     return snapshot && snapshot.codeDigest === snapshotDigest(snapshot.files) &&
       run.contractRevision === c.activeContractRevision && run.contractDigest === definitionDigest &&
       (baseline || run.impactScopeDigest === scopeDigest) &&
@@ -813,6 +824,12 @@ function evaluateDeliveryControl(status, currentContext) {
         Number(run.level.slice(1)) < Number(check.minimumLevel.slice(1))) return null;
     if (!identityValid(run, baseline) || (!baseline && !reviewed(run))) return "STALE";
     if (!environmentValid(run, check)) return "BLOCKED";
+    if (status.schemaVersion === "2.2") {
+      const outcome = layerOutcome(run.result, run.source === "manual");
+      if (outcome === "unknown" || outcome === "fail" && observation.outcome === "pass") return "BLOCKED";
+      if (outcome === "not_run") return "NOT_RUN";
+      if (outcome === "pass" && observation.outcome === "fail") return "BLOCKED";
+    }
     if (run.runStatus === "blocked" || ["setup", "environment", "unknown"].includes(run.failureKind)) return "BLOCKED";
     if (run.runStatus !== "completed" || observation.outcome === "not_run") return "NOT_RUN";
     if (observation.outcome === "fail") return run.failureKind === "assertion" ? "FAILED" : "BLOCKED";
@@ -982,5 +999,6 @@ module.exports = {
   environmentProbeFingerprint,
   environmentSelectionDigest,
   recordSourceDigest,
+  coverageDigest,
   isSafeRelativePath,
 };

@@ -31,6 +31,11 @@
 - 对状态设置 256 KiB 上限；大证据只流式哈希，不读取到状态或模型。
 - capture/assess、普通/JSON 输出均零写入，不执行状态中的命令或访问证据 URL。
 
+2.2 证据入账器遵循 [evidence-recording](../evidence-recording.md)：start/import 是显式写操作，
+必须校验整个状态 expected digest 并持有独占锁，单文件原子替换；prepare/summary 与所有
+JSON/dry-run 零写入。导入必须匹配执行前绑定，分离 assertion/runner/wrapper，来源侧先脱敏；
+不执行 argv、不自动提高 claim。锁只保护协作写入，不承诺对未守锁编辑器或断电的事务性。
+
 只读 Skill 评估器还必须：
 
 - 只读取当前工作目录内显式相对 JSON，拒绝 symlink、越界、重复参数和超过 256 KiB 的输入。
@@ -62,6 +67,8 @@
   impact scope 缺口、环境 probe 失配和 check-delivery 直接成功。
 - 测试选择回退到 working tree、catalog 非健康被放行、finding 撤回缺反证、
   answer leakage 被接纳、候选关键错误被平均掉和 evaluate-skill 直接成功。
+- 2.2 定向 mutant 覆盖未知 wrapper/零断言通过、旧绑定导入、状态 CAS/锁/只读保护、
+  coverage 漏项、SSR 方法冒充、消费者样本/检查缺口和 record-evidence 直接成功。
 
 ## 5. 契约校验边界
 

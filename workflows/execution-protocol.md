@@ -34,6 +34,10 @@ check/finding、允许动作、必要阶段和前序 invocation。当前调用�
 verify/review/deliver 的动作白名单由状态 Schema 和确定性校验共同约束。
 invocation 的允许动作必须是任务 `authorizedActions` 的子集；resume 不得凭历史调用扩大授权。
 
+新任务使用 2.2；每次 invocation 在执行前按 [证据自动入账](../docs/evidence-recording.md)
+记录实际技能身份。start 首次生成 ID，prepare 固定本轮输入绑定，项目工具执行后 import 自动关联证据；
+结果未知保持 unknown，禁止重放旧 argv。只读 summary 从权威状态生成当前结论。
+
 ### Resume 判定
 
 按 task ID 或用户明确 workspace 选择任务。其次才使用当前会话唯一关联；

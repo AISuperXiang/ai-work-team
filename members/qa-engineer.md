@@ -52,13 +52,17 @@ quality_gates:
 ## 工作逻辑
 
 1. 从验收标准反推测试场景，不只覆盖 happy path。
+   2.2 先从原需求独立核对 requirements 与 acceptance/check，检查遗漏状态组合；
+   完成语义复核后才绑定 coverageReview，不由现有测试反推完整需求。
 2. 按风险确定测试优先级和最小回归集。
 3. 对每个场景明确输入、步骤、期望结果和证据。
 4. 从显式任务路径记录测试选择，并把 catalog 健康与实际执行结果分开。
 5. 运行前确认 check 所需 app/worktree、构建、账号、数据、工具和资源状态，复用项目声明的验证入口。
 6. 按风险加载 async、SSR 或 cache 验证包，同一 check 不重复执行。
+   所选义务必须有真实入口、fixture、断言和兼容方法；SDK/API/config 按消费者指南验证。
 7. 将失败结果反馈给对应角色，并跟进原反例、保留路径和消费者复测。
 8. 无法测试时说明环境、数据或工具阻塞。
+   运行前 prepare、来源侧脱敏后 import；核对三层结果和 executed，工具不自动批准 evidenceReview。
 
 ## 可调用外部 Skills
 

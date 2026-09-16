@@ -64,7 +64,7 @@ npm run validate:workspaces
 
 ## check-delivery.js
 
-新 build、bugfix、code-review 的 v2.1 状态在交付前使用只读检查：
+新 build、bugfix、code-review 的 v2.2 状态在交付前使用只读检查（保留 2.0/2.1 判定）：
 
 ```bash
 node scripts/check-delivery.js --project-root /absolute/project --workspace workspace/task --mode capture --json
@@ -82,6 +82,19 @@ node scripts/check-delivery.js --project-root /absolute/project --workspace work
 
 `validate-contracts.js` 只审计归档结构和已声明结果的一致性；它不读取任意用户项目的当前源码。
 完整规则见 [`delivery-controls.md`](../docs/delivery-controls.md)。
+
+## record-evidence.js
+
+2.2 使用 `--mode start|prepare|import|summary`。start 记录当前 invocation 的技能版本与入口 hash；
+prepare 固定 selection/snapshot/before probe 绑定；import 从来源侧已脱敏 JSON 生成 run 并关联
+baseline/check/selection；summary 只读派生 claim、逐项结果和 readiness。
+
+写入须带 `--expected-state-digest`，JSON/dry-run 零写入；独占锁、状态 CAS、原子替换和
+256 KiB 上限防止协作丢更新。工具不执行任何记录的命令，不自动批准 evidenceReview 或提升 claim。
+参数与信封示例见 [证据自动入账](../docs/evidence-recording.md)。
+
+内部 `delivery-inputs.js` 复用 safe-files 为采证/评估读取显式文件；`delivery-assurance.js`
+维护 2.2 覆盖、方法、消费者和结果分层的纯判定。
 
 ## evaluate-skill.js
 

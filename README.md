@@ -4,7 +4,7 @@
 
 > 面向 Agent / IDE 的产品研发专家团队编排 Skill：把一句自然语言需求或 `/team` 指令，推进为有方案、有实现、有验证证据、可走查、可交付的结果。
 
-当前版本：`0.6.0`。本版本重点加强可续跑任务、逐项证据门禁、增量代码审查、环境身份校验和 Skill 效果评估。
+当前版本：`0.7.0`。本版本增加证据自动入账、需求验收覆盖复核和真实消费者契约校验。
 
 ## 项目简介
 
@@ -279,7 +279,11 @@ workspace/
 
 详细规则见 [`docs/quality-gates.md`](./docs/quality-gates.md) 和 [`docs/quality-rubrics.md`](./docs/quality-rubrics.md)。
 
-新 build、bugfix、code-review 使用 v2.1 `workflow-status.json.deliveryControl`。
+新 build、bugfix、code-review 使用 v2.2 `workflow-status.json.deliveryControl`，2.0/2.1 保持原读取语义。
+通过 [record-evidence](./docs/evidence-recording.md) 的 start/prepare/import/summary 自动记录技能身份、
+执行前绑定和三层结果，并派生摘要；JSON/dry-run 零写入，不执行历史命令。
+需求来源、风险义务和 [真实消费者](./docs/engineering-standards/consumer-contract-standard.md)
+逐项关联检查；完整性和业务语义仍由负责人复核，当前没有真实试点提效数据。
 交付前可运行只读检查：
 
 ```bash

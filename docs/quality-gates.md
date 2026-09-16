@@ -175,6 +175,9 @@
 - 运行时/浏览器/manual 验证同时有 before/after 环境确认；端口占用或 health 心跳不得单独证明 app、worktree、构建、账号或数据正确。
 - 项目声明 Local Gateway、runner 或资源锁时优先复用；不得重复启动、绕过锁或关闭用户原有服务。
 - v2 required check 必须匹配当前契约 digest、方法、caseKey、环境、文件快照和输出摘要。
+- 2.2 必须有从原文复核的 requirements→acceptance/check 覆盖和当前 coverageReview；
+  selected 风险义务的方法、入口、fixture、断言匹配，适用消费者 facets 有真实消费检查与样本。
+- 2.2 自动入账的 assertion/runner/wrapper 独立明确；unknown、整体失败或 executed=0 不能关闭 required。
 - FAILED/CONFLICT 阻断，NOT_RUN/BLOCKED/STALE 保持待验；评分和更高 V 等级均不能覆盖。
 
 失败时降低结论或补充验证，不得用质量评分掩盖证据缺口。

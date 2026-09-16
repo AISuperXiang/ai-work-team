@@ -4,7 +4,7 @@
   "skill": {
     "id": "ai-work-team",
     "name": "AI Work Team Skill",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "entry": "SKILL.md",
     "description": "Product-engineering team workflows for goal design, implementation, resumable verification, evidence-gated code review, and delivery."
   },
@@ -28,6 +28,7 @@
     "commands": "commands/team.md",
     "validation": "scripts/validate-structure.js",
     "deliveryAssessment": "scripts/check-delivery.js",
+    "evidenceRecording": "scripts/record-evidence.js",
     "skillEvaluation": "scripts/evaluate-skill.js"
   },
   "install": {
@@ -91,7 +92,7 @@
       "docs/methodologies/role-activation-methodology.md"
     ],
     "environmentPolicy": "Run Node scripts from the skill root. Core workflows must not require credentials or external services. Reuse project-declared environment adapters, gateways, runners, and resource locks; never infer application identity or build freshness from a port or heartbeat alone. CLI changes must pass Node 18/20/22 behavior tests and the Node 22 mutation gate.",
-    "deliveryControlPolicy": "For new build, bug-fix, and code-review work, use v2.1 to separate explicit task-scoped test selection, catalog health, and execution evidence. Bind acceptance checks to one confirmed contract revision, current invocation, behavior impact scope, environment probes, and current evidence. Review findings require counterevidence, attribution, confidence, and current fix state. Resume only necessary stages; verify and deliver remain read-only with respect to source, tests, and fixtures. Use check-delivery only as a read-only consistency and freshness check; human owners remain responsible for expected behavior and complete impact scope.",
+    "deliveryControlPolicy": "Use v2.2 for new build, bug-fix and code-review tasks; preserve v2.0/v2.1 read semantics. Record skill identity and pre-run binding with record-evidence; import sanitized structured assertion/runner/wrapper outcomes with state CAS. Never replay stored commands or infer success from unknown results. Map original requirements, compatible risk obligations and real producer/consumer versions and samples to required checks. Owners review completeness and business semantics. Resume only necessary stages; verify and deliver preserve source/test/fixture boundaries. check-delivery and evaluate-skill remain read-only.",
     "evaluationPolicy": "Evaluate important Skill-rule changes with hidden-answer historical holdout cases before real-task pilots. Compare human active time and escaped regressions within risk groups; critical errors cannot be averaged away and immature observations remain inconclusive.",
     "roleActivationPolicy": "Treat workflow members as a candidate pool. Before loading role details, record active, consulted, or not_applicable roles with scenario evidence in rolePlan.",
     "externalSkillPolicy": "Only install external skills from external-skills/catalog.json after explicit user instruction or approval.",

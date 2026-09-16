@@ -30,6 +30,8 @@
 - 目标驱动技术方案必须满足 `goal-contract-gate`、`autonomy-gate` 和 `design-review-gate`，且方案完成不等于授权实现。
 - 方法论用于指导思考，不替代仓库真实上下文。
 - 实现、缺陷修复和代码审查必须记录 `executionProfile` 与 `verificationLevel`；静态检查不能替代运行时行为验证。
-- 新 build、bugfix、code-review 使用 v2.1，分别记录任务测试选择、catalog 健康和逐项执行证据；整体等级和评分不能覆盖缺失、失败、冲突或过期的 required check。
+- 新 build、bugfix、code-review 使用 v2.2，分别记录任务测试选择、catalog 健康和逐项执行证据；
+  [自动入账](evidence-recording.md)、需求覆盖与[消费者契约](engineering-standards/consumer-contract-standard.md)
+  补全执行链；整体等级和评分不能覆盖缺失、失败、冲突或过期的 required check。
 - 所有工作流先形成 `rolePlan`，只加载有明确职责的角色；未参与角色必须记录不适用依据。
 - 外部集成文档只定义接口，不代表首版会真实调用外部系统。

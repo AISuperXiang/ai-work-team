@@ -1,19 +1,14 @@
 #!/usr/bin/env node
 "use strict";
 
-const fs = require("node:fs");
-const { spawnSync } = require("node:child_process");
 const { CliArgumentError, parseCliArgs } = require("./cli-args");
-const { readStableFile, resolveSafePath } = require("./safe-files");
+const { openDelivery, captureSnapshot, captureContext } = require("./delivery-inputs");
 const {
   validateDeliveryControl,
   evaluateDeliveryControl,
   contractDigest,
   impactScopeDigest,
-  snapshotDigest,
 } = require("./delivery-controls");
-
-const MAX_STATUS_BYTES = 256 * 1024;
 
 function main(argv) {
   const { options, positionals } = parseCliArgs(argv, { options: {
@@ -30,22 +25,7 @@ function main(argv) {
     return;
   }
   if (!options.projectRoot || !options.workspace) throw new CliArgumentError("--project-root and --workspace are required");
-  const root = fs.realpathSync(options.projectRoot);
-  if (!fs.statSync(root).isDirectory()) throw new CliArgumentError("Project root must be a directory");
-  const workspace = resolveSafePath(root, options.workspace);
-  if (!fs.statSync(workspace).isDirectory()) throw new CliArgumentError("Workspace must be a directory");
-  const statusPath = resolveSafePath(workspace, "workflow-status.json");
-  let status;
-  try {
-    status = JSON.parse(readStableFile(statusPath, {
-      maxBytes: MAX_STATUS_BYTES,
-      changedMessage: "Input changed during capture",
-    }));
-  }
-  catch (error) {
-    if (error instanceof CliArgumentError) throw error;
-    throw new Error("Status is unavailable, oversized or invalid JSON");
-  }
+  const { root, workspace, status } = openDelivery(options.projectRoot, options.workspace);
   const operation = options.mode || "assess";
   const errors = validateDeliveryControl(status);
   let output;
@@ -55,41 +35,12 @@ function main(argv) {
     const c = status.deliveryControl;
     // The last snapshot is the explicit capture manifest, not an inferred
     // dependency graph. "missing" hashes permit initial capture and deletions.
-    const manifest = c.snapshots.at(-1);
-    if (!manifest) throw new Error("Add an explicit snapshot file manifest before capture");
-    const files = manifest.files.map((entry) => {
-      const file = resolveSafePath(root, entry.path, { allowMissing: true });
-      return {
-        ...entry,
-        hash: file ? readStableFile(file, {
-          maxBytes: 1024 * 1024 * 1024,
-          hashOnly: true,
-          changedMessage: "Input changed during capture",
-        }) : "missing",
-      };
-    });
-    const git = spawnSync("git", ["-C", root, "rev-parse", "HEAD"], { shell: false, encoding: "utf8", timeout: 5000 });
-    const snapshot = { id: manifest.id, headSha: git.status === 0 ? git.stdout.trim() : null,
-      baseSha: manifest.baseSha, files, codeDigest: snapshotDigest(files) };
     if (operation === "capture") {
+      const snapshot = captureSnapshot(root, c.snapshots.at(-1));
       output = { operation, subject: c.taskMode === "implementation" ? "implementation" : "analysis",
         snapshot, contractDigest: contractDigest(c), impactScopeDigest: impactScopeDigest(c), diagnostics: [] };
     } else {
-      const outputHashes = Object.create(null);
-      const evidence = [
-        ...c.verificationRuns.flatMap((run) => run.outputRefs),
-        ...c.environmentProbes.map((probe) => probe.evidence),
-      ];
-      for (const entry of evidence) {
-        if (Object.prototype.hasOwnProperty.call(outputHashes, entry.path)) continue;
-        const file = resolveSafePath(workspace, entry.path, { allowMissing: true });
-        outputHashes[entry.path] = file ? readStableFile(file, {
-          maxBytes: 1024 * 1024 * 1024,
-          hashOnly: true,
-          changedMessage: "Input changed during capture",
-        }) : null;
-      }
-      output = { operation, ...evaluateDeliveryControl(status, { snapshot, outputHashes }) };
+      output = { operation, ...evaluateDeliveryControl(status, captureContext(root, workspace, c)) };
     }
   }
   if (options.json) console.log(JSON.stringify(output, null, 2));

@@ -44,7 +44,7 @@ outputs:
 - PRD、验收标准或需求简报。
 - UI 方案、截图、设计稿或页面路径。
 - 测试结果或待验证项。
-- 原任务的 v2.1 `workflow-status.json`；2.0 保留既有 P0/P1 能力，旧任务缺少对应数据时按
+- 原任务的版本化 `workflow-status.json`；新任务用 2.2，2.0/2.1 保留原判定，旧任务缺少对应数据时按
   [Delivery Controls](../docs/delivery-controls.md) 标记 legacy_unverified，
   不根据旧 completed 或最高验证等级补写通过。
 

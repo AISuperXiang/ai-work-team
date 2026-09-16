@@ -4,6 +4,10 @@
 
 修改 server import、loader、bootstrap、hydration、SSR 错误终态、fallback 或服务端/客户端去重逻辑时选择本包。
 
+2.2 按风险选 `server-entry-import`（integration/runtime）或 `unresolved-recovery`
+（integration/runtime/browser）义务，记录真实入口、fixture、断言和 check。
+分页 unit check 即使 V4 也不能关闭 server import 义务；没有触发的义务不强加。
+
 ## 最短证伪路径
 
 1. 从真实 server entry import/render，不以组件 harness 或 barrel 字符串链代替。

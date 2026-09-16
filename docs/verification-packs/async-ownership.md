@@ -4,6 +4,9 @@
 
 修改 await 边界、并发调度、取消、重试、分页、卸载、刷新或共享调用者所有权时选择本包。
 
+2.2 选择 `async-ordering` 义务（unit/integration/runtime/browser），
+明确 entryRef、可控时序 fixtureRef、可观察 assertion 和 checkIds。
+
 ## 最短证伪路径
 
 1. 用 deferred、barrier 或可控 promise 固定关键 await 前后的时序。

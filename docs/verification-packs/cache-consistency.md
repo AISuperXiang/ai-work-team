@@ -4,6 +4,13 @@
 
 修改 cache key、TTL、命中结构、refresh、invalidate、持久化写、代次或成功事件语义时选择本包。
 
+2.2 选择 `consumer-cache-hit` 义务（integration/runtime/browser），
+记录真实消费者入口、snapshot 内 fixture、返回结构/事件断言及 checkIds；
+仅验证控制器内部状态的 unit 不能关闭消费链义务。
+
+仅改变内部时序、隔离或失效策略时可选 `cache-ordering`（另允许 unit），
+用可控 fixture 证明相关状态，不因此强加页面消费链。
+
 ## 最短证伪路径
 
 1. 覆盖真实消费者的 miss -> write -> hit 链，而不是只测 controller 内部状态。

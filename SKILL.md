@@ -1,8 +1,8 @@
 ---
-name: "ai-work-team"
-description: "产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接或续跑需求、评审需求、从目标生成 PRD 和可控迭代技术方案、代码审查与优化、增量审查或问题复核、仅执行验证、汇总交付、缺陷修复、走查验收，或使用 /team 指令。"
+name: ai-work-team
+description: 产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接或续跑需求、评审需求、从目标生成 PRD 和可控迭代技术方案、代码审查与优化、增量审查或问题复核、仅执行验证、汇总交付、缺陷修复、走查验收，或使用 /team 指令。
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # AI Work Team
@@ -82,9 +82,9 @@ metadata:
 ## 执行循环
 
 build、bugfix、resume、verify、code-review、walk、deliver 必须先读取
-[`docs/delivery-controls.md`](docs/delivery-controls.md)。新任务使用 v2.1 状态：
+[`docs/delivery-controls.md`](docs/delivery-controls.md)。新任务使用 v2.2 状态：
 有效契约、原反例与保留路径、逐验收项证据共用现有门禁。
-2.0 状态继续按已有 P0/P1 契约读取；旧任务无对应证据时不得自动提升为新门禁已验收。
+2.0/2.1 状态继续按原契约读取；旧任务无对应证据时不得自动提升为新门禁已验收。
 goal-design 的设计批准仍不代表实现批准。
 
 `resume`、`verify`、代码审查模式和 `deliver` 是操作约束，优先于领域关键词：
@@ -110,6 +110,15 @@ goal-design 的设计批准仍不代表实现批准。
 12. **Verify**：按项目声明能力预检环境，按风险加载 async/SSR/cache 验证包并运行检查；不能运行时说明原因、影响和替代检查，并按 `V0-V4` 标记验证等级。
 13. **Assess Quality**：检查适用质量维度；数字评分仅在用户要求或复盘比较时提供，不参与准入。
 14. **Deliver**：从权威状态单向输出交付摘要、证据、风险和下一步建议。
+
+2.2 任务按 [`docs/evidence-recording.md`](docs/evidence-recording.md) 执行
+`record-evidence start → prepare → 项目验证 → import → summary`：开始时记录实际技能身份，
+运行前固定输入绑定，运行后导入来源侧已脱敏结果；未知 runner/wrapper 不得改填通过。
+技术设计前逐条抽取需求来源到 `assurance.requirements`，QA 从原文复核遗漏及状态组合，
+再绑定 coverageReview；selected 风险包必须有入口、fixture、断言和方法兼容的义务。
+SDK/API/配置消费链变化时加载
+[`consumer-contract-standard.md`](docs/engineering-standards/consumer-contract-standard.md)，
+记录真实两侧版本、消费入口和样本；库内通过不能替代消费端验证。
 
 如果需求信息不足但可通过仓库探索获得，先探索；只有产品意图、优先级或取舍无法从环境推断时才询问用户。
 

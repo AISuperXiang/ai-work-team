@@ -60,6 +60,9 @@ outputs:
 - 是否有最小可交付切片。
 - 是否避免不必要重构。
 - 测试策略是否覆盖核心风险。
+- 需求来源是否逐条映射到必需验收与 check，共享选项的 loading/empty/error 等相关组合是否遗漏。
+- SDK/API/配置变化是否按 [消费者契约](../docs/engineering-standards/consumer-contract-standard.md)
+  固定真实两侧版本、调用入口、序列化样本和适用验证项。
 - 未激活的工程角色是否有明确不适用依据。
 
 ## 失败处理

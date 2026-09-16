@@ -12,5 +12,7 @@
 
 - 技术负责人从当前 impact scope 决定 selected / not_applicable，并记录 triggerRef 和理由。
 - selected 包的 check 必须属于当前 scope 和 required acceptance；同一个 check 可以服务多个包。
+- 2.2 selected 包每个 check 都需关联 assurance.obligations，写 kind、真实 entryRef、
+  snapshot 内 fixtureRef、assertion。只选本次触发的义务；方法兼容和绿测不能替代 QA 的断言语义复核。
 - 关键词只辅助发现风险。没有真实语义影响时不加载，不生成空验证矩阵。
 - 无法获得 fixture、目标分支或运行环境时保持 NOT_RUN/BLOCKED，并给出 owner；不得用重复压力运行、截图数量或更高全局验证等级补位。

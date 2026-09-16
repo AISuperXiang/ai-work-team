@@ -43,6 +43,10 @@ outputs:
 - 已按 [Behavior Impact Standard](../docs/engineering-standards/behavior-impact-standard.md)
   记录入口、共享决策、同类入口、消费者、可观察结果、排除依据和合并保护检查。
 - 已确认复杂度分级，以及本次实现需要支撑的价值或缺陷影响观测方式。
+- 2.2 任务已从原需求建立 requirements→acceptance/check 覆盖并完成 QA 复核；
+  selected 风险包的义务有真实入口、fixture、断言和兼容方法。
+  SDK/API/配置变化按 [消费者契约](../docs/engineering-standards/consumer-contract-standard.md)
+  明确两侧版本、实际消费入口、序列化样本和适用 facets。
 
 ## 工作区落盘
 
@@ -88,6 +92,8 @@ workspace/<existing-requirement>/features/<feature-folder>/
    只绑定 current scope 中的 required check。
 9. **失败修复循环**：验证失败时必须记录失败类型、修复动作和复跑结果；最多连续 3 轮后仍失败则交付阻塞报告。
 10. **证据归档**：把命令结果、日志摘要、截图路径、数据来源或人工验收记录写入 `evidence/README.md`。
+    2.2 按 [自动入账](../docs/evidence-recording.md) 在验证前 prepare、验证后 import；
+    assertion、runner、wrapper 各自记录，零断言和未知结果不推导通过。再由 QA 核对 evidenceReview。
 11. **质量评估**：按 `docs/quality-rubrics.md` 检查适用维度；数字评分仅在用户要求或复盘时提供，不参与准入。
 12. **走查交付**：由已激活的产品、UI、QA 角色走查；更新权威状态，并按 recordPolicy 生成 walkthrough/handoff/delivery 视图。
 

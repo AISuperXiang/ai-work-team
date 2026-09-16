@@ -47,6 +47,10 @@
 
 若 consumers 为空，必须记录 `consumerNotApplicableReason`。排除项必须有证据引用，不能写“预计无影响”。
 
+SDK/API、schema、默认值、配置序列化或 lookup 变化时按
+[真实消费者契约](consumer-contract-standard.md) 追踪生产者→样本→消费者→结果。
+2.2 用 assurance.consumerContracts 关联 scope；其他消费者有明确不适用依据时登记 consumerExclusions。
+
 ## 4. 增量代码审查
 
 代码审查分为：

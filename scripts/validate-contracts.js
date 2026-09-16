@@ -1080,7 +1080,7 @@ function validateStatusObject(parsed, relativePath, options = {}) {
   const controlErrors = validateDeliveryControl(parsed);
   for (const diagnostic of controlErrors) fail(`${relativePath} ${diagnostic.code}: ${diagnostic.at || ""}`);
   if (controlErrors.length && parsed.schemaVersion) return false;
-  if (["2.0", "2.1"].includes(parsed.schemaVersion) && !templateMode) {
+  if (["2.0", "2.1", "2.2"].includes(parsed.schemaVersion) && !templateMode) {
     const control = parsed.deliveryControl;
     const terminal = ["accepted", "analysis_complete"].includes(control.completion.claim);
     if (terminal) {
@@ -1209,6 +1209,7 @@ function validateStatusSchemaContract() {
   const supportedVersions = schema.properties?.schemaVersion?.enum || [];
   if (supportedVersions.includes("2.0") &&
       supportedVersions.includes("2.1") &&
+      supportedVersions.includes("2.2") &&
       schema.dependentRequired?.schemaVersion?.includes("deliveryControl") &&
       schema.dependentRequired?.deliveryControl?.includes("schemaVersion") &&
       schema.$defs?.deliveryControl) {
@@ -1217,6 +1218,16 @@ function validateStatusSchemaContract() {
     fail("status schema missing versioned delivery control contract");
   }
   const deliveryRequired = schema.$defs?.deliveryControl?.required || [];
+  const v22 = schema.allOf?.find((item) => item.if?.properties?.schemaVersion?.const === "2.2")
+    ?.then?.properties?.deliveryControl;
+  if (v22?.required?.includes("assurance") &&
+      v22?.properties?.verificationRuns?.items?.required?.includes("result")) {
+    pass("status schema requires v2.2 assurance and structured results");
+  } else fail("status schema missing v2.2 assurance/result requirement");
+  for (const definition of ["assurance", "requirement", "obligation", "consumerContract", "result", "executionIdentity"]) {
+    if (schema.$defs?.[definition]) pass(`${relativePath} defines v2.2 contract: ${definition}`);
+    else fail(`${relativePath} missing v2.2 contract: ${definition}`);
+  }
   for (const field of [
     "taskId",
     "authorizedActions",
@@ -1815,7 +1826,7 @@ function tableHasRows(relativePath, heading) {
 }
 
 function artifactOmitted(status, artifact) {
-  return status?.schemaVersion === "2.1" &&
+  return ["2.1", "2.2"].includes(status?.schemaVersion) &&
     status.deliveryControl?.recordPolicy?.omittedArtifacts?.some((item) =>
       item.artifact === artifact && isMeaningful(item.reason) &&
       isMeaningful(item.decisionRef));

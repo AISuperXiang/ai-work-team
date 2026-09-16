@@ -5,8 +5,8 @@
 
 ## 1. 适用与责任
 
-- 新 build、bugfix、code-review 状态使用 `schemaVersion: "2.1"`，在既有 `workflow-status.json.deliveryControl` 记录控制数据。
-- `2.0` 继续按 P0/P1 契约读取；只有 `2.1` 提供测试选择分层、finding 归因、风险验证包和权威记录策略，不静默补造历史字段。
+- 新 build、bugfix、code-review 状态使用 `schemaVersion: "2.2"`，在既有 `workflow-status.json.deliveryControl` 记录控制数据。
+- `2.0/2.1` 保持原读取语义；2.1 起提供测试选择、finding 归因和权威记录策略；2.2 增加自动入账、需求覆盖、验证义务及消费者契约，不静默补造历史字段。
 - walk/deliver 必须读取原任务状态并核对有效性。没有 v2 数据时明确为 legacy_unverified，不把旧 completed 当作新门禁通过。
 - goal-design 保留原四类自治契约；批准进入 build 时引用其目标与决定生成 v2，不重新发明目标。
 - 交付经理维护有效来源与结论；实现 owner 维护影响范围、反例和保留行为；QA 核对预期依据与证据。
@@ -127,7 +127,7 @@ capture/assess 均不写文件、不执行记录的 argv、不访问 URL、不�
 
 ## 8. 兼容与诚实边界
 
-无 schemaVersion 的旧档案仍按旧规则审计，不自动改写或补证据。`2.0` 保留 P0/P1 能力；新任务使用 `2.1`。未知版本或有 deliveryControl 无版本均报错。旧任务重新实现/验收前显式升级并补足证据。
+无 schemaVersion 的旧档案仍按旧规则审计，不自动改写或补证据。`2.0/2.1` 保持原能力；新任务使用 `2.2`。未知版本或有 deliveryControl 无版本均报错。旧任务重新实现/验收时按 [升级规则](evidence-recording.md) 保留历史，不只改版本号。
 
 core validate:contracts 不扫描历史 workspace；历史失败由显式 validate:workspaces 输出，不删除档案来换全绿。
 
@@ -196,6 +196,10 @@ Agent 默认从 current impact scope 生成显式项目根相对路径。没有�
 拥有 run 的 invocation 必须允许 `run_verification`。退出 0、全部 skip、NOT RUN
 或未触达目标分支仍不能推导 PASSED。
 
+2.2 沿用上述约束，并要求每个 run 的 result 独立记录 assertion、executed、runner、wrapper、
+原始信封 hash 和执行前 bindingDigest。按 [证据自动入账](evidence-recording.md) 使用
+start/prepare/import，不手动重盖旧结果的输入摘要；工具不会运行历史命令。
+
 `knownFailures` 只复用诊断与 owner。签名必须包含稳定 case/error 身份和环境条件；源码、依赖、fixture、工具、catalog inventory 或影响范围变化时重新评估。已知失败不抹掉 required 失败，不降低发布门禁。
 
 ## 13. Finding 裁决
@@ -215,6 +219,22 @@ evidenceStatus、attribution、confidence、fixedState 相互独立。pre_existi
 按 [verification-packs](verification-packs/README.md) 选择 async_ownership、ssr_recovery、cache_consistency。selected 包只引用 current impact scope 中的 required check；同一 check 可以服务多个包。not_applicable 必须有触发分析和理由，不制造空矩阵。
 
 验证包不规定业务实现，不要求所有项目使用同一种取消、重试、SSR 或缓存方案。selected 包有 check 未通过时保持 review。
+
+2.2 在 assurance.obligations 为 selected 包的每个 check 声明义务 kind、真实 entryRef、
+进入 snapshot 的 fixtureRef 和 assertion。server-entry-import 只接受 integration/runtime；
+unresolved-recovery 另可 browser；async-ordering/cache-ordering 可 unit/integration/runtime/browser；
+consumer-cache-hit 只接受 integration/runtime/browser。方法兼容只是必要条件，QA 仍需核对实际断言。
+
+## 14.1 需求与消费者覆盖（2.2）
+
+在 assurance.requirements 从原始需求逐条登记 id、contractRevision、sourceRef、behavior、required、
+checkIds。checkIds 反向解析到 acceptance；当前必需需求只能关联当前 required 且在影响范围内的 check，
+当前每个 required check 也必须有需求来源。空映射报告 REQUIREMENT_UNCOVERED，不能用现有测试全绿掩盖。
+
+QA 对照原文复核遗漏、组合状态和断言语义，写 coverageReview 的 definitionDigest/reviewer/ref。
+定义摘要包含契约、需求、义务、消费者定义与影响范围；定义变化使旧复核失效。完全漏登的原文条目
+仍需人工发现，工具不解析 PRD 语义。公开 SDK/API/配置消费链按
+[真实消费者契约](engineering-standards/consumer-contract-standard.md) 绑定两侧版本、样本和 required facets。
 
 ## 15. 权威记录与效果评估
 

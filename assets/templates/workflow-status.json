@@ -1,6 +1,10 @@
 {
-  "schemaVersion": "2.1",
+  "schemaVersion": "2.2",
   "deliveryControl": {
+    "assurance": {
+      "executionIdentities": [], "requirements": [], "coverageReview": null,
+      "obligations": [], "consumerContracts": [], "consumerExclusions": []
+    },
     "taskId": "replace-with-stable-task-id",
     "taskMode": "implementation",
     "authorizedActions": [
