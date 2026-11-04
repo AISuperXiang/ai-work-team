@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "2.2",
+  "deliveryControl": {
+    "assurance": {
+      "executionIdentities": [],
+      "requirements": [],
+      "coverageReview": null,
+      "obligations": [],
+      "consumerContracts": [],
+      "consumerExclusions": []
+    },
+    "taskId": "replace-with-stable-task-id",
+    "taskMode": "design",
+    "authorizedActions": [
+      "read",
+      "run_verification",
+      "run_assessment",
+      "append_evidence",
+      "write_summary"
+    ],
+    "activeContractRevision": null,
+    "currentInvocationId": null,
+    "currentImpactScopeIds": [],
+    "contracts": [],
+    "acceptance": [],
+    "fixes": [],
+    "snapshots": [],
+    "invocations": [],
+    "impactScopes": [],
+    "reviewRuns": [],
+    "environmentProbes": [],
+    "testSelections": [],
+    "catalogHealth": [],
+    "knownFailures": [],
+    "verificationPacks": [],
+    "verificationRuns": [],
+    "findingDisposition": [],
+    "recordPolicy": {
+      "profile": "standard",
+      "authoritativeRecord": "workflow-status.json",
+      "summaryMode": "derived",
+      "requiredArtifacts": ["workflow-status.json"],
+      "derivedArtifacts": [
+        "technical-design.md",
+        "delivery-summary.md"
+      ],
+      "omittedArtifacts": [],
+      "summarySourceDigest": null
+    },
+    "completion": {
+      "implementation": "not_applicable",
+      "claim": "pending"
+    }
+  },
+  "workflow": "technical-design-review",
+  "requirementFolder": "",
+  "complexityLevel": "S",
+  "executionProfile": "standard",
+  "verificationLevel": "V0",
+  "rolePlan": [
+    {
+      "role": "delivery-manager",
+      "mode": "active",
+      "reason": "维护方案范围、证据、决策和交付结论。",
+      "stages": ["Context", "Decision"]
+    },
+    {
+      "role": "product-manager",
+      "mode": "not_applicable",
+      "reason": "初始化时没有独立产品范围；若后续出现用户行为取舍必须重新激活。",
+      "stages": []
+    },
+    {
+      "role": "operations-manager",
+      "mode": "not_applicable",
+      "reason": "初始化时不涉及运营配置、实验或发布节奏。",
+      "stages": []
+    },
+    {
+      "role": "ui-designer",
+      "mode": "not_applicable",
+      "reason": "初始化时不涉及界面或交互；命中 UI 风险时必须重新激活。",
+      "stages": []
+    },
+    {
+      "role": "tech-lead",
+      "mode": "active",
+      "reason": "负责上下文、架构方案和技术决策。",
+      "stages": ["Context", "Architecture", "Decision"]
+    },
+    {
+      "role": "frontend-engineer",
+      "mode": "not_applicable",
+      "reason": "初始化时未确认客户端实现范围。",
+      "stages": []
+    },
+    {
+      "role": "backend-engineer",
+      "mode": "not_applicable",
+      "reason": "初始化时未确认服务端实现范围。",
+      "stages": []
+    },
+    {
+      "role": "qa-engineer",
+      "mode": "active",
+      "reason": "负责方案可测性、验收和证据策略复核。",
+      "stages": ["QA Review", "Decision"]
+    }
+  ],
+  "updatedAt": "",
+  "stages": [
+    {
+      "name": "Context",
+      "owner": "delivery-manager,tech-lead",
+      "status": "pending",
+      "gates": ["role-activation-gate", "evidence-gate"],
+      "artifacts": ["technical-design.md"],
+      "evidence": []
+    },
+    {
+      "name": "Architecture",
+      "owner": "tech-lead",
+      "status": "pending",
+      "gates": ["technical-gate", "decision-gate"],
+      "artifacts": ["technical-design.md", "implementation-plan.md"],
+      "evidence": []
+    },
+    {
+      "name": "QA Review",
+      "owner": "qa-engineer",
+      "status": "pending",
+      "gates": ["test-gate", "verification-gate"],
+      "artifacts": ["test-plan.md"],
+      "evidence": []
+    },
+    {
+      "name": "Decision",
+      "owner": "delivery-manager,tech-lead",
+      "status": "pending",
+      "gates": ["decision-gate", "handoff-gate", "delivery-gate"],
+      "artifacts": [
+        "technical-design.md",
+        "delivery-summary.md",
+        "workflow-status.json"
+      ],
+      "evidence": []
+    }
+  ]
+}
+

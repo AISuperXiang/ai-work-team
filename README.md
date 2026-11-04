@@ -4,7 +4,7 @@
 
 > 面向 Agent / IDE 的产品研发专家团队编排 Skill：把一句自然语言需求或 `/team` 指令，推进为有方案、有实现、有验证证据、可走查、可交付的结果。
 
-当前版本：`0.7.0`。本版本增加证据自动入账、需求验收覆盖复核和真实消费者契约校验。
+当前版本：`0.8.0`。本版本增加安全幂等的 Workspace Init 与递归只读 Audit。
 
 ## 项目简介
 
@@ -64,6 +64,7 @@
 | Skill 效果评估 | 需要比较规则升级是否降低错误和人工成本 | holdout、真实任务试点、adopt/hold/reject |
 | 产品 / UI / QA 走查 | 多角色需要形成统一验收结论 | 走查报告、阻塞项、交付结论 |
 | 项目上下文构建 | Agent 缺少项目结构和约束 | `AGENTS.md` |
+| Workspace Init / Audit | 新任务缺状态，父子目录或历史任务容易漏记 | 最小 v2.2 状态、递归库存与结构缺口 |
 | 能力扩展 | 团队需要外部 Skill 或本地 CLI | 能力目录、角色映射、安全边界 |
 
 ## 快速开始
@@ -120,6 +121,8 @@ npm test
 | `/team goal-design <目标>` | 从目标生成 PRD、需求/UI 评审、四类自治 Schema 和评审后的技术方案，等待用户批准执行 |
 | `/team build <需求>` | 从需求到实现、验证和交付完整推进 |
 | `/team buildContext <工作目录> [需求/范围]` | 扫描项目并生成或更新 `AGENTS.md` |
+| `/team init-workspace <项目根目录> <slug> <workflow>` | 安全初始化最小 v2.2 任务状态 |
+| `/team audit-workspaces <项目根目录> [日期范围]` | 递归盘点主任务、feature/implementation 子任务和状态缺口 |
 | `/team bugfix <问题>` | 按复现、根因、修复、回归流程处理缺陷 |
 | `/team resume <任务>` | 核对变化，从原工作流最早必要阶段续跑 |
 | `/team verify <任务> [check IDs]` | 只运行缺失、失败或失效验证，不修改源码、测试期望或 fixture |
@@ -142,6 +145,8 @@ npm test
 /team code-review 当前 diff --mode delta
 /team code-review workspace/20260915-order-fix --mode recheck --findings F1,F2
 /team buildContext <project-root> 为后续需求建立 Agent 上下文
+/team init-workspace <project-root> workspace-init-audit requirement-end-to-end
+/team audit-workspaces <project-root> --since 2026-08-04 --until 2026-11-04
 ```
 
 完整指令说明见 [`commands/team.md`](./commands/team.md)。
@@ -297,6 +302,18 @@ node scripts/check-delivery.js \
 工具不执行状态中记录的命令，也不替代业务语义、影响范围或环境身份的人工复核。
 旧状态仍可审计，但结果为 `legacy_unverified`，不会自动升级为当前可验收。
 
+新任务可先安全初始化最小状态，并递归审计 workspace 库存：
+
+```bash
+npm run workspace:init -- --root /absolute/project --slug short-task \
+  --workflow requirement-end-to-end
+npm run workspace:audit -- --root /absolute/project --since 2026-08-04 --json
+```
+
+Init 只创建 `workflow-status.json`，已有匹配状态幂等复用，冲突状态不覆盖。
+`--dry-run` 与 `--json` 仅预览。Audit 始终只读，发现缺失/无效状态或 symlink 任务时退出 `1`；
+它不替代 `check-delivery` 的当前交付评估。
+
 增量审查必须分别展示本轮 reviewed、仍有效 inherited 和 gaps。运行时证据必须绑定
 impact scope 与脱敏 environment probe；端口占用或服务心跳不能单独证明目标实例和当前构建。
 
@@ -416,6 +433,7 @@ npm run validate:contracts
 npm run test:behavior
 npm run test:mutation
 npm run validate:workspaces
+npm run workspace:audit -- --root /absolute/project --json
 ```
 
 ## 文档职责

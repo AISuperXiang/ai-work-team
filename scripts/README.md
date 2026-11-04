@@ -4,6 +4,36 @@
 [`cli-quality-architecture.md`](../docs/engineering-standards/cli-quality-architecture.md)。
 `safe-files.js` 为只读 CLI 统一提供相对路径、symlink、文件类型、大小和读取稳定性检查。
 
+## init-task.js
+
+安全初始化一个最小 v2.2 workspace 状态：
+
+```bash
+node scripts/init-task.js --root /absolute/project --slug short-task \
+  --workflow requirement-end-to-end
+```
+
+- 支持 build、bugfix、code-review 和 technical-design 四类状态模板。
+- 绑定日期目录、task/invocation ID、Skill identity、profile 和 complexity。
+- 只创建 `workflow-status.json`；已有匹配状态幂等返回，冲突或无效状态失败关闭。
+- `--dry-run` 和 `--json` 零写入。
+- 未提供 `--authorization-ref` 时记录通用 `user-request`；Agent 工作流应传可追溯引用。
+
+## audit-workspaces.js
+
+递归盘点 workspace：
+
+```bash
+node scripts/audit-workspaces.js --root /absolute/project \
+  --since 2026-08-04 --until 2026-11-04 --json
+```
+
+- 扫描主任务、`features/*` 和 `implementation` 子任务。
+- 报告 present/missing/invalid 状态及主/子任务分项统计。
+- 拒绝并报告 symlink 任务，不跟随到 workspace 外部。
+- 发现缺失、无效或不安全条目退出 `1`；输入错误退出 `2`。
+- 始终只读，只做库存和结构检查，不替代 `check-delivery`。
+
 ## validate-structure.js
 
 运行：

@@ -1,6 +1,6 @@
 {
   "name": "ai-work-team",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "description": "A product-engineering team skill with resumable workflows, evidence-gated delivery, code review, implementation, and validation tooling.",
   "engines": {
@@ -17,6 +17,8 @@
     "skills:list": "node scripts/list-external-skills.js",
     "skills:install": "node scripts/install-external-skills.js",
     "context:build": "node scripts/build-context.js",
+    "workspace:init": "node scripts/init-task.js",
+    "workspace:audit": "node scripts/audit-workspaces.js",
     "eval:skill": "node scripts/evaluate-skill.js",
     "test": "npm run validate:structure && npm run validate:contracts && npm run test:behavior"
   },

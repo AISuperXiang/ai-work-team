@@ -22,6 +22,8 @@
 - 已有受管文件超过 256 KiB 时失败关闭，不能把读取失败当成空文件。
 - dry-run 和 JSON 模式不得产生文件写入。
 - 更新带受管 marker 的文件时必须保留 marker 外的人工内容，并保证重复执行幂等。
+- `init-task.js` 只创建一个新的 `workflow-status.json`；相同状态幂等返回，冲突或无效状态不得隐式 repair/overwrite。
+- `audit-workspaces.js` 必须全程只读，递归主任务与 `features/*`/`implementation` 子任务，不跟随 symlink，也不把结构健康表述为交付 readiness。
 
 只读证据检查还必须：
 
@@ -61,6 +63,8 @@ JSON/dry-run 零写入。导入必须匹配执行前绑定，分离 assertion/ru
   - candidate、dry-run、隐式批量与子进程退出码绕过。
   - 核心 contracts 重新扫描历史 workspace。
   - 三个核心 CLI 被替换为直接成功退出。
+  - workspace audit 缺口退出码或 symlink 范围被绕过。
+  - workspace init 的 preview 零写入、已有状态保护、目录绑定或入口 kill switch 被绕过。
 - 新增关键分支时必须同步增加 mutant 或说明已有 mutant 如何覆盖。
 - 交付控制的关键 mutant 还包括：忽略契约 digest/保留项、STALE 或 skip 当 PASS、
   open P1 仍接受、旧版本降级、路径校验绕过、verify/deliver 动作越权、
@@ -74,6 +78,7 @@ JSON/dry-run 零写入。导入必须匹配执行前绑定，分离 assertion/ru
 
 - `npm run validate:contracts` 只校验可发布核心、模板和规范，不扫描历史 workspace 状态。
 - `npm run validate:workspaces` 显式扫描全部 workspace。
+- `npm run workspace:audit -- --root <project>` 对任意项目做递归库存/结构审计；与只扫描 Skill 归档的 `validate:workspaces` 分工独立。
 - 单目录审计使用：
 
 ```bash

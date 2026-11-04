@@ -21,6 +21,8 @@ These rules apply to the entire `ai-work-team` repository. Read `SKILL.md` first
 - If an existing managed file exceeds 256 KiB or cannot be read safely, fail without modifying it.
 - Dry-run and JSON modes must not write files.
 - Preserve manual content outside managed markers and keep repeated updates idempotent.
+- `init-task.js` may create one new `workflow-status.json` only. Matching state is idempotent; conflicting or invalid state must never be repaired or overwritten implicitly.
+- `audit-workspaces.js` is read-only and must not follow symlink tasks or present structural inventory as delivery readiness.
 
 ## Test Rules
 
@@ -36,6 +38,7 @@ These rules apply to the entire `ai-work-team` repository. Read `SKILL.md` first
 - `npm run test:mutation` must report a score of at least 85%.
 - Critical mutants must have zero survivors.
 - Critical mutants include argument-validation bypasses, path and file-size guard bypasses, install policy bypasses, subprocess exit-code loss, workspace/core contract coupling, and direct-success CLI kill switches.
+- Workspace CLI critical mutants also include audit gap/symlink bypasses, init preview writes, existing-state overwrite paths, and missing task/folder bindings.
 - Add or update mutation cases whenever a new critical branch is introduced.
 
 ## Contract Validation Rules
@@ -49,6 +52,7 @@ These rules apply to the entire `ai-work-team` repository. Read `SKILL.md` first
 - Review findings must record counterevidence, attribution, confidence, and current fixed state. Retracted findings require explicit counterevidence; pre-existing findings do not create repair authorization.
 - `workflow-status.json` is the authoritative current record. Derived summaries cannot override contracts, findings, runs, readiness, or resource ownership; numeric quality scores are advisory only.
 - `scripts/evaluate-skill.js` is read-only. It may aggregate only explicit evaluation input, must reject answer leakage and unsafe paths, and must not run agents, access hidden oracles, or write results.
+- `scripts/audit-workspaces.js` only inventories primary/feature/implementation task state. Missing or invalid state is non-zero; it does not replace `check-delivery`.
 - Historical workspace validation is explicit:
   - All workspaces: `npm run validate:workspaces`
   - One workspace: `node scripts/validate-contracts.js --workspace workspace/<requirement-folder>`

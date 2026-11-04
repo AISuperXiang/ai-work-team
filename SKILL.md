@@ -2,7 +2,7 @@
 name: ai-work-team
 description: 产品/运营/UI/研发/测试专家团队工作流编排 Skill。Use when user asks to 承接或续跑需求、评审需求、从目标生成 PRD 和可控迭代技术方案、代码审查与优化、增量审查或问题复核、仅执行验证、汇总交付、缺陷修复、走查验收，或使用 /team 指令。
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # AI Work Team
@@ -40,6 +40,7 @@ metadata:
 - 用户要求需求评审、代码逻辑审查与优化、技术方案评审、缺陷修复交付、产品/UI/QA 走查。
 - 用户要求续跑已有任务、只执行验证、增量审查或复核指定问题。
 - 用户要求构建项目上下文、生成或更新 `AGENTS.md`。
+- 用户要求初始化 workspace 任务或递归审计 workspace 完整性。
 - 用户要求推荐或安装外部 Skills，或登记本地 CLI 能力给团队角色使用。
 
 不适用场景：
@@ -74,6 +75,8 @@ metadata:
 | `/team walk`                   | `workflows/product-ui-qa-walkthrough.md`、`docs/delivery-controls.md`、`docs/quality-rubrics.md`、`docs/handoff-contract.md`                                                                                                                                                                                                                                       | `members/product-manager.md`、`members/ui-designer.md`、`members/qa-engineer.md`、`assets/templates/walkthrough-report.md`        |
 | `/team deliver`                | `workflows/delivery-summary.md`、`docs/delivery-controls.md`、`docs/quality-rubrics.md`、`docs/handoff-contract.md`                                                                                                                                                                                                                                                | `members/delivery-manager.md`、`members/qa-engineer.md`、`assets/templates/delivery-summary.md`                                   |
 | `/team buildContext`           | `workflows/project-context-build.md`、`assets/templates/agents-context.md`                                                                                                                                                                                                                                                                                         | `scripts/build-context.js`、目标仓库现有 `AGENTS.md`                                                                              |
+| `/team init-workspace`         | `workspace/README.md`、`docs/engineering-standards/cli-quality-architecture.md`                                                                                                                                                                                                                                                                                    | `scripts/init-task.js`、对应工作流状态模板                                                                                         |
+| `/team audit-workspaces`       | `workspace/README.md`、`docs/engineering-standards/cli-quality-architecture.md`                                                                                                                                                                                                                                                                                    | `scripts/audit-workspaces.js`                                                                                                     |
 | `/team install`                | `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md`、`external-skills/role-map.md`                                                                                                                                                                                                                          | `external-skills/README.md`、`scripts/list-external-skills.js`、`scripts/install-external-skills.js`                              |
 | `/team register-cli`           | `external-cli/README.md`                                                                                                                                                                                                                                                                                                                                           | 已存在的 `external-cli/<cli-id>.md`                                                                                               |
 | Skill 优化效果评估             | `docs/methodologies/skill-evaluation-methodology.md`、`schemas/skill-evaluation.schema.json`                                                                                                                                                                                                                                                                       | `assets/templates/skill-evaluation.json`、`scripts/evaluate-skill.js`                                                             |
@@ -135,6 +138,8 @@ SDK/API/配置消费链变化时加载
 端到端交付、缺陷修复、走查和需要落盘证据的任务必须使用 `workspace/`：
 
 - 每个新需求默认创建 `workspace/YYYYMMDD-short-requirement-slug/`。
+- 新任务优先通过 `scripts/init-task.js` 初始化最小 v2.2 状态；`--json` 和 `--dry-run` 只预览不写入。
+- 使用 `scripts/audit-workspaces.js` 递归盘点主任务、`features/*` 和 `implementation` 子任务；审计只检查库存与结构，不替代交付 readiness。
 - 执行协议中的通用占位目录写作 `workspace/<requirement-folder>/`。
 - 只有用户明确指定“在某需求下增加某功能”时，才复用已有需求目录并写入 `features/`。
 - 代码改动发生在用户项目仓库；workspace 保存 PRD、方案、计划、决策、风险、交接、验证证据和交付摘要。

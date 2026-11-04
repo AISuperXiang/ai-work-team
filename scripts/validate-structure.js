@@ -40,6 +40,9 @@ const requiredFiles = [
   "scripts/check-delivery.js",
   "scripts/skill-evaluation.js",
   "scripts/evaluate-skill.js",
+  "scripts/workspace-tasks.js",
+  "scripts/init-task.js",
+  "scripts/audit-workspaces.js",
   "scripts/run-mutation-tests.js",
   "test/build-context.test.js",
   "test/external-skill-utils.test.js",
@@ -49,6 +52,8 @@ const requiredFiles = [
   "test/delivery-controls.test.js",
   "test/check-delivery.test.js",
   "test/skill-evaluation.test.js",
+  "test/init-task.test.js",
+  "test/audit-workspaces.test.js",
   ".github/workflows/ci.yml",
   "workspace/README.md"
 ];
@@ -122,6 +127,7 @@ const templateFiles = [
   "assets/templates/goal-design-workflow-status.json",
   "assets/templates/bugfix-workflow-status.json",
   "assets/templates/code-review-workflow-status.json",
+  "assets/templates/technical-design-workflow-status.json",
   "assets/templates/bug-analysis.md",
   "assets/templates/code-review.md",
   "assets/templates/ui-review.md",
@@ -368,6 +374,16 @@ if (existsFile("skill-runtime.json")) {
     runtimeConfig && runtimeConfig.entrypoints &&
       runtimeConfig.entrypoints.skillEvaluation === "scripts/evaluate-skill.js",
     "skill-runtime.json skill evaluation entry is evaluate-skill.js"
+  );
+  record(
+    runtimeConfig && runtimeConfig.entrypoints &&
+      runtimeConfig.entrypoints.workspaceInitialization === "scripts/init-task.js",
+    "skill-runtime.json workspace initialization entry is init-task.js"
+  );
+  record(
+    runtimeConfig && runtimeConfig.entrypoints &&
+      runtimeConfig.entrypoints.workspaceAudit === "scripts/audit-workspaces.js",
+    "skill-runtime.json workspace audit entry is audit-workspaces.js"
   );
   record(
     runtimeConfig && packageJson && runtimeConfig.skill && runtimeConfig.skill.version === packageJson.version,

@@ -28,6 +28,8 @@ execution_mode: sequential
 | P0 | `/team goal-design`、根据目标先完善需求并出技术方案、目标驱动自治迭代方案 | 目标驱动技术方案 | `workflows/goal-driven-technical-design.md` | `/team goal-design` |
 | P0 | `/team build`、承接需求、实现需求、从需求到交付 | 端到端需求交付 | `workflows/requirement-end-to-end.md` | `/team build` |
 | P0 | `/team buildContext`、生成 AGENTS.md、构建项目上下文、项目 Agent 索引 | 项目上下文构建 | `workflows/project-context-build.md` | `/team buildContext` |
+| P0 | `/team init-workspace`、初始化 workspace、创建任务状态 | Workspace 初始化 | `workspace/README.md` | `/team init-workspace` |
+| P0 | `/team audit-workspaces`、扫描 workspace、盘点任务记录 | Workspace 递归审计 | `workspace/README.md` | `/team audit-workspaces` |
 | P0 | `/team resume`、继续上次任务、从中断处继续 | 原工作流续跑 | `workflows/execution-protocol.md` | `/team resume` |
 | P0 | `/team verify`、只验证、只复跑、不改代码 | 原工作流仅验证 | `workflows/execution-protocol.md` | `/team verify` |
 | P0 | `/team code-review --mode recheck`、只复核问题、核对 finding | 代码审查问题复核 | `workflows/code-review-delivery.md` | `/team code-review --mode recheck` |

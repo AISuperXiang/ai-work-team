@@ -4,7 +4,7 @@
   "skill": {
     "id": "ai-work-team",
     "name": "AI Work Team Skill",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "entry": "SKILL.md",
     "description": "Product-engineering team workflows for goal design, implementation, resumable verification, evidence-gated code review, and delivery."
   },
@@ -29,7 +29,9 @@
     "validation": "scripts/validate-structure.js",
     "deliveryAssessment": "scripts/check-delivery.js",
     "evidenceRecording": "scripts/record-evidence.js",
-    "skillEvaluation": "scripts/evaluate-skill.js"
+    "skillEvaluation": "scripts/evaluate-skill.js",
+    "workspaceInitialization": "scripts/init-task.js",
+    "workspaceAudit": "scripts/audit-workspaces.js"
   },
   "install": {
     "packageName": "ai-work-team",

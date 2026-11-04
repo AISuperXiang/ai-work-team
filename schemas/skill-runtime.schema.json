@@ -107,6 +107,12 @@
         },
         "skillEvaluation": {
           "type": "string"
+        },
+        "workspaceInitialization": {
+          "type": "string"
+        },
+        "workspaceAudit": {
+          "type": "string"
         }
       }
     },

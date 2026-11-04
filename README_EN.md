@@ -4,7 +4,7 @@
 
 > A product-engineering expert team orchestration Skill for Agent / IDE environments. It turns a natural-language request or `/team` command into a reviewable delivery with plans, implementation, verification evidence, risks, and handoff records.
 
-Current version: `0.7.0`. This release adds automatic evidence recording, requirement coverage review, and real consumer contract checks.
+Current version: `0.8.0`. This release adds safe, idempotent Workspace Init and recursive read-only Audit.
 
 ## Overview
 
@@ -64,6 +64,7 @@ It is usually unnecessary when:
 | Skill-effect evaluation | Comparing whether rule changes reduce errors and human effort | Holdout cases, real-task pilots, adopt/hold/reject |
 | Product / UI / QA walkthrough | Reaching one multi-role acceptance decision | Walkthrough report, blockers, delivery decision |
 | Project context generation | Giving Agents project structure and constraints | `AGENTS.md` |
+| Workspace Init / Audit | Preventing new, nested, or historical tasks from missing authoritative state | Minimal v2.2 state plus recursive inventory and structural gaps |
 | Capability extension | Adding external Skills or local CLI tools safely | Capability catalog, role mapping, safety boundaries |
 
 ## Quick Start
@@ -120,6 +121,8 @@ After installation, use either a natural-language request or an explicit `/team`
 | `/team goal-design <goal>` | Generate a PRD, requirement/UI reviews, four autonomy Schemas, and a reviewed technical design for user approval |
 | `/team build <request>` | Drive a request through implementation, verification, and delivery |
 | `/team buildContext <working-directory> [request/scope]` | Scan a project and create or update `AGENTS.md` |
+| `/team init-workspace <project-root> <slug> <workflow>` | Safely initialize a minimal v2.2 task state |
+| `/team audit-workspaces <project-root> [date range]` | Recursively inventory primary, feature, and implementation task gaps |
 | `/team bugfix <problem>` | Handle a defect through reproduction, diagnosis, fix, and regression |
 | `/team resume <task>` | Reconcile changes and resume the original workflow from the first necessary stage |
 | `/team verify <task> [check IDs]` | Run only missing, failed, or stale checks without changing source, test expectations, or fixtures |
@@ -142,6 +145,8 @@ Examples:
 /team code-review current diff --mode delta
 /team code-review workspace/20260915-order-fix --mode recheck --findings F1,F2
 /team buildContext <project-root> Build Agent context for future work
+/team init-workspace <project-root> workspace-init-audit requirement-end-to-end
+/team audit-workspaces <project-root> --since 2026-08-04 --until 2026-11-04
 ```
 
 See [`commands/team.md`](./commands/team.md) for the complete command reference.
@@ -296,6 +301,18 @@ node scripts/check-delivery.js \
 
 The tool never executes commands recorded in status and does not replace human review of business meaning, impact scope, or environment identity. Legacy statuses remain auditable but evaluate as `legacy_unverified`, not currently acceptable.
 
+Initialize minimal task state and audit workspace inventory with:
+
+```bash
+npm run workspace:init -- --root /absolute/project --slug short-task \
+  --workflow requirement-end-to-end
+npm run workspace:audit -- --root /absolute/project --since 2026-08-04 --json
+```
+
+Init creates only `workflow-status.json`, reuses an exact existing state idempotently, and never overwrites conflicts.
+`--dry-run` and `--json` are preview-only. Audit is always read-only and exits `1` for missing/invalid
+status or symlink tasks. It does not replace live `check-delivery` assessment.
+
 Incremental reviews report current reviewed scope, valid inherited scope, and gaps separately.
 Runtime evidence is bound to an impact scope and sanitized environment probes; a listening
 port or healthy heartbeat alone does not establish the target instance or current build.
@@ -416,6 +433,7 @@ npm run validate:contracts
 npm run test:behavior
 npm run test:mutation
 npm run validate:workspaces
+npm run workspace:audit -- --root /absolute/project --json
 ```
 
 ## Document Responsibilities

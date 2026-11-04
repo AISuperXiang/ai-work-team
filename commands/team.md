@@ -20,6 +20,8 @@ execution_mode: sequential
 | `/team goal-design <目标>` | 目标驱动技术方案 | `workflows/goal-driven-technical-design.md` | 目标；可选项目路径和约束 | PRD、需求/UI 评审、四类自治 Schema、评审后技术方案、用户决策摘要 |
 | `/team build <需求>` | 端到端需求交付 | `workflows/requirement-end-to-end.md` | 需求描述 | workspace、权威状态、必要方案/决策、代码实现、验证、风险和交付视图 |
 | `/team buildContext <工作目录> [需求/范围]` | 项目上下文构建 | `workflows/project-context-build.md` | 工作目录 | `AGENTS.md`、角色索引、技术上下文、约束和验证结果 |
+| `/team init-workspace <项目根目录> <slug> <workflow>` | Workspace 初始化 | `workspace/README.md` | 项目根目录、slug、受支持工作流 | 最小 v2.2 状态、task/invocation/Skill identity |
+| `/team audit-workspaces <项目根目录> [日期范围]` | Workspace 递归审计 | `workspace/README.md` | 项目根目录；可选 since/until | 主任务、子任务、缺失/无效状态的只读清单 |
 | `/team bugfix <问题>` | 缺陷修复交付 | `workflows/bugfix-delivery.md` | 问题现象 | 根因、修复、回归、交付摘要 |
 | `/team resume <任务>` | 原工作流续跑 | `workflows/execution-protocol.md` | task ID 或 workspace 路径 | 变化核对、必要阶段、续跑结果 |
 | `/team verify <任务> [check IDs]` | 仅验证 | `workflows/execution-protocol.md` | task ID 或 workspace 路径；可选 check ID | 缺失/失败/失效检查结果，不修改业务代码 |
@@ -36,6 +38,8 @@ execution_mode: sequential
 | --- | --- |
 | “承接这个需求并实现” | `/team build` |
 | “给这个项目生成 AGENTS.md 上下文” | `/team buildContext` |
+| “初始化一个 workspace 任务” | `/team init-workspace` |
+| “扫描 workspace 是否有漏记任务” | `/team audit-workspaces` |
 | “帮我评审这个需求” | `/team review` |
 | “先出技术方案” | `/team design` |
 | “根据这个目标先完善需求并出可控迭代的技术方案” | `/team goal-design` |
@@ -77,12 +81,14 @@ review-only 的 `analysis_complete` 只表示报告完成，不表示被审代�
 10. 运行集成、浏览器或真实环境验证时读取
     `docs/engineering-standards/verification-environment-standard.md`，优先复用项目声明的 Gateway、runner 和资源锁。
 11. 对 `/team buildContext` 读取 `workflows/project-context-build.md`，并使用 `scripts/build-context.js` 扫描目标工作目录。
-12. 对 `/team install` 读取 `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md` 和 `external-skills/role-map.md`。
-13. 对 `/team register-cli` 读取 `external-cli/README.md`，检查 CLI 是否可用，并创建或更新 `external-cli/<cli-id>.md` 能力卡。
-14. 建立状态板和 `rolePlan`。
-15. 仅加载 `rolePlan` 中 `active` 或 `consulted` 的成员文件与方法论。
-16. 按阶段执行并检查质量门禁，包含 role activation、value、decision、handoff、complexity、evidence、verification 和 no-legacy 约束。
-17. 代码落地场景必须写入 workspace 需求目录，并在项目代码中完成文件改动和验证。
+12. 对 `/team init-workspace` 使用 `scripts/init-task.js`；不得覆盖或修复已有冲突状态，JSON/dry-run 零写入。
+13. 对 `/team audit-workspaces` 使用 `scripts/audit-workspaces.js`；递归主任务与子任务，只读输出库存/结构缺口，不表述为交付验收。
+14. 对 `/team install` 读取 `workflows/external-skill-install.md`、`external-skills/catalog.json`、`external-skills/install-policy.md` 和 `external-skills/role-map.md`。
+15. 对 `/team register-cli` 读取 `external-cli/README.md`，检查 CLI 是否可用，并创建或更新 `external-cli/<cli-id>.md` 能力卡。
+16. 建立状态板和 `rolePlan`。
+17. 仅加载 `rolePlan` 中 `active` 或 `consulted` 的成员文件与方法论。
+18. 按阶段执行并检查质量门禁，包含 role activation、value、decision、handoff、complexity、evidence、verification 和 no-legacy 约束。
+19. 代码落地场景必须写入 workspace 需求目录，并在项目代码中完成文件改动和验证。
 
 ## 失败处理
 
@@ -101,6 +107,8 @@ review-only 的 `analysis_complete` 只表示报告完成，不表示被审代�
 - `/team code-review --mode recheck` 缺 finding ID：只展示未关闭 finding 供选择，不启动全量审查。
 - `/team deliver` 存在失效证据或未关闭 required 项：只汇总为 review/blocked，不顺便启动全测或修复。
 - `/team buildContext` 未提供工作目录：询问用户提供代码仓库或工作区路径；不得默认扫描无关目录。
+- `/team init-workspace` 目标状态已存在但参数冲突或状态无效：停止并报告冲突，不覆盖、不自动修复。
+- `/team audit-workspaces` 发现缺状态、无效状态或 symlink 任务：返回非零和结构化缺口；不得跟随 symlink 或改写档案。
 - `/team install` 未带参数：按 `external-skills/catalog.json` 安装内置 `recommended` 清单，跳过 `candidate`。
 - `/team install` 带参数但未命中 catalog：展示 `/team install --list` 和可用角色，不安装未知来源 Skill。
 - `/team register-cli` 缺少 `cli-id`、`--command`、`--roles` 或 `--capabilities`：要求用户补充，不创建不完整能力卡。

@@ -60,6 +60,29 @@ workspace/
 - 不使用空格、中文标点或特殊符号。
 - 如果用户指定需求名称，优先使用用户指定名称的安全 slug。
 
+## 初始化与审计
+
+新任务优先使用：
+
+```bash
+node scripts/init-task.js --root /absolute/project --slug short-task \
+  --workflow requirement-end-to-end
+```
+
+首版支持 `requirement-end-to-end`、`bugfix-delivery`、`code-review-delivery` 和
+`technical-design-review`。CLI 只生成最小 `workflow-status.json`，包含 task/invocation/Skill identity；
+已有匹配状态返回幂等成功，已有冲突或无效状态不覆盖、不修复。`--dry-run` 与 `--json` 只预览。
+
+递归库存审计使用：
+
+```bash
+node scripts/audit-workspaces.js --root /absolute/project \
+  --since 2026-08-04 --until 2026-11-04 --json
+```
+
+Audit 扫描主任务、`features/*` 和 `implementation` 子任务，报告缺失/无效状态与 symlink，
+全程只读。它不评估交付 readiness；实时结论仍使用 `check-delivery.js`。
+
 ## 交付约束
 
 - `/team build` 必须先创建或选择一个 workspace 需求目录，再推进 PRD、方案、实现、测试和交付。
@@ -72,7 +95,7 @@ workspace/
 - 角色交接必须记录背景、决策、待确认问题、风险、产物和验证；是否生成独立 `role-handoff.md` 由 `recordPolicy` 决定。
 - `workflow-status.json` 必须记录阶段状态、负责人、门禁、产物路径、证据路径和 `rolePlan`。
 - `workflow-status.json` 还必须记录 `executionProfile`（`lightweight` / `standard` / `assurance`）和 `verificationLevel`（`V0-V4`）；交付结论不得超过验证等级，未参与角色必须有不适用依据。
-- 新 build、bugfix、code-review 的 `workflow-status.json` 使用 v2.1 `deliveryControl`，
+- 新 build、bugfix、code-review 的 `workflow-status.json` 使用 v2.2 `deliveryControl`，
   记录稳定 task、invocation、唯一有效契约、行为影响面、验收/check、审查轮次、
   测试选择、catalog 健康、风险验证包、环境 probe、修复对照、快照、运行、
   finding 裁决、recordPolicy 和 evidence review；

@@ -2063,6 +2063,7 @@ validateWorkflowStatusTemplate("assets/templates/workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/goal-design-workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
 validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
+validateWorkflowStatusTemplate("assets/templates/technical-design-workflow-status.json");
 validateGoalDesignSchemaContracts();
 validateSkillEvaluationContract();
 validateBusinessImpactRubric();

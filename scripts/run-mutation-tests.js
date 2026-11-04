@@ -18,6 +18,8 @@ const ALL_TESTS = [
   "test/check-delivery.test.js",
   "test/skill-evaluation.test.js",
   "test/record-evidence.test.js",
+  "test/init-task.test.js",
+  "test/audit-workspaces.test.js",
 ];
 
 const MUTANTS = [
@@ -471,6 +473,90 @@ const MUTANTS = [
     search: "try { main(process.argv.slice(2)); }",
     replacement: "process.exit(0);\ntry { main(process.argv.slice(2)); }",
     tests: ["test/check-delivery.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-audit-cli-kill-switch",
+    file: "scripts/audit-workspaces.js",
+    search: "  process.exitCode = main(process.argv.slice(2));",
+    replacement: "  process.exitCode = 0;",
+    tests: ["test/audit-workspaces.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-audit-gap-exit",
+    file: "scripts/audit-workspaces.js",
+    search:
+      "  return result.summary.missingStatus ||\n" +
+      "    result.summary.invalidStatus ||\n" +
+      "    result.summary.unsafeEntries\n" +
+      "    ? 1\n" +
+      "    : 0;",
+    replacement: "  return 0;",
+    tests: ["test/audit-workspaces.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-audit-symlink-scope",
+    file: "scripts/workspace-tasks.js",
+    search: "    if (entry.isSymbolicLink()) {",
+    replacement: "    if (false) {",
+    tests: ["test/audit-workspaces.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-init-cli-kill-switch",
+    file: "scripts/init-task.js",
+    search: "  process.exitCode = main(process.argv.slice(2));",
+    replacement: "  process.exitCode = 0;",
+    tests: ["test/init-task.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-init-preview-write",
+    file: "scripts/init-task.js",
+    search: "  if (command.preview) {",
+    replacement: "  if (false) {",
+    tests: ["test/init-task.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-init-existing-status",
+    file: "scripts/init-task.js",
+    search: "    if (fs.existsSync(statusPath)) {",
+    replacement: "    if (false) {",
+    tests: ["test/init-task.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-init-target-symlink",
+    file: "scripts/init-task.js",
+    search:
+      "    const targetStat = fs.lstatSync(targetDir);\n" +
+      "    if (targetStat.isSymbolicLink() || !targetStat.isDirectory()) {\n" +
+      "      throw new CliArgumentError(\n" +
+      "        \"Target task must be a regular non-symlink directory\",\n" +
+      "      );\n" +
+      "    }\n" +
+      "    const realTarget = fs.realpathSync(targetDir);\n" +
+      "    if (\n" +
+      "      realTarget !== targetDir ||\n" +
+      "      path.dirname(realTarget) !== fs.realpathSync(workspace)\n" +
+      "    ) {\n" +
+      "      throw new CliArgumentError(\"Target task must remain inside workspace\");\n" +
+      "    }",
+    replacement:
+      "    const targetStat = fs.lstatSync(targetDir);\n" +
+      "    const realTarget = fs.realpathSync(targetDir);",
+    tests: ["test/init-task.test.js"],
+    critical: true,
+  },
+  {
+    id: "workspace-init-requirement-binding",
+    file: "scripts/workspace-tasks.js",
+    search: "  status.requirementFolder = options.requirementFolder;",
+    replacement: "  status.requirementFolder = \"\";",
+    tests: ["test/init-task.test.js"],
     critical: true,
   },
   {

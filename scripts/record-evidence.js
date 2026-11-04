@@ -10,6 +10,7 @@ const { MAX_STATUS_BYTES, readJson, hashFile, openDelivery, captureSnapshot, cap
 const { validateShape, validateDeliveryControl, evaluateDeliveryControl, digest, contractDigest,
   impactScopeDigest, kindDigest, environmentSelectionDigest, recordSourceDigest, coverageDigest } = require("./delivery-controls");
 const { runBinding, layerOutcome } = require("./delivery-assurance");
+const { startTask } = require("./workspace-tasks");
 const schema = require("../schemas/status.schema.json");
 const ref = (name) => ({ $ref: `#/$defs/${name}` });
 class RecordError extends Error {}
@@ -189,21 +190,13 @@ function main(argv) {
   } else {
     if (!o.expected && !o.json && !o.dry) throw new CliArgumentError("Writes require --expected-state-digest");
     if (o.mode === "start") {
-      if (!c.invocations.length) {
-        if (!o.authorization) throw new CliArgumentError("First invocation requires --authorization-ref");
-        if (c.taskId === "replace-with-stable-task-id") c.taskId = `task-${randomUUID()}`;
-        c.currentInvocationId = `invoke-${randomUUID()}`;
-        c.invocations.push({ id: c.currentInvocationId, operation: "start", authorizationRef: o.authorization,
-          contractRevision: c.activeContractRevision, snapshotId: c.snapshots.at(-1)?.id || null,
-          selectedCheckIds: [], selectedFindingIds: [], allowedActions: [...c.authorizedActions],
-          necessaryStages: [], reason: "Start authorized task" });
+      if (!c.invocations.length && !o.authorization) {
+        throw new CliArgumentError("First invocation requires --authorization-ref");
       }
-      if (!c.assurance.executionIdentities.some((i) => i.invocationId === c.currentInvocationId)) {
-        const skillRoot = path.resolve(__dirname, "..");
-        c.assurance.executionIdentities.push({ invocationId: c.currentInvocationId,
-          version: readJson(resolveSafePath(skillRoot, "package.json")).version,
-          entryHash: hashFile(skillRoot, "SKILL.md"), runtime: process.version, capturedAt: new Date().toISOString() });
-      }
+      startTask(status, {
+        authorizationRef: o.authorization || c.invocations.at(-1)?.authorizationRef,
+        skillRoot: path.resolve(__dirname, ".."),
+      });
     } else {
       if (["accepted", "analysis_complete"].includes(c.completion.claim)) throw new RecordError("Reopen before importing evidence");
       const inputPath = resolveSafePath(workspace, o.input);
