@@ -1,23 +1,57 @@
-# AI Work Team
+# AI Work Team — AI Agent 产品研发团队工作流
+
+[![CI](https://github.com/AISuperXiang/ai-work-team/actions/workflows/ci.yml/badge.svg)](https://github.com/AISuperXiang/ai-work-team/actions/workflows/ci.yml)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?logo=node.js&logoColor=white)](./package.json)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 **语言：简体中文 | [English](./README_EN.md)**
 
-> 面向 Agent / IDE 的产品研发专家团队编排 Skill：把一句自然语言需求或 `/team` 指令，推进为有方案、有实现、有验证证据、可走查、可交付的结果。
+> 面向 Trae、Codex、Claude 和通用 Agent / IDE 的产品研发团队协作 Skill。把一句自然语言需求推进为 PRD、技术方案、代码实现、测试证据、代码审查和可追溯交付。
 
-当前版本：`0.8.0`。本版本增加安全幂等的 Workspace Init 与递归只读 Audit。
+`ai-work-team` 是一套可执行的 AI Agent workflow / multi-agent product engineering workflow，不是 Prompt 合集。它把产品经理、UI、技术负责人、前端、后端、QA 和交付经理的职责按风险编排，并通过 workspace、质量门禁和证据记录约束“完成”的含义。
 
-## 项目简介
+当前版本：`0.8.0`。新增安全幂等的 Workspace Init 与递归只读 Audit。
 
-`ai-work-team` 将产品、运营、UI、技术负责人、前端、后端、QA 和交付经理的协作流程固化为可执行工作流。它不替代某个研发角色，而是负责：
+## 30 秒上手
 
-- 先识别任务类型，再选择匹配的交付工作流。
-- 按风险和任务范围激活必要角色，避免全角色无差别参与。
-- 将关键决策、风险、交接和验证证据写入可追溯文档。
-- 限制结论不超过实际验证等级，避免把静态检查表述为运行时通过。
-- 为需求实现、缺陷修复、代码审查和走查提供统一的完成定义。
+安装：
+
+```bash
+npx skills add AISuperXiang/ai-work-team@ai-work-team -g -y
+```
+
+然后直接告诉 Agent：
+
+```text
+/team build 做一个支持优惠券的会员续费页，并完成实现、测试和交付
+```
+
+也可以完全使用自然语言：
+
+```text
+承接这个需求，从 PRD、技术方案、代码实现到测试验收完整推进。
+```
+
+Skill 会自动选择工作流、激活必要角色、创建 workspace，并把决策、风险、验证和剩余缺口落盘。
+
+## 为什么选择 AI Work Team
+
+| 你遇到的问题 | AI Work Team 提供的能力 |
+| --- | --- |
+| 需求只有一句话，边界和验收不清 | 需求收口、PRD、价值假设和可测试验收标准 |
+| 技术方案写完就失去上下文 | Goal Contract、决策日志、Task DAG、角色交接 |
+| Agent 改完代码却无法证明正确 | 显式测试选择、V0-V4 验证等级、逐项证据门禁 |
+| Bug 修复只覆盖当前报错 | 原反例、保留路径、消费者和回归验证 |
+| Code Review 充满风格意见 | 基于调用链、反证、归因和严重度的缺陷审查 |
+| 多轮任务难以续跑 | task / invocation、有效契约、快照和证据复用 |
+| workspace 任务容易漏记 | 幂等 Init、递归 Audit、主任务与子任务缺口清单 |
+
+它不会让所有角色机械参与，也不会把 lint、退出码或“看起来正常”冒充业务验收。
 
 ## 目录
 
+- [30 秒上手](#30-秒上手)
+- [为什么选择 AI Work Team](#为什么选择-ai-work-team)
 - [适用场景](#适用场景)
 - [核心能力](#核心能力)
 - [快速开始](#快速开始)
@@ -30,6 +64,7 @@
 - [目录结构](#目录结构)
 - [扩展能力](#扩展能力)
 - [维护与验证](#维护与验证)
+- [相关概念与检索词](#相关概念与检索词)
 
 ## 适用场景
 
@@ -148,6 +183,17 @@ npm test
 /team init-workspace <project-root> workspace-init-audit requirement-end-to-end
 /team audit-workspaces <project-root> --since 2026-08-04 --until 2026-11-04
 ```
+
+不想记命令时，也可以直接说：
+
+| 自然语言请求 | 对应能力 |
+| --- | --- |
+| “帮我把这个想法整理成可开发的 PRD” | 需求评审 / goal-design |
+| “承接这个功能并实现，验证后给我交付结果” | build |
+| “这个线上问题帮我复现、修复并补回归” | bugfix |
+| “Review 当前改动，优先找逻辑缺陷和漏测” | code-review |
+| “继续上次任务，只重跑失效的检查” | resume / verify |
+| “扫描 workspace，找出缺状态或无效任务记录” | audit-workspaces |
 
 完整指令说明见 [`commands/team.md`](./commands/team.md)。
 
@@ -448,3 +494,7 @@ npm run workspace:audit -- --root /absolute/project --json
 `ai-work-team` 可以复用当前 IDE / Agent 已具备的代码审查、安全审查、运行时调试、数据库分析、前端设计、测试生成、产品规划和项目分诊能力。
 
 公开发布文档和运行时声明只描述能力域，不记录本机已下载的公司、私有或环境特定 Skill 清单，也不保存密钥、Cookie、Token 等敏感信息。
+
+## 相关概念与检索词
+
+AI Agent 团队、Multi-Agent Workflow、Product Engineering Agent、AI 软件开发流程、PRD 生成、需求评审、技术方案、代码实现、Bug 修复、Code Review、测试验证、TDD、质量门禁、交付编排、Agent Workspace、Trae Skill、Codex Skill、Claude Skill。

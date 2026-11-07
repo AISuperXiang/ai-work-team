@@ -1,23 +1,57 @@
-# AI Work Team
+# AI Work Team — Product Engineering Workflow for AI Agents
+
+[![CI](https://github.com/AISuperXiang/ai-work-team/actions/workflows/ci.yml/badge.svg)](https://github.com/AISuperXiang/ai-work-team/actions/workflows/ci.yml)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?logo=node.js&logoColor=white)](./package.json)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 **Language: [简体中文](./README.md) | English**
 
-> A product-engineering expert team orchestration Skill for Agent / IDE environments. It turns a natural-language request or `/team` command into a reviewable delivery with plans, implementation, verification evidence, risks, and handoff records.
+> A product-engineering team Skill for Trae, Codex, Claude, and general Agent / IDE environments. Turn one natural-language request into a PRD, technical design, implementation, test evidence, code review, and traceable delivery.
+
+`ai-work-team` is an executable AI agent workflow / multi-agent product engineering workflow, not a prompt collection. It orchestrates product, UI, technical leadership, frontend, backend, QA, and delivery responsibilities by risk, then uses workspaces, quality gates, and evidence records to define what “done” actually means.
 
 Current version: `0.8.0`. This release adds safe, idempotent Workspace Init and recursive read-only Audit.
 
-## Overview
+## Start in 30 Seconds
 
-`ai-work-team` turns collaboration among product, operations, UI, technical leadership, frontend, backend, QA, and delivery roles into executable workflows. It does not replace individual specialists. Instead, it:
+Install:
 
-- Identifies the task type before selecting a delivery workflow.
-- Activates only the roles required by the task scope and risk.
-- Records decisions, risks, handoffs, and verification evidence in traceable documents.
-- Keeps every conclusion within the boundary supported by its verification level.
-- Provides a shared definition of done for feature delivery, bug fixes, code reviews, and walkthroughs.
+```bash
+npx skills add AISuperXiang/ai-work-team@ai-work-team -g -y
+```
+
+Then tell your Agent:
+
+```text
+/team build Create a membership renewal page with coupons, then implement, test, and deliver it
+```
+
+Or use plain natural language:
+
+```text
+Own this requirement end to end, from PRD and technical design through implementation and acceptance testing.
+```
+
+The Skill selects a workflow, activates only the required roles, creates a workspace, and records decisions, risks, verification, and remaining gaps.
+
+## Why AI Work Team
+
+| Problem | What AI Work Team provides |
+| --- | --- |
+| The request is one sentence with unclear scope | Requirement intake, PRD, value hypotheses, and testable acceptance criteria |
+| Technical plans lose context after handoff | Goal Contract, decision logs, Task DAGs, and role handoffs |
+| An Agent changes code but cannot prove correctness | Explicit test selection, V0-V4 verification levels, and per-check evidence gates |
+| A bug fix covers only the visible failure | Original counterexample, preserved paths, consumers, and regression checks |
+| Code review becomes a list of style opinions | Call-chain, counterevidence, attribution, severity, and missing-test analysis |
+| Long-running tasks are hard to resume | Task/invocation history, active contracts, snapshots, and reusable evidence |
+| Workspace tasks are silently lost | Idempotent Init, recursive Audit, and primary/child task gap reports |
+
+It does not activate every role mechanically, and it never treats lint, a zero exit code, or “looks good” as business acceptance.
 
 ## Contents
 
+- [Start in 30 Seconds](#start-in-30-seconds)
+- [Why AI Work Team](#why-ai-work-team)
 - [When to Use It](#when-to-use-it)
 - [Core Capabilities](#core-capabilities)
 - [Quick Start](#quick-start)
@@ -30,6 +64,7 @@ Current version: `0.8.0`. This release adds safe, idempotent Workspace Init and 
 - [Project Structure](#project-structure)
 - [Extensibility](#extensibility)
 - [Maintenance and Validation](#maintenance-and-validation)
+- [Related Terms and Search Keywords](#related-terms-and-search-keywords)
 
 ## When to Use It
 
@@ -148,6 +183,17 @@ Examples:
 /team init-workspace <project-root> workspace-init-audit requirement-end-to-end
 /team audit-workspaces <project-root> --since 2026-08-04 --until 2026-11-04
 ```
+
+You do not need to memorize commands. Plain-language requests work too:
+
+| Natural-language request | Routed capability |
+| --- | --- |
+| “Turn this idea into an implementation-ready PRD” | requirement review / goal-design |
+| “Own this feature, implement it, verify it, and deliver the result” | build |
+| “Reproduce this production bug, fix it, and add regression coverage” | bugfix |
+| “Review the current changes for logic bugs and missing tests” | code-review |
+| “Resume the previous task and rerun only stale checks” | resume / verify |
+| “Audit the workspace for missing or invalid task state” | audit-workspaces |
 
 See [`commands/team.md`](./commands/team.md) for the complete command reference.
 
@@ -448,3 +494,7 @@ npm run workspace:audit -- --root /absolute/project --json
 `ai-work-team` can reuse code review, security review, runtime debugging, database analysis, frontend design, test generation, product planning, and project triage capabilities already available in the current IDE / Agent.
 
 Public documentation and runtime metadata describe capability domains only. They do not record company-internal, private, or environment-specific local Skill inventories, and they never store secrets, cookies, or tokens.
+
+## Related Terms and Search Keywords
+
+AI agent team, multi-agent workflow, product engineering agent, AI software development lifecycle, PRD generator, requirement review, technical design, implementation agent, bug fixing, code review, test automation, TDD, quality gates, delivery orchestration, agent workspace, Trae Skill, Codex Skill, Claude Skill.
