@@ -445,6 +445,7 @@ No external Skill is installed without explicit user approval.
 Node CLIs follow [`cli-quality-architecture.md`](./docs/engineering-standards/cli-quality-architecture.md):
 
 - Unknown options, missing values, duplicate options, and conflicts exit with code `2`; invalid input never falls back to bulk installation.
+- Contract validation sets `process.exitCode` and exits naturally so CI pipes receive complete diagnostics; exit codes remain `0` for success, `1` for validation failure, and `2` for invalid input.
 - User-controlled output is limited to regular relative files inside the target root; traversal, absolute paths, and symlinks are rejected.
 - Existing managed files larger than 256 KiB fail closed and are never overwritten.
 - Behavior tests use `node:test`, temporary directories, and a fake `npx` without network or real global Skill changes.

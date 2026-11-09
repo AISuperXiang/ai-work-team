@@ -693,6 +693,22 @@ const MUTANTS = [
     critical: true,
   },
   {
+    id: "contracts-output-flush",
+    file: "scripts/validate-contracts.js",
+    search: "process.exitCode = main();",
+    replacement: "process.exit(main());",
+    tests: ["test/validate-contracts.test.js"],
+    critical: true,
+  },
+  {
+    id: "contracts-cli-kill-switch",
+    file: "scripts/validate-contracts.js",
+    search: "process.exitCode = main();",
+    replacement: "process.exitCode = 0;",
+    tests: ["test/validate-contracts.test.js"],
+    critical: true,
+  },
+  {
     id: "contracts-default-workspace-scan",
     file: "scripts/validate-contracts.js",
     search: "  } else if (command.allWorkspaces) {",

@@ -53,18 +53,6 @@ function parseCommandLine(argv) {
   };
 }
 
-let command;
-try {
-  command = parseCommandLine(process.argv.slice(2));
-} catch (error) {
-  console.error(error.message);
-  process.exit(error instanceof CliArgumentError ? error.exitCode : 1);
-}
-if (command.help) {
-  usage();
-  process.exit(0);
-}
-
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -964,26 +952,28 @@ function requireSectionExists(relativePath, heading) {
   }
 }
 
-for (const check of checks) {
-  const absolutePath = path.join(ROOT, check.file);
-  if (!fs.existsSync(absolutePath)) {
-    fail(`missing file: ${check.file}`);
-    continue;
-  }
-
-  const content = fs.readFileSync(absolutePath, "utf8");
-  for (const needle of check.mustContain) {
-    if (content.includes(needle)) {
-      pass(`${check.file} contains: ${needle}`);
-    } else {
-      fail(`${check.file} missing: ${needle}`);
+function validateReferencedContracts() {
+  for (const check of checks) {
+    const absolutePath = path.join(ROOT, check.file);
+    if (!fs.existsSync(absolutePath)) {
+      fail(`missing file: ${check.file}`);
+      continue;
     }
-  }
-  for (const needle of check.mustNotContain || []) {
-    if (content.includes(needle)) {
-      fail(`${check.file} must not contain: ${needle}`);
-    } else {
-      pass(`${check.file} omits obsolete value: ${needle}`);
+
+    const content = fs.readFileSync(absolutePath, "utf8");
+    for (const needle of check.mustContain) {
+      if (content.includes(needle)) {
+        pass(`${check.file} contains: ${needle}`);
+      } else {
+        fail(`${check.file} missing: ${needle}`);
+      }
+    }
+    for (const needle of check.mustNotContain || []) {
+      if (content.includes(needle)) {
+        fail(`${check.file} must not contain: ${needle}`);
+      } else {
+        pass(`${check.file} omits obsolete value: ${needle}`);
+      }
     }
   }
 }
@@ -2058,32 +2048,52 @@ function validateNoLegacyContract() {
   }
 }
 
-validateStatusSchemaContract();
-validateWorkflowStatusTemplate("assets/templates/workflow-status.json");
-validateWorkflowStatusTemplate("assets/templates/goal-design-workflow-status.json");
-validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
-validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
-validateWorkflowStatusTemplate("assets/templates/technical-design-workflow-status.json");
-validateGoalDesignSchemaContracts();
-validateSkillEvaluationContract();
-validateBusinessImpactRubric();
-validateTemplateContracts();
-try {
-  if (command.workspace) {
-    validateWorkspaceStatuses([normalizeWorkspaceDir(command.workspace)]);
-  } else if (command.allWorkspaces) {
-    validateWorkspaceStatuses();
+function main() {
+  let command;
+  try {
+    command = parseCommandLine(process.argv.slice(2));
+  } catch (error) {
+    console.error(error.message);
+    return error instanceof CliArgumentError ? error.exitCode : 1;
   }
-} catch (error) {
-  console.error(error.message);
-  process.exit(error instanceof CliArgumentError ? error.exitCode : 1);
-}
-validateLegacyPatternContract();
-validateNoLegacyContract();
+  if (command.help) {
+    usage();
+    return 0;
+  }
 
-if (failed > 0) {
-  console.error(`\n${failed} contract check(s) failed.`);
-  process.exit(1);
+  validateReferencedContracts();
+  validateStatusSchemaContract();
+  validateWorkflowStatusTemplate("assets/templates/workflow-status.json");
+  validateWorkflowStatusTemplate("assets/templates/goal-design-workflow-status.json");
+  validateWorkflowStatusTemplate("assets/templates/bugfix-workflow-status.json");
+  validateWorkflowStatusTemplate("assets/templates/code-review-workflow-status.json");
+  validateWorkflowStatusTemplate("assets/templates/technical-design-workflow-status.json");
+  validateGoalDesignSchemaContracts();
+  validateSkillEvaluationContract();
+  validateBusinessImpactRubric();
+  validateTemplateContracts();
+  try {
+    if (command.workspace) {
+      validateWorkspaceStatuses([normalizeWorkspaceDir(command.workspace)]);
+    } else if (command.allWorkspaces) {
+      validateWorkspaceStatuses();
+    }
+  } catch (error) {
+    console.error(error.message);
+    return error instanceof CliArgumentError ? error.exitCode : 1;
+  }
+  validateLegacyPatternContract();
+  validateNoLegacyContract();
+
+  if (failed > 0) {
+    console.error(`\n${failed} contract check(s) failed.`);
+    return 1;
+  }
+
+  console.log("\nAll implementation contract checks passed.");
+  return 0;
 }
 
-console.log("\nAll implementation contract checks passed.");
+// Let queued stdout/stderr drain before terminating, including when CI pipes
+// the verbose validation output into another process.
+process.exitCode = main();

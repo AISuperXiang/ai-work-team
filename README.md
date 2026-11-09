@@ -445,6 +445,7 @@ node scripts/install-external-skills.js web-design-guidelines --dry-run
 Node CLI 遵循 [`cli-quality-architecture.md`](./docs/engineering-standards/cli-quality-architecture.md)：
 
 - 未知参数、缺值、重复参数和冲突参数统一退出 `2`，不得退化为默认批量安装。
+- 契约校验通过 `process.exitCode` 自然退出，保证 CI 管道中的完整诊断写出；退出码仍为成功 `0`、校验失败 `1`、输入错误 `2`。
 - 用户输出只允许写入目标根目录内的普通相对文件；拒绝路径穿越、绝对路径和 symlink。
 - 已有受管文件超过 256 KiB 时失败关闭，不覆盖原内容。
 - 行为测试使用 `node:test`、临时目录和 fake `npx`，不访问网络或真实全局 Skill 环境。

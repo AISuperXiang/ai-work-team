@@ -92,6 +92,8 @@ npm run validate:workspaces
 
 目标驱动 workspace 完成 Architecture Design 后，契约校验还会检查 `goal-contract.json`、`milestones.json`、`tasks.json` 和 `autonomy-policy.json` 的跨文件一致性。
 
+退出码为成功 `0`、校验失败 `1`、参数或 workspace 路径错误 `2`。入口通过 `process.exitCode` 自然退出，等待 stdout/stderr 写完，避免 CI 管道截断末尾诊断。
+
 ## check-delivery.js
 
 新 build、bugfix、code-review 的 v2.2 状态在交付前使用只读检查（保留 2.0/2.1 判定）：

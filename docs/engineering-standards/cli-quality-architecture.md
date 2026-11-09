@@ -13,6 +13,7 @@
   - 显式 `--all` 模式。
 - `--force-external` 和 `--allow-candidate` 无 selector 时必须配合 `--all`。
 - 子进程必须使用参数数组和 `shell: false`，不得拼接 shell 命令。
+- 契约校验入口通过 `main()` 返回退出码并设置 `process.exitCode`，等待 stdout/stderr 写完；不得用 `process.exit()` 截断 CI 管道中的诊断。输入错误仍退出 `2`，校验失败仍退出 `1`。
 
 ## 2. 文件写入边界
 
@@ -52,6 +53,7 @@ JSON/dry-run 零写入。导入必须匹配执行前绑定，分离 assertion/ru
 - 文件测试使用 `mkdtempSync` 创建临时目录，结束后递归清理。
 - 必须覆盖正常、异常、边界和副作用路径，不能用断言数量代替关键行为。
 - `npm test` 必须包含结构、核心契约和行为测试。
+- 契约 CLI 回归须在 stdout 有积压时验证诊断完整性、成功/失败退出码、参数拒绝和帮助模式；不能只依赖本机管道容量。
 
 ## 4. 突变门禁
 

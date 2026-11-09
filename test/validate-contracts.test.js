@@ -4,8 +4,14 @@ const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
 const test = require("node:test");
+const { spawnSync } = require("node:child_process");
 
-const { PROJECT_ROOT, runCli } = require("./cli-test-helpers");
+const {
+  PROJECT_ROOT,
+  cleanupDir,
+  createTempDir,
+  runCli,
+} = require("./cli-test-helpers");
 
 function createGoalDesignStatus(relativeDir) {
   const template = JSON.parse(
@@ -232,6 +238,105 @@ test("validate-contracts checks v2 archive claims without reading current source
   result = runCli("scripts/validate-contracts.js", ["--workspace", relativeDir]);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /CLAIM_EXCEEDS_EVIDENCE|DERIVED_SUMMARY_STALE/);
+});
+
+test("validate-contracts flushes piped output before exiting", async (t) => {
+  const { fixture, reseal } = require("./delivery-controls-fixture");
+  const { status } = fixture();
+  const relativeDir = `workspace/.contract-output-${process.pid}`;
+  const dir = path.join(PROJECT_ROOT, relativeDir);
+  const preloadDir = createTempDir("contract-output");
+  fs.mkdirSync(dir, { recursive: true });
+  t.after(() => {
+    cleanupDir(dir);
+    cleanupDir(preloadDir);
+  });
+
+  status.workflow = "requirement-end-to-end";
+  status.requirementFolder = relativeDir;
+  status.deliveryControl.completion.claim = "accepted";
+  reseal(status);
+  status.deliveryControl.verificationRuns[1].observations = [];
+  fs.writeFileSync(
+    path.join(dir, "workflow-status.json"),
+    JSON.stringify(status),
+  );
+
+  // Queue more than a pipe can hold so premature process.exit() is observable
+  // on every platform, including machines where ordinary CLI output fits.
+  const prefixBytes = 2 * 1024 * 1024;
+  const preloadPath = path.join(preloadDir, "backpressure.cjs");
+  fs.writeFileSync(
+    preloadPath,
+    `process.stdout.write("x".repeat(${prefixBytes}));\n`,
+  );
+
+  const cases = [
+    {
+      name: "failed archive claim",
+      args: ["--workspace", relativeDir],
+      exitCode: 1,
+      stdout: /CLAIM_EXCEEDS_EVIDENCE|DERIVED_SUMMARY_STALE/,
+      stderr: /contract check\(s\) failed/,
+    },
+    {
+      name: "invalid workspace path",
+      args: ["--workspace", "../outside"],
+      exitCode: 2,
+      stderr: /workspace.*inside/i,
+    },
+    {
+      name: "unknown argument",
+      args: ["--unknown"],
+      exitCode: 2,
+      stderr: /unknown option/i,
+    },
+    {
+      name: "help",
+      args: ["--help"],
+      exitCode: 0,
+      stdout: /Usage:/,
+    },
+    {
+      name: "successful core validation",
+      args: [],
+      exitCode: 0,
+      stdout: /All implementation contract checks passed/,
+    },
+  ];
+
+  for (const scenario of cases) {
+    await t.test(scenario.name, () => {
+      const result = spawnSync(
+        process.execPath,
+        [
+          "--require",
+          preloadPath,
+          path.join(PROJECT_ROOT, "scripts/validate-contracts.js"),
+          ...scenario.args,
+        ],
+        {
+          cwd: PROJECT_ROOT,
+          encoding: "utf8",
+          maxBuffer: 4 * 1024 * 1024,
+          timeout: 30_000,
+        },
+      );
+      assert.ifError(result.error);
+      assert.equal(result.status, scenario.exitCode, result.stderr);
+      assert.ok(
+        result.stdout.startsWith("x".repeat(prefixBytes)),
+        `stdout was truncated: received ${Buffer.byteLength(result.stdout)} bytes`,
+      );
+      const output = result.stdout.slice(prefixBytes);
+      if (scenario.stdout) assert.match(output, scenario.stdout);
+      if (scenario.stderr) assert.match(result.stderr, scenario.stderr);
+      if (scenario.exitCode !== 0) {
+        assert.doesNotMatch(output, /All implementation contract checks passed/);
+      }
+      if (scenario.name === "help") assert.doesNotMatch(output, /^PASS /m);
+    });
+  }
 });
 
 test("v2.1 lightweight workspace can omit derived handoff and delivery files", (t) => {
